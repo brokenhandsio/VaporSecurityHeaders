@@ -1,2 +1,2 @@
-# Vapor-SecurityHeaders
+# VaporSecurityHeaders
 Harden Your Security Headers For Vapor
