@@ -1,6 +1,6 @@
 import XCTest
 
-@testable import VaporSecurityHeaderTests
+@testable import VaporSecurityHeadersTests
 
 XCTMain([
     testCase(HeaderTests.allTests),
