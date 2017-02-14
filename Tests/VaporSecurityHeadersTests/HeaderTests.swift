@@ -35,6 +35,23 @@ class HeaderTests: XCTestCase {
         XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers["X-XSS-Protection"])
     }
     
+    func testDefaultHeadersWithHSTS() throws {
+        let expectedXCTOHeaderValue = "nosniff"
+        let expectedCSPHeaderValue = "default-src 'self'"
+        let expectedXFOHeaderValue = "deny"
+        let expectedXSSProtectionHeaderValue = "1; mode=block"
+        let expectedHSTSHeaderValue = "max-age=31536000; includeSubdomains; preload"
+        
+        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders(enableHSTS: true))
+        let response = try drop.respond(to: request)
+        
+        XCTAssertEqual(expectedXCTOHeaderValue, response.headers["X-Content-Type-Options"])
+        XCTAssertEqual(expectedCSPHeaderValue, response.headers["Content-Security-Policy"])
+        XCTAssertEqual(expectedXFOHeaderValue, response.headers["X-Frame-Options"])
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers["X-XSS-Protection"])
+        XCTAssertEqual(expectedHSTSHeaderValue, response.headers["Strict-Transport-Security"])
+    }
+    
     func testAllHeadersForApi() throws {
         let expectedXCTOHeaderValue = "nosniff"
         let expectedCSPHeaderValue = "default-src 'none'"
@@ -51,7 +68,20 @@ class HeaderTests: XCTestCase {
     }
     
     func testAPIHeadersWithHSTS() throws {
+        let expectedXCTOHeaderValue = "nosniff"
+        let expectedCSPHeaderValue = "default-src 'none'"
+        let expectedXFOHeaderValue = "deny"
+        let expectedXSSProtectionHeaderValue = "1; mode=block"
+        let expectedHSTSHeaderValue = "max-age=31536000; includeSubdomains; preload"
         
+        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders(api: true, enableHSTS: true))
+        let response = try drop.respond(to: request)
+        
+        XCTAssertEqual(expectedXCTOHeaderValue, response.headers["X-Content-Type-Options"])
+        XCTAssertEqual(expectedCSPHeaderValue, response.headers["Content-Security-Policy"])
+        XCTAssertEqual(expectedXFOHeaderValue, response.headers["X-Frame-Options"])
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers["X-XSS-Protection"])
+        XCTAssertEqual(expectedHSTSHeaderValue, response.headers["Strict-Transport-Security"])
     }
     
     /*
@@ -63,10 +93,6 @@ class HeaderTests: XCTestCase {
         
     }
     */
-    
-    func testDefaultHeadersWithHSTS() throws {
-        
-    }
     
     /*
     func testDefaultHeadersWithHSTSandHPKP() throws {

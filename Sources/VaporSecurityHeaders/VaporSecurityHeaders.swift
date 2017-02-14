@@ -3,21 +3,19 @@ import HTTP
 struct SecurityHeaders: Middleware {
     
     private let isApi: Bool
+    private let enableHSTS: Bool
     
-    init() {
-        isApi = false
-    }
-    
-    init(api: Bool) {
+    init(api: Bool = false, enableHSTS: Bool = false) {
         self.isApi = api
+        self.enableHSTS = enableHSTS
     }
-    
     
     enum HeaderNames: String {
         case cto = "X-Content-Type-Options"
         case csp = "Content-Security-Policy"
         case xfo = "X-Frame-Options"
         case xssProtection = "X-XSS-Protection"
+        case hsts = "Strict-Transport-Security"
     }
     
     
@@ -28,6 +26,10 @@ struct SecurityHeaders: Middleware {
         response.headers[HeaderKey(HeaderNames.csp.rawValue)] = getHeader(for: .csp)
         response.headers[HeaderKey(HeaderNames.xfo.rawValue)] = getHeader(for: .xfo)
         response.headers[HeaderKey(HeaderNames.xssProtection.rawValue)] = getHeader(for: .xssProtection)
+        
+        if enableHSTS {
+            response.headers[HeaderKey.strictTransportSecurity] = getHeader(for: .hsts)
+        }
         
         return response
     }
@@ -47,6 +49,8 @@ struct SecurityHeaders: Middleware {
             return "deny"
         case .xssProtection:
             return "1; mode=block"
+        case .hsts:
+            return "max-age=31536000; includeSubdomains; preload"
         }
     }
 }
