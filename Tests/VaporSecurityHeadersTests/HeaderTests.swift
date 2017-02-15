@@ -141,7 +141,12 @@ class HeaderTests: XCTestCase {
     }
     
     func testHeaderWithFrameOptionsAllowFrom() throws {
+        let frameOptionsSpec = FrameOptionsSpec(option: .allow(from: "https://test.com"))
+        let middleware = SecurityHeaders(frameOptionsSpecification: frameOptionsSpec)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
         
+        XCTAssertEqual("ALLOW-FROM https://test.com", response.headers[HeaderKey.xFrameOptions])
     }
     
     

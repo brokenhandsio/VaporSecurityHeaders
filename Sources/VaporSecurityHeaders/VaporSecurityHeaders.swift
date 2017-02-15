@@ -70,9 +70,10 @@ struct SecurityHeaders: Middleware {
 
 struct FrameOptionsSpec: SecurityHeaderSpecification {
     
-    enum Options: String {
-        case deny = "DENY"
-        case sameOrigin = "SAMEORIGIN"
+    enum Options {
+        case deny
+        case sameOrigin
+        case allow(from: String)
     }
     
     private let option: Options
@@ -82,7 +83,14 @@ struct FrameOptionsSpec: SecurityHeaderSpecification {
     }
     
     func setHeader(on response: Response) {
-        response.headers[HeaderKey.xFrameOptions] = option.rawValue
+        switch option {
+        case .deny:
+            response.headers[HeaderKey.xFrameOptions] = "DENY"
+        case .sameOrigin:
+            response.headers[HeaderKey.xFrameOptions] = "SAMEORIGIN"
+        case .allow(let from):
+            response.headers[HeaderKey.xFrameOptions] = "ALLOW-FROM \(from)"
+        }
     }
 }
 
