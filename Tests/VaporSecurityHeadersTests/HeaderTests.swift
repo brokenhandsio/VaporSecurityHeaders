@@ -149,6 +149,33 @@ class HeaderTests: XCTestCase {
         XCTAssertEqual("ALLOW-FROM https://test.com", response.headers[HeaderKey.xFrameOptions])
     }
     
+    func testHeaderWithXssProtectionDisable() throws {
+        let xssProtectionSpec = XssProtectionSpec(option: .disable)
+        let middleware = SecurityHeaders(xssProtectionSpecification: xssProtectionSpec)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        
+        XCTAssertEqual("0", response.headers[HeaderKey.xXssProtection])
+    }
+    
+    func testHeaderWithXssProtectionEnable() throws {
+        let xssProtectionSpec = XssProtectionSpec(option: .enable)
+        let middleware = SecurityHeaders(xssProtectionSpecification: xssProtectionSpec)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        
+        XCTAssertEqual("1", response.headers[HeaderKey.xXssProtection])
+    }
+    
+    func testHeaderWithXssProtectionBlock() throws {
+        let xssProtectionSpec = XssProtectionSpec(option: .block)
+        let middleware = SecurityHeaders(xssProtectionSpecification: xssProtectionSpec)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        
+        XCTAssertEqual("1; mode=block", response.headers[HeaderKey.xXssProtection])
+    }
+    
     
     private func makeTestDroplet(middlewareToAdd: Middleware) throws -> Droplet {
         let drop = Droplet(arguments: ["dummy/path/", "prepare"])

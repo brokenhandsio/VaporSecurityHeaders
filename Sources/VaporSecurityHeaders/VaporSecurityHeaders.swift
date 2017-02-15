@@ -14,6 +14,7 @@ struct SecurityHeaders: Middleware {
             self.init(contentTypeSpecification: ContentTypeOptionsSpec(option: .nosniff),
                       contentSecurityPolicySpecification: ContentSecurityPolicySpec(value: "default-src 'none'"),
                       frameOptionsSpecification: FrameOptionsSpec(option: .deny),
+                      xssProtectionSpecification: XssProtectionSpec(option: .block),
                       enableHSTS: enableHSTS)
         }
         else {
@@ -24,29 +25,17 @@ struct SecurityHeaders: Middleware {
     init(contentTypeSpecification: ContentTypeOptionsSpec = ContentTypeOptionsSpec(option: .nosniff),
          contentSecurityPolicySpecification: ContentSecurityPolicySpec = ContentSecurityPolicySpec(value: "default-src 'self'"),
          frameOptionsSpecification: FrameOptionsSpec = FrameOptionsSpec(option: .deny),
+         xssProtectionSpecification: XssProtectionSpec = XssProtectionSpec(option: .block),
          enableHSTS: Bool = false) {
-        specifications = [contentTypeSpecification, contentSecurityPolicySpecification, frameOptionsSpecification]
+        specifications = [contentTypeSpecification, contentSecurityPolicySpecification, frameOptionsSpecification, xssProtectionSpecification]
         self.enableHSTS = enableHSTS
     }
     
-    enum HeaderNames {
-        case cto
-        case csp
-        case xfo
-        case xssProtection
-        case hsts
-    }
-    
-    
     func respond(to request: Request, chainingTo next: Responder) throws -> Response {
         let response = try next.respond(to: request)
-
-        response.headers[HeaderKey.contentSecurityPolicy] = getHeader(for: .csp)
-        response.headers[HeaderKey.xFrameOptions] = getHeader(for: .xfo)
-        response.headers[HeaderKey.xXssProtection] = getHeader(for: .xssProtection)
         
         if enableHSTS {
-            response.headers[HeaderKey.strictTransportSecurity] = getHeader(for: .hsts)
+            response.headers[HeaderKey.strictTransportSecurity] = "max-age=31536000; includeSubdomains; preload"
         }
         
         for spec in specifications {
@@ -55,15 +44,30 @@ struct SecurityHeaders: Middleware {
         
         return response
     }
+}
+
+struct XssProtectionSpec: SecurityHeaderSpecification {
     
-    private func getHeader(for headerName: HeaderNames) -> String {
-        switch headerName {
-        case .xssProtection:
-            return "1; mode=block"
-        case .hsts:
-            return "max-age=31536000; includeSubdomains; preload"
-        default:
-            return ""
+    enum Options {
+        case disable
+        case enable
+        case block
+    }
+    
+    private let option: Options
+    
+    init(option: Options) {
+        self.option = option
+    }
+    
+    func setHeader(on response: Response) {
+        switch option {
+        case .disable:
+            response.headers[HeaderKey.xXssProtection] = "0"
+        case .enable:
+            response.headers[HeaderKey.xXssProtection] = "1"
+        case .block:
+            response.headers[HeaderKey.xXssProtection] = "1; mode=block"
         }
     }
 }
