@@ -58,7 +58,7 @@ class HeaderTests: XCTestCase {
         let expectedXFOHeaderValue = "DENY"
         let expectedXSSProtectionHeaderValue = "1; mode=block"
         
-        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders(api: true))
+        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders.api())
         let response = try drop.respond(to: request)
         
         XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HeaderKey.xContentTypeOptions])
@@ -74,7 +74,7 @@ class HeaderTests: XCTestCase {
         let expectedXSSProtectionHeaderValue = "1; mode=block"
         let expectedHSTSHeaderValue = "max-age=31536000; includeSubDomains; preload"
         
-        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders(api: true, hstsConfiguration: StrictTransportSecurityConfiguration()))
+        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders.api(hstsConfiguration: StrictTransportSecurityConfiguration()))
         let response = try drop.respond(to: request)
         
         XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HeaderKey.xContentTypeOptions])

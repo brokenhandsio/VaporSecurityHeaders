@@ -8,17 +8,12 @@ struct SecurityHeaders: Middleware {
     
     private var configurations: [SecurityHeaderConfiguration]
     
-    init(api: Bool, hstsConfiguration: StrictTransportSecurityConfiguration? = nil) {
-        if api {
-            self.init(contentTypeConfiguration: ContentTypeOptionsConfiguration(option: .nosniff),
-                      contentSecurityPolicyConfiguration: ContentSecurityPolicyConfiguration(value: "default-src 'none'"),
-                      frameOptionsConfiguration: FrameOptionsConfiguration(option: .deny),
-                      xssProtectionConfiguration: XssProtectionConfiguration(option: .block),
-                      hstsConfiguration: hstsConfiguration)
-        }
-        else {
-            self.init()
-        }
+    static func api(hstsConfiguration: StrictTransportSecurityConfiguration? = nil) -> SecurityHeaders {
+        return SecurityHeaders(contentTypeConfiguration: ContentTypeOptionsConfiguration(option: .nosniff),
+                  contentSecurityPolicyConfiguration: ContentSecurityPolicyConfiguration(value: "default-src 'none'"),
+                  frameOptionsConfiguration: FrameOptionsConfiguration(option: .deny),
+                  xssProtectionConfiguration: XssProtectionConfiguration(option: .block),
+                  hstsConfiguration: hstsConfiguration)
     }
     
     init(contentTypeConfiguration: ContentTypeOptionsConfiguration = ContentTypeOptionsConfiguration(option: .nosniff),
