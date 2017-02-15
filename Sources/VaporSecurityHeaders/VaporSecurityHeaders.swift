@@ -10,22 +10,22 @@ struct SecurityHeaders: Middleware {
         self.enableHSTS = enableHSTS
     }
     
-    enum HeaderNames: String {
-        case cto = "X-Content-Type-Options"
-        case csp = "Content-Security-Policy"
-        case xfo = "X-Frame-Options"
-        case xssProtection = "X-XSS-Protection"
-        case hsts = "Strict-Transport-Security"
+    enum HeaderNames {
+        case cto
+        case csp
+        case xfo
+        case xssProtection
+        case hsts
     }
     
     
     func respond(to request: Request, chainingTo next: Responder) throws -> Response {
         let response = try next.respond(to: request)
         
-        response.headers[HeaderKey(HeaderNames.cto.rawValue)] = getHeader(for: .cto)
-        response.headers[HeaderKey(HeaderNames.csp.rawValue)] = getHeader(for: .csp)
-        response.headers[HeaderKey(HeaderNames.xfo.rawValue)] = getHeader(for: .xfo)
-        response.headers[HeaderKey(HeaderNames.xssProtection.rawValue)] = getHeader(for: .xssProtection)
+        response.headers[HeaderKey.xContentTypeOptions] = getHeader(for: .cto)
+        response.headers[HeaderKey.contentSecurityPolicy] = getHeader(for: .csp)
+        response.headers[HeaderKey.xFrameOptions] = getHeader(for: .xfo)
+        response.headers[HeaderKey.xXssProtection] = getHeader(for: .xssProtection)
         
         if enableHSTS {
             response.headers[HeaderKey.strictTransportSecurity] = getHeader(for: .hsts)
@@ -52,5 +52,23 @@ struct SecurityHeaders: Middleware {
         case .hsts:
             return "max-age=31536000; includeSubdomains; preload"
         }
+    }
+}
+
+extension HeaderKey {
+    static public var contentSecurityPolicy: HeaderKey {
+        return HeaderKey("Content-Security-Policy")
+    }
+    
+    static public var xXssProtection: HeaderKey {
+        return HeaderKey("X-XSS-Protection")
+    }
+    
+    static public var xFrameOptions: HeaderKey {
+        return HeaderKey("X-Frame-Options")
+    }
+    
+    static public var xContentTypeOptions: HeaderKey {
+        return HeaderKey("X-Content-Type-Options")
     }
 }
