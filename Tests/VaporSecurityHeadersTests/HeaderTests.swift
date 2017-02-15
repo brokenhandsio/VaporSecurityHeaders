@@ -104,6 +104,15 @@ class HeaderTests: XCTestCase {
     }
     */
     
+    func testHeadersWithContentTypeOptionsTurnedOff() throws {
+        let contentTypeSpec = ContentTypeOptionsSpec(option: .none)
+        let middleware = SecurityHeaders(contentTypeSpecification: contentTypeSpec)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        
+        XCTAssertNil(response.headers["X-Content-Type-Options"])
+    }
+    
     
     private func makeTestDroplet(middlewareToAdd: Middleware) throws -> Droplet {
         let drop = Droplet(arguments: ["dummy/path/", "prepare"])
