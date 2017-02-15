@@ -17,6 +17,7 @@ A Middleware library for adding security headers to your Vapor application.
 
 The following features are on the roadmap to be implemented:
 
+* Content-Security-Policy-Report-Only Header
 * HPKP
 * Per page Content Security Policies
 
