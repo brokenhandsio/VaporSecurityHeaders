@@ -23,7 +23,7 @@ class HeaderTests: XCTestCase {
     func testDefaultHeaders() throws {
         let expectedXCTOHeaderValue = "nosniff"
         let expectedCSPHeaderValue = "default-src 'self'"
-        let expectedXFOHeaderValue = "deny"
+        let expectedXFOHeaderValue = "DENY"
         let expectedXSSProtectionHeaderValue = "1; mode=block"
         
         let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders())
@@ -38,7 +38,7 @@ class HeaderTests: XCTestCase {
     func testDefaultHeadersWithHSTS() throws {
         let expectedXCTOHeaderValue = "nosniff"
         let expectedCSPHeaderValue = "default-src 'self'"
-        let expectedXFOHeaderValue = "deny"
+        let expectedXFOHeaderValue = "DENY"
         let expectedXSSProtectionHeaderValue = "1; mode=block"
         let expectedHSTSHeaderValue = "max-age=31536000; includeSubdomains; preload"
         
@@ -55,7 +55,7 @@ class HeaderTests: XCTestCase {
     func testAllHeadersForApi() throws {
         let expectedXCTOHeaderValue = "nosniff"
         let expectedCSPHeaderValue = "default-src 'none'"
-        let expectedXFOHeaderValue = "deny"
+        let expectedXFOHeaderValue = "DENY"
         let expectedXSSProtectionHeaderValue = "1; mode=block"
         
         let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders(api: true))
@@ -70,7 +70,7 @@ class HeaderTests: XCTestCase {
     func testAPIHeadersWithHSTS() throws {
         let expectedXCTOHeaderValue = "nosniff"
         let expectedCSPHeaderValue = "default-src 'none'"
-        let expectedXFOHeaderValue = "deny"
+        let expectedXFOHeaderValue = "DENY"
         let expectedXSSProtectionHeaderValue = "1; mode=block"
         let expectedHSTSHeaderValue = "max-age=31536000; includeSubdomains; preload"
         
@@ -123,15 +123,21 @@ class HeaderTests: XCTestCase {
     }
     
     func testHeaderWithFrameOptionsDeny() throws {
-        let middleware = SecurityHeaders()
+        let frameOptionsSpec = FrameOptionsSpec(option: .deny)
+        let middleware = SecurityHeaders(frameOptionsSpecification: frameOptionsSpec)
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
         
-        XCTAssertEqual("deny", response.headers[HeaderKey.xFrameOptions])
+        XCTAssertEqual("DENY", response.headers[HeaderKey.xFrameOptions])
     }
     
     func testHeaderWithFrameOptionsSameOrigin() throws {
+        let frameOptionsSpec = FrameOptionsSpec(option: .sameOrigin)
+        let middleware = SecurityHeaders(frameOptionsSpecification: frameOptionsSpec)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
         
+        XCTAssertEqual("SAMEORIGIN", response.headers[HeaderKey.xFrameOptions])
     }
     
     func testHeaderWithFrameOptionsAllowFrom() throws {

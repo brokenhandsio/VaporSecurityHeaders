@@ -13,7 +13,7 @@ struct SecurityHeaders: Middleware {
         if api {
             self.init(contentTypeSpecification: ContentTypeOptionsSpec(option: .nosniff),
                       contentSecurityPolicySpecification: ContentSecurityPolicySpec(value: "default-src 'none'"),
-                      frameOptionsSpecification: FrameOptionsSpec(),
+                      frameOptionsSpecification: FrameOptionsSpec(option: .deny),
                       enableHSTS: enableHSTS)
         }
         else {
@@ -23,7 +23,7 @@ struct SecurityHeaders: Middleware {
     
     init(contentTypeSpecification: ContentTypeOptionsSpec = ContentTypeOptionsSpec(option: .nosniff),
          contentSecurityPolicySpecification: ContentSecurityPolicySpec = ContentSecurityPolicySpec(value: "default-src 'self'"),
-         frameOptionsSpecification: FrameOptionsSpec = FrameOptionsSpec(),
+         frameOptionsSpecification: FrameOptionsSpec = FrameOptionsSpec(option: .deny),
          enableHSTS: Bool = false) {
         specifications = [contentTypeSpecification, contentSecurityPolicySpecification, frameOptionsSpecification]
         self.enableHSTS = enableHSTS
@@ -70,8 +70,19 @@ struct SecurityHeaders: Middleware {
 
 struct FrameOptionsSpec: SecurityHeaderSpecification {
     
+    enum Options: String {
+        case deny = "DENY"
+        case sameOrigin = "SAMEORIGIN"
+    }
+    
+    private let option: Options
+    
+    init(option: Options) {
+        self.option = option
+    }
+    
     func setHeader(on response: Response) {
-        response.headers[HeaderKey.xFrameOptions] = "deny"
+        response.headers[HeaderKey.xFrameOptions] = option.rawValue
     }
 }
 
