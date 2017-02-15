@@ -6,19 +6,18 @@ protocol SecurityHeaderConfiguration {
 
 struct SecurityHeaders: Middleware {
     
-    private let enableHSTS: Bool
-    private let configurations: [SecurityHeaderConfiguration]
+    private var configurations: [SecurityHeaderConfiguration]
     
-    init(api: Bool, enableHSTS: Bool = false) {
+    init(api: Bool, hstsConfiguration: StrictTransportSecurityConfiguration? = nil) {
         if api {
             self.init(contentTypeConfiguration: ContentTypeOptionsConfiguration(option: .nosniff),
                       contentSecurityPolicyConfiguration: ContentSecurityPolicyConfiguration(value: "default-src 'none'"),
                       frameOptionsConfiguration: FrameOptionsConfiguration(option: .deny),
                       xssProtectionConfiguration: XssProtectionConfiguration(option: .block),
-                      enableHSTS: enableHSTS)
+                      hstsConfiguration: hstsConfiguration)
         }
         else {
-            self.init(enableHSTS: enableHSTS)
+            self.init()
         }
     }
     
@@ -26,17 +25,16 @@ struct SecurityHeaders: Middleware {
          contentSecurityPolicyConfiguration: ContentSecurityPolicyConfiguration = ContentSecurityPolicyConfiguration(value: "default-src 'self'"),
          frameOptionsConfiguration: FrameOptionsConfiguration = FrameOptionsConfiguration(option: .deny),
          xssProtectionConfiguration: XssProtectionConfiguration = XssProtectionConfiguration(option: .block),
-         enableHSTS: Bool = false) {
+         hstsConfiguration: StrictTransportSecurityConfiguration? = nil) {
         configurations = [contentTypeConfiguration, contentSecurityPolicyConfiguration, frameOptionsConfiguration, xssProtectionConfiguration]
-        self.enableHSTS = enableHSTS
+        
+        if let hstsConfiguration = hstsConfiguration {
+            configurations.append(hstsConfiguration)
+        }
     }
     
     func respond(to request: Request, chainingTo next: Responder) throws -> Response {
         let response = try next.respond(to: request)
-        
-        if enableHSTS {
-            response.headers[HeaderKey.strictTransportSecurity] = "max-age=31536000; includeSubdomains; preload"
-        }
         
         for spec in configurations {
             spec.setHeader(on: response)
@@ -47,8 +45,27 @@ struct SecurityHeaders: Middleware {
 }
 
 struct StrictTransportSecurityConfiguration: SecurityHeaderConfiguration {
+    
+    private let maxAge: Int
+    private let includeSubdomains: Bool
+    private let preload: Bool
+    
+    init(maxAge: Int = 31536000, includeSubdomains: Bool = true, preload: Bool = true) {
+        self.maxAge = maxAge
+        self.includeSubdomains = includeSubdomains
+        self.preload = preload
+    }
+    
     func setHeader(on response: Response) {
+        var headerValue = "max-age=\(maxAge);"
+        if includeSubdomains {
+            headerValue += " includeSubDomains;"
+        }
+        if preload {
+            headerValue += " preload"
+        }
         
+        response.headers[HeaderKey.strictTransportSecurity] = headerValue
     }
 }
 

@@ -40,9 +40,9 @@ class HeaderTests: XCTestCase {
         let expectedCSPHeaderValue = "default-src 'self'"
         let expectedXFOHeaderValue = "DENY"
         let expectedXSSProtectionHeaderValue = "1; mode=block"
-        let expectedHSTSHeaderValue = "max-age=31536000; includeSubdomains; preload"
+        let expectedHSTSHeaderValue = "max-age=31536000; includeSubDomains; preload"
         
-        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders(enableHSTS: true))
+        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders(hstsConfiguration: StrictTransportSecurityConfiguration()))
         let response = try drop.respond(to: request)
         
         XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HeaderKey.xContentTypeOptions])
@@ -72,9 +72,9 @@ class HeaderTests: XCTestCase {
         let expectedCSPHeaderValue = "default-src 'none'"
         let expectedXFOHeaderValue = "DENY"
         let expectedXSSProtectionHeaderValue = "1; mode=block"
-        let expectedHSTSHeaderValue = "max-age=31536000; includeSubdomains; preload"
+        let expectedHSTSHeaderValue = "max-age=31536000; includeSubDomains; preload"
         
-        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders(api: true, enableHSTS: true))
+        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders(api: true, hstsConfiguration: StrictTransportSecurityConfiguration()))
         let response = try drop.respond(to: request)
         
         XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HeaderKey.xContentTypeOptions])
@@ -174,6 +174,69 @@ class HeaderTests: XCTestCase {
         let response = try drop.respond(to: request)
         
         XCTAssertEqual("1; mode=block", response.headers[HeaderKey.xXssProtection])
+    }
+    
+    func testHeaderWithHSTSwithMaxAge() throws {
+        let hstsConfig = StrictTransportSecurityConfiguration(maxAge: 30)
+        let middleware = SecurityHeaders(hstsConfiguration: hstsConfig)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        
+        XCTAssertEqual("max-age=30; includeSubDomains; preload", response.headers[HeaderKey.strictTransportSecurity])
+    }
+    
+    func testHeadersWithHSTSwithSubdomains() throws {
+        let hstsConfig = StrictTransportSecurityConfiguration(maxAge: 30, includeSubdomains: true)
+        let middleware = SecurityHeaders(hstsConfiguration: hstsConfig)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        
+        XCTAssertEqual("max-age=30; includeSubDomains; preload", response.headers[HeaderKey.strictTransportSecurity])
+    }
+    
+    func testHeadersWithHSTSwithPreload() throws {
+        let hstsConfig = StrictTransportSecurityConfiguration(maxAge: 30, preload: true)
+        let middleware = SecurityHeaders(hstsConfiguration: hstsConfig)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        
+        XCTAssertEqual("max-age=30; includeSubDomains; preload", response.headers[HeaderKey.strictTransportSecurity])
+    }
+    
+    func testHeadersWithHSTSwithPreloadAndSubdomain() throws {
+        let hstsConfig = StrictTransportSecurityConfiguration(maxAge: 30, includeSubdomains: true, preload: true)
+        let middleware = SecurityHeaders(hstsConfiguration: hstsConfig)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        
+        XCTAssertEqual("max-age=30; includeSubDomains; preload", response.headers[HeaderKey.strictTransportSecurity])
+    }
+    
+    func testHeadersWithHSTSwithSubdomainsFalse() throws {
+        let hstsConfig = StrictTransportSecurityConfiguration(maxAge: 30, includeSubdomains: false)
+        let middleware = SecurityHeaders(hstsConfiguration: hstsConfig)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        
+        XCTAssertEqual("max-age=30; preload", response.headers[HeaderKey.strictTransportSecurity])
+    }
+    
+    func testHeadersWithHSTSwithPreloadFalse() throws {
+        let hstsConfig = StrictTransportSecurityConfiguration(maxAge: 30, preload: false)
+        let middleware = SecurityHeaders(hstsConfiguration: hstsConfig)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        
+        XCTAssertEqual("max-age=30; includeSubDomains;", response.headers[HeaderKey.strictTransportSecurity])
+    }
+    
+    func testHeadersWithHSTSwithSubdomainAndPreloadFalse() throws {
+        let hstsConfig = StrictTransportSecurityConfiguration(maxAge: 30, includeSubdomains: false, preload: false)
+        let middleware = SecurityHeaders(hstsConfiguration: hstsConfig)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        
+        XCTAssertEqual("max-age=30;", response.headers[HeaderKey.strictTransportSecurity])
     }
     
     
