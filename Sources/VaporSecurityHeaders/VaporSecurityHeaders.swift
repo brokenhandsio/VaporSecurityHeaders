@@ -1,20 +1,20 @@
 import HTTP
 
-protocol SecurityHeaderSpecification {
+protocol SecurityHeaderConfiguration {
     func setHeader(on response: Response)
 }
 
 struct SecurityHeaders: Middleware {
     
     private let enableHSTS: Bool
-    private let specifications: [SecurityHeaderSpecification]
+    private let configurations: [SecurityHeaderConfiguration]
     
     init(api: Bool, enableHSTS: Bool = false) {
         if api {
-            self.init(contentTypeSpecification: ContentTypeOptionsSpec(option: .nosniff),
-                      contentSecurityPolicySpecification: ContentSecurityPolicySpec(value: "default-src 'none'"),
-                      frameOptionsSpecification: FrameOptionsSpec(option: .deny),
-                      xssProtectionSpecification: XssProtectionSpec(option: .block),
+            self.init(contentTypeConfiguration: ContentTypeOptionsConfiguration(option: .nosniff),
+                      contentSecurityPolicyConfiguration: ContentSecurityPolicyConfiguration(value: "default-src 'none'"),
+                      frameOptionsConfiguration: FrameOptionsConfiguration(option: .deny),
+                      xssProtectionConfiguration: XssProtectionConfiguration(option: .block),
                       enableHSTS: enableHSTS)
         }
         else {
@@ -22,12 +22,12 @@ struct SecurityHeaders: Middleware {
         }
     }
     
-    init(contentTypeSpecification: ContentTypeOptionsSpec = ContentTypeOptionsSpec(option: .nosniff),
-         contentSecurityPolicySpecification: ContentSecurityPolicySpec = ContentSecurityPolicySpec(value: "default-src 'self'"),
-         frameOptionsSpecification: FrameOptionsSpec = FrameOptionsSpec(option: .deny),
-         xssProtectionSpecification: XssProtectionSpec = XssProtectionSpec(option: .block),
+    init(contentTypeConfiguration: ContentTypeOptionsConfiguration = ContentTypeOptionsConfiguration(option: .nosniff),
+         contentSecurityPolicyConfiguration: ContentSecurityPolicyConfiguration = ContentSecurityPolicyConfiguration(value: "default-src 'self'"),
+         frameOptionsConfiguration: FrameOptionsConfiguration = FrameOptionsConfiguration(option: .deny),
+         xssProtectionConfiguration: XssProtectionConfiguration = XssProtectionConfiguration(option: .block),
          enableHSTS: Bool = false) {
-        specifications = [contentTypeSpecification, contentSecurityPolicySpecification, frameOptionsSpecification, xssProtectionSpecification]
+        configurations = [contentTypeConfiguration, contentSecurityPolicyConfiguration, frameOptionsConfiguration, xssProtectionConfiguration]
         self.enableHSTS = enableHSTS
     }
     
@@ -38,7 +38,7 @@ struct SecurityHeaders: Middleware {
             response.headers[HeaderKey.strictTransportSecurity] = "max-age=31536000; includeSubdomains; preload"
         }
         
-        for spec in specifications {
+        for spec in configurations {
             spec.setHeader(on: response)
         }
         
@@ -46,7 +46,13 @@ struct SecurityHeaders: Middleware {
     }
 }
 
-struct XssProtectionSpec: SecurityHeaderSpecification {
+struct StrictTransportSecurityConfiguration: SecurityHeaderConfiguration {
+    func setHeader(on response: Response) {
+        
+    }
+}
+
+struct XssProtectionConfiguration: SecurityHeaderConfiguration {
     
     enum Options {
         case disable
@@ -72,7 +78,7 @@ struct XssProtectionSpec: SecurityHeaderSpecification {
     }
 }
 
-struct FrameOptionsSpec: SecurityHeaderSpecification {
+struct FrameOptionsConfiguration: SecurityHeaderConfiguration {
     
     enum Options {
         case deny
@@ -98,7 +104,7 @@ struct FrameOptionsSpec: SecurityHeaderSpecification {
     }
 }
 
-struct ContentSecurityPolicySpec: SecurityHeaderSpecification {
+struct ContentSecurityPolicyConfiguration: SecurityHeaderConfiguration {
     
     private let value: String
     
@@ -112,7 +118,7 @@ struct ContentSecurityPolicySpec: SecurityHeaderSpecification {
 }
 
 
-struct ContentTypeOptionsSpec: SecurityHeaderSpecification {
+struct ContentTypeOptionsConfiguration: SecurityHeaderConfiguration {
     
     private let option: Options
     
@@ -134,6 +140,8 @@ struct ContentTypeOptionsSpec: SecurityHeaderSpecification {
         }
     }
 }
+
+// MARK: - HeaderKey
 
 extension HeaderKey {
     static public var contentSecurityPolicy: HeaderKey {

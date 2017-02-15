@@ -105,8 +105,8 @@ class HeaderTests: XCTestCase {
     */
     
     func testHeadersWithContentTypeOptionsTurnedOff() throws {
-        let contentTypeSpec = ContentTypeOptionsSpec(option: .none)
-        let middleware = SecurityHeaders(contentTypeSpecification: contentTypeSpec)
+        let contentTypeConfig = ContentTypeOptionsConfiguration(option: .none)
+        let middleware = SecurityHeaders(contentTypeConfiguration: contentTypeConfig)
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
         
@@ -114,8 +114,8 @@ class HeaderTests: XCTestCase {
     }
     
     func testHeadersWithContentTypeOptionsNosniff() throws {
-        let contentTypeSpec = ContentTypeOptionsSpec(option: .nosniff)
-        let middleware = SecurityHeaders(contentTypeSpecification: contentTypeSpec)
+        let contentTypeConfig = ContentTypeOptionsConfiguration(option: .nosniff)
+        let middleware = SecurityHeaders(contentTypeConfiguration: contentTypeConfig)
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
         
@@ -123,8 +123,8 @@ class HeaderTests: XCTestCase {
     }
     
     func testHeaderWithFrameOptionsDeny() throws {
-        let frameOptionsSpec = FrameOptionsSpec(option: .deny)
-        let middleware = SecurityHeaders(frameOptionsSpecification: frameOptionsSpec)
+        let frameOptionsConfig = FrameOptionsConfiguration(option: .deny)
+        let middleware = SecurityHeaders(frameOptionsConfiguration: frameOptionsConfig)
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
         
@@ -132,8 +132,8 @@ class HeaderTests: XCTestCase {
     }
     
     func testHeaderWithFrameOptionsSameOrigin() throws {
-        let frameOptionsSpec = FrameOptionsSpec(option: .sameOrigin)
-        let middleware = SecurityHeaders(frameOptionsSpecification: frameOptionsSpec)
+        let frameOptionsConfig = FrameOptionsConfiguration(option: .sameOrigin)
+        let middleware = SecurityHeaders(frameOptionsConfiguration: frameOptionsConfig)
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
         
@@ -141,8 +141,8 @@ class HeaderTests: XCTestCase {
     }
     
     func testHeaderWithFrameOptionsAllowFrom() throws {
-        let frameOptionsSpec = FrameOptionsSpec(option: .allow(from: "https://test.com"))
-        let middleware = SecurityHeaders(frameOptionsSpecification: frameOptionsSpec)
+        let frameOptionsConfig = FrameOptionsConfiguration(option: .allow(from: "https://test.com"))
+        let middleware = SecurityHeaders(frameOptionsConfiguration: frameOptionsConfig)
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
         
@@ -150,8 +150,8 @@ class HeaderTests: XCTestCase {
     }
     
     func testHeaderWithXssProtectionDisable() throws {
-        let xssProtectionSpec = XssProtectionSpec(option: .disable)
-        let middleware = SecurityHeaders(xssProtectionSpecification: xssProtectionSpec)
+        let xssProtectionConfig = XssProtectionConfiguration(option: .disable)
+        let middleware = SecurityHeaders(xssProtectionConfiguration: xssProtectionConfig)
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
         
@@ -159,8 +159,8 @@ class HeaderTests: XCTestCase {
     }
     
     func testHeaderWithXssProtectionEnable() throws {
-        let xssProtectionSpec = XssProtectionSpec(option: .enable)
-        let middleware = SecurityHeaders(xssProtectionSpecification: xssProtectionSpec)
+        let xssProtectionConfig = XssProtectionConfiguration(option: .enable)
+        let middleware = SecurityHeaders(xssProtectionConfiguration: xssProtectionConfig)
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
         
@@ -168,8 +168,8 @@ class HeaderTests: XCTestCase {
     }
     
     func testHeaderWithXssProtectionBlock() throws {
-        let xssProtectionSpec = XssProtectionSpec(option: .block)
-        let middleware = SecurityHeaders(xssProtectionSpecification: xssProtectionSpec)
+        let xssProtectionConfig = XssProtectionConfiguration(option: .block)
+        let middleware = SecurityHeaders(xssProtectionConfiguration: xssProtectionConfig)
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
         
