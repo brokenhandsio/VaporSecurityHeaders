@@ -29,10 +29,10 @@ class HeaderTests: XCTestCase {
         let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders())
         let response = try drop.respond(to: request)
         
-        XCTAssertEqual(expectedXCTOHeaderValue, response.headers["X-Content-Type-Options"])
-        XCTAssertEqual(expectedCSPHeaderValue, response.headers["Content-Security-Policy"])
-        XCTAssertEqual(expectedXFOHeaderValue, response.headers["X-Frame-Options"])
-        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers["X-XSS-Protection"])
+        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HeaderKey.xContentTypeOptions])
+        XCTAssertEqual(expectedCSPHeaderValue, response.headers[HeaderKey.contentSecurityPolicy])
+        XCTAssertEqual(expectedXFOHeaderValue, response.headers[HeaderKey.xFrameOptions])
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[HeaderKey.xXssProtection])
     }
     
     func testDefaultHeadersWithHSTS() throws {
@@ -45,11 +45,11 @@ class HeaderTests: XCTestCase {
         let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders(enableHSTS: true))
         let response = try drop.respond(to: request)
         
-        XCTAssertEqual(expectedXCTOHeaderValue, response.headers["X-Content-Type-Options"])
-        XCTAssertEqual(expectedCSPHeaderValue, response.headers["Content-Security-Policy"])
-        XCTAssertEqual(expectedXFOHeaderValue, response.headers["X-Frame-Options"])
-        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers["X-XSS-Protection"])
-        XCTAssertEqual(expectedHSTSHeaderValue, response.headers["Strict-Transport-Security"])
+        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HeaderKey.xContentTypeOptions])
+        XCTAssertEqual(expectedCSPHeaderValue, response.headers[HeaderKey.contentSecurityPolicy])
+        XCTAssertEqual(expectedXFOHeaderValue, response.headers[HeaderKey.xFrameOptions])
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[HeaderKey.xXssProtection])
+        XCTAssertEqual(expectedHSTSHeaderValue, response.headers[HeaderKey.strictTransportSecurity])
     }
     
     func testAllHeadersForApi() throws {
@@ -61,10 +61,10 @@ class HeaderTests: XCTestCase {
         let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders(api: true))
         let response = try drop.respond(to: request)
         
-        XCTAssertEqual(expectedXCTOHeaderValue, response.headers["X-Content-Type-Options"])
-        XCTAssertEqual(expectedCSPHeaderValue, response.headers["Content-Security-Policy"])
-        XCTAssertEqual(expectedXFOHeaderValue, response.headers["X-Frame-Options"])
-        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers["X-XSS-Protection"])
+        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HeaderKey.xContentTypeOptions])
+        XCTAssertEqual(expectedCSPHeaderValue, response.headers[HeaderKey.contentSecurityPolicy])
+        XCTAssertEqual(expectedXFOHeaderValue, response.headers[HeaderKey.xFrameOptions])
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[HeaderKey.xXssProtection])
     }
     
     func testAPIHeadersWithHSTS() throws {
@@ -77,11 +77,11 @@ class HeaderTests: XCTestCase {
         let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders(api: true, enableHSTS: true))
         let response = try drop.respond(to: request)
         
-        XCTAssertEqual(expectedXCTOHeaderValue, response.headers["X-Content-Type-Options"])
-        XCTAssertEqual(expectedCSPHeaderValue, response.headers["Content-Security-Policy"])
-        XCTAssertEqual(expectedXFOHeaderValue, response.headers["X-Frame-Options"])
-        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers["X-XSS-Protection"])
-        XCTAssertEqual(expectedHSTSHeaderValue, response.headers["Strict-Transport-Security"])
+        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HeaderKey.xContentTypeOptions])
+        XCTAssertEqual(expectedCSPHeaderValue, response.headers[HeaderKey.contentSecurityPolicy])
+        XCTAssertEqual(expectedXFOHeaderValue, response.headers[HeaderKey.xFrameOptions])
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[HeaderKey.xXssProtection])
+        XCTAssertEqual(expectedHSTSHeaderValue, response.headers[HeaderKey.strictTransportSecurity])
     }
     
     /*
@@ -110,7 +110,32 @@ class HeaderTests: XCTestCase {
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
         
-        XCTAssertNil(response.headers["X-Content-Type-Options"])
+        XCTAssertNil(response.headers[HeaderKey.xContentTypeOptions])
+    }
+    
+    func testHeadersWithContentTypeOptionsNosniff() throws {
+        let contentTypeSpec = ContentTypeOptionsSpec(option: .nosniff)
+        let middleware = SecurityHeaders(contentTypeSpecification: contentTypeSpec)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        
+        XCTAssertEqual("nosniff", response.headers[HeaderKey.xContentTypeOptions])
+    }
+    
+    func testHeaderWithFrameOptionsDeny() throws {
+        let middleware = SecurityHeaders()
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        
+        XCTAssertEqual("deny", response.headers[HeaderKey.xFrameOptions])
+    }
+    
+    func testHeaderWithFrameOptionsSameOrigin() throws {
+        
+    }
+    
+    func testHeaderWithFrameOptionsAllowFrom() throws {
+        
     }
     
     

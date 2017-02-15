@@ -1,5 +1,9 @@
 import HTTP
 
+protocol SecurityHeaderSpecification {
+    func setHeader(on response: Response)
+}
+
 struct SecurityHeaders: Middleware {
     
     private let enableHSTS: Bool
@@ -9,6 +13,7 @@ struct SecurityHeaders: Middleware {
         if api {
             self.init(contentTypeSpecification: ContentTypeOptionsSpec(option: .nosniff),
                       contentSecurityPolicySpecification: ContentSecurityPolicySpec(value: "default-src 'none'"),
+                      frameOptionsSpecification: FrameOptionsSpec(),
                       enableHSTS: enableHSTS)
         }
         else {
@@ -18,8 +23,9 @@ struct SecurityHeaders: Middleware {
     
     init(contentTypeSpecification: ContentTypeOptionsSpec = ContentTypeOptionsSpec(option: .nosniff),
          contentSecurityPolicySpecification: ContentSecurityPolicySpec = ContentSecurityPolicySpec(value: "default-src 'self'"),
+         frameOptionsSpecification: FrameOptionsSpec = FrameOptionsSpec(),
          enableHSTS: Bool = false) {
-        specifications = [contentTypeSpecification, contentSecurityPolicySpecification]
+        specifications = [contentTypeSpecification, contentSecurityPolicySpecification, frameOptionsSpecification]
         self.enableHSTS = enableHSTS
     }
     
@@ -52,8 +58,6 @@ struct SecurityHeaders: Middleware {
     
     private func getHeader(for headerName: HeaderNames) -> String {
         switch headerName {
-        case .xfo:
-            return "deny"
         case .xssProtection:
             return "1; mode=block"
         case .hsts:
@@ -61,6 +65,13 @@ struct SecurityHeaders: Middleware {
         default:
             return ""
         }
+    }
+}
+
+struct FrameOptionsSpec: SecurityHeaderSpecification {
+    
+    func setHeader(on response: Response) {
+        response.headers[HeaderKey.xFrameOptions] = "deny"
     }
 }
 
@@ -99,10 +110,6 @@ struct ContentTypeOptionsSpec: SecurityHeaderSpecification {
             break
         }
     }
-}
-
-protocol SecurityHeaderSpecification {
-    func setHeader(on response: Response)
 }
 
 extension HeaderKey {
