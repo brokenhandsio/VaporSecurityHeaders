@@ -16,6 +16,7 @@ Easily add headers to all your responses for improving the security of your site
 * X-Frame-Options
 * X-Content-Type-Options
 * Strict-Transport-Security (HSTS)
+* Server
 
 These headers will *help* prevent cross-site scripting attacks, SSL downgrade attacks, content injection attacks, click-jacking etc. They will not help for any attacks directly against your server, but they will help your users and help secure sensitive information (CSRF tokens). Please note that this library does not guarantee anything and nothing is ever completely secure.
 
@@ -129,6 +130,17 @@ To use the Strict-Transport-Security header, you can configure and add it as so 
 ```swift
 let strictTransportSecurityConfig = StrictTransportSecurityConfiguration(maxAge: 31536000, includeSubdomains: true, preload: true)
 let securityHeaders = SecurityHeaders(hstsConfiguration: strictTransportSecurityConfig)
+```
+
+## Server
+
+The Server header is usually hidden from responses in order to not give away what type of server you are running and what version you are using. This is to stop attackers from scanning your site and using known vulnerabilities against it easily. By default Vapor does not show the server header in responses for this reason.
+
+However, it can be fun to add in a custom server configuration for a bit of personalisation, such as your website name, or company name (look at Github's response) and the `ServerConfiguraiton` is to allow this. So, for example, if I wanted my `Server` header to be `brokenhands.io`, I would configure it like:
+
+```swift
+let serverConfig = ServerConfiguration(value: "brokenhands.io")
+let securityHeaders = SecurityHeaders(serverConfiguration: serverConfig)
 ```
 
 ## Public-Key-Pins

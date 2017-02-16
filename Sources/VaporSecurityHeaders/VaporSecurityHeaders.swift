@@ -8,23 +8,29 @@ struct SecurityHeaders: Middleware {
     
     private var configurations: [SecurityHeaderConfiguration]
     
-    static func api(hstsConfiguration: StrictTransportSecurityConfiguration? = nil) -> SecurityHeaders {
+    static func api(hstsConfiguration: StrictTransportSecurityConfiguration? = nil, serverConfiguration: ServerConfiguration? = nil) -> SecurityHeaders {
         return SecurityHeaders(contentTypeConfiguration: ContentTypeOptionsConfiguration(option: .nosniff),
                   contentSecurityPolicyConfiguration: ContentSecurityPolicyConfiguration(value: "default-src 'none'"),
                   frameOptionsConfiguration: FrameOptionsConfiguration(option: .deny),
                   xssProtectionConfiguration: XssProtectionConfiguration(option: .block),
-                  hstsConfiguration: hstsConfiguration)
+                  hstsConfiguration: hstsConfiguration,
+                  serverConfiguration: serverConfiguration)
     }
     
     init(contentTypeConfiguration: ContentTypeOptionsConfiguration = ContentTypeOptionsConfiguration(option: .nosniff),
          contentSecurityPolicyConfiguration: ContentSecurityPolicyConfiguration = ContentSecurityPolicyConfiguration(value: "default-src 'self'"),
          frameOptionsConfiguration: FrameOptionsConfiguration = FrameOptionsConfiguration(option: .deny),
          xssProtectionConfiguration: XssProtectionConfiguration = XssProtectionConfiguration(option: .block),
-         hstsConfiguration: StrictTransportSecurityConfiguration? = nil) {
+         hstsConfiguration: StrictTransportSecurityConfiguration? = nil,
+         serverConfiguration: ServerConfiguration? = nil) {
         configurations = [contentTypeConfiguration, contentSecurityPolicyConfiguration, frameOptionsConfiguration, xssProtectionConfiguration]
         
         if let hstsConfiguration = hstsConfiguration {
             configurations.append(hstsConfiguration)
+        }
+        
+        if let serverConfiguration = serverConfiguration {
+            configurations.append(serverConfiguration)
         }
     }
     
@@ -36,6 +42,18 @@ struct SecurityHeaders: Middleware {
         }
         
         return response
+    }
+}
+
+struct ServerConfiguration: SecurityHeaderConfiguration {
+    private let value: String
+    
+    init(value: String) {
+        self.value = value
+    }
+    
+    func setHeader(on response: Response) {
+        response.headers[HeaderKey.server] = value
     }
 }
 

@@ -239,6 +239,15 @@ class HeaderTests: XCTestCase {
         XCTAssertEqual("max-age=30;", response.headers[HeaderKey.strictTransportSecurity])
     }
     
+    func testHeadersWithServerValue() throws {
+        let serverConfig = ServerConfiguration(value: "brokenhands.io")
+        let middleware = SecurityHeaders(serverConfiguration: serverConfig)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        
+        XCTAssertEqual("brokenhands.io", response.headers[HeaderKey.server])
+    }
+    
     
     private func makeTestDroplet(middlewareToAdd: Middleware) throws -> Droplet {
         let drop = Droplet(arguments: ["dummy/path/", "prepare"])
