@@ -45,7 +45,6 @@ You can test your site by visiting the awesome [Security Headers](https://securi
 
 The following features are on the roadmap to be implemented:
 
-* Server
 * Content-Security-Policy-Report-Only Header
 * HPKP
 * Per page Content Security Policies
