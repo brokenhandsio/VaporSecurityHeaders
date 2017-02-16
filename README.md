@@ -46,7 +46,8 @@ You can test your site by visiting the awesome [Security Headers](https://securi
 The following features are on the roadmap to be implemented:
 
 * Content-Security-Policy-Report-Only Header
-* HPKP
+* Public-Key-Pins (HPKP)
+* Public-Key-Pins-Report-Only
 * Per page Content Security Policies
 
 # Server Configuration
@@ -62,6 +63,31 @@ Both web servers should pass on the response headers from Vapor without issue wh
 # Security Header Information
 
 ## Content-Security-Policy
+
+Content Security Policy is one of the most effective tools for protecting against cross-site scripting attacks. In essence it is a way of whitelisting sources for content so that you only load from known and trusted sources. For more information about CSP, read Scott Helme's [awesome blog post](https://scotthelme.co.uk/content-security-policy-an-introduction/) which tells you how to configure it and what to use.
+
+The Vapor Security Headers package will set a default CSP of `default-src: 'self'`, which means that you can load images, scripts, fonts, CSS etc **only** from your domain. It also means that you cannot have any inline Javascript or CSS, which is one of the most effective measures you can take in protecting your site, and will wipe out a large proportion of content-injection attacks.
+
+The API default CSP is `default-src: 'none'` as an API should only return data and never be loading scripts or images to display!
+
+To configure your CSP you can add it to your `ContentSecurityPolicyConfiguration` like so:
+
+```swift
+let cspConfig = ContentSecurityPolicyConfiguration(value: "default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style;")
+let securityHeaders = SecurityHeaders(contentSecurityPolicyConfiguration: cspConfig)
+```
+
+This policy means that by default everything is blocked, however:
+
+* Scripts can be loaded from `https://static.brokenhands.io`
+* CSS can be loaded from `https://static.brokenhands.io`
+* Images can be loaded from `https://static.brokenhands.io`
+* Fonts can be loaded from `https://static.brokenhands.io`
+* Any JS connections can only be made to any `brokenhands.io` subdomain over HTTPS
+* Form actions go only go to the same site
+* Any HTTP requests will be sent over HTTPS
+* Any attempts to load HTTP content will be blocked
+* Any scripts and style links must have [SRI](https://scotthelme.co.uk/subresource-integrity/) values
 
 ## X-XSS-Protection
 
@@ -145,7 +171,3 @@ let securityHeaders = SecurityHeaders(serverConfiguration: serverConfig)
 ## Public-Key-Pins
 
 Coming soon
-
-## Report-Uri
-
-TODO

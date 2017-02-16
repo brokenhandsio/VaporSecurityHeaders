@@ -244,6 +244,16 @@ class HeaderTests: XCTestCase {
         XCTAssertEqual("brokenhands.io", response.headers[HeaderKey.server])
     }
     
+    func testHeadersWithCSP() throws {
+        let csp = "default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style;"
+        let cspConfig = ContentSecurityPolicyConfiguration(value: csp)
+        let middleware = SecurityHeaders(contentSecurityPolicyConfiguration: cspConfig)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        
+        XCTAssertEqual(csp, response.headers[HeaderKey.contentSecurityPolicy])
+    }
+    
     private func makeTestDroplet(middlewareToAdd: Middleware) throws -> Droplet {
         let drop = Droplet(arguments: ["dummy/path/", "prepare"])
         drop.middleware.append(middlewareToAdd)
