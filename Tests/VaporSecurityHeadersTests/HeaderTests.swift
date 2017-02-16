@@ -11,7 +11,23 @@ class HeaderTests: XCTestCase {
         ("testDefaultHeaders", testDefaultHeaders),
         ("testAllHeadersForApi", testAllHeadersForApi),
         ("testAPIHeadersWithHSTS", testAPIHeadersWithHSTS),
-        ("testDefaultHeadersWithHSTS", testDefaultHeadersWithHSTS)
+        ("testDefaultHeadersWithHSTS", testDefaultHeadersWithHSTS),
+        ("testHeadersWithContentTypeOptionsTurnedOff", testHeadersWithContentTypeOptionsTurnedOff),
+        ("testHeadersWithContentTypeOptionsNosniff", testHeadersWithContentTypeOptionsNosniff),
+        ("testHeaderWithFrameOptionsDeny", testHeaderWithFrameOptionsDeny),
+        ("testHeaderWithFrameOptionsSameOrigin", testHeaderWithFrameOptionsSameOrigin),
+        ("testHeaderWithFrameOptionsAllowFrom", testHeaderWithFrameOptionsAllowFrom),
+        ("testHeaderWithXssProtectionDisable", testHeaderWithXssProtectionDisable),
+        ("testHeaderWithXssProtectionEnable", testHeaderWithXssProtectionEnable),
+        ("testHeaderWithXssProtectionBlock", testHeaderWithXssProtectionBlock),
+        ("testHeaderWithHSTSwithMaxAge", testHeaderWithHSTSwithMaxAge),
+        ("testHeadersWithHSTSwithSubdomains", testHeadersWithHSTSwithSubdomains),
+        ("testHeadersWithHSTSwithPreload", testHeadersWithHSTSwithPreload),
+        ("testHeadersWithHSTSwithPreloadAndSubdomain", testHeadersWithHSTSwithPreloadAndSubdomain),
+        ("testHeadersWithHSTSwithSubdomainsFalse", testHeadersWithHSTSwithSubdomainsFalse),
+        ("testHeadersWithHSTSwithPreloadFalse", testHeadersWithHSTSwithPreloadFalse),
+        ("testHeadersWithHSTSwithSubdomainAndPreloadFalse", testHeadersWithHSTSwithSubdomainAndPreloadFalse),
+        ("testHeadersWithServerValue", testHeadersWithServerValue),
     ]
     
     private var request: Request!
@@ -83,26 +99,6 @@ class HeaderTests: XCTestCase {
         XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[HeaderKey.xXssProtection])
         XCTAssertEqual(expectedHSTSHeaderValue, response.headers[HeaderKey.strictTransportSecurity])
     }
-    
-    /*
-    func testAPIHeadersWithHSTSandHPKP() throws {
-        
-    }
-    
-    func testAPIHeadersWithHPKP() throws {
-        
-    }
-    */
-    
-    /*
-    func testDefaultHeadersWithHSTSandHPKP() throws {
-        
-    }
-    
-    func testDefaultHeadersWithHPKP() throws {
-        
-    }
-    */
     
     func testHeadersWithContentTypeOptionsTurnedOff() throws {
         let contentTypeConfig = ContentTypeOptionsConfiguration(option: .none)
@@ -247,7 +243,6 @@ class HeaderTests: XCTestCase {
         
         XCTAssertEqual("brokenhands.io", response.headers[HeaderKey.server])
     }
-    
     
     private func makeTestDroplet(middlewareToAdd: Middleware) throws -> Droplet {
         let drop = Droplet(arguments: ["dummy/path/", "prepare"])
