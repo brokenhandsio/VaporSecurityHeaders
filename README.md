@@ -78,7 +78,7 @@ The Vapor Security Headers package will set a default CSP of `default-src: 'self
 
 The API default CSP is `default-src: 'none'` as an API should only return data and never be loading scripts or images to display!
 
-To configure your CSP you can add it to your `ContentSecurityPolicyConfiguration` like so:
+I plan on massively improving creating the CSP configurations, but for now to configure your CSP you can add it to your `ContentSecurityPolicyConfiguration` like so:
 
 ```swift
 let cspConfig = ContentSecurityPolicyConfiguration(value: "default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style; report-uri https://csp-report.brokenhands.io")
