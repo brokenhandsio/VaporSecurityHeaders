@@ -122,7 +122,14 @@ Strict-Transport-Security is an improvement over 301/302 redirects or HTTPS forw
 
 The default configuration is `max-age=31536000; includeSubDomains; preload`. This tells the browser to force HTTPS for a year, and for *every* subdomain as well. So if you specify this, make sure you have SSL properly configured for all subdomains, e.g. `test.mysite.com`, `dev.mysite.com` etc.
 
-The `preload` tag tells Chrome that you want to be preloaded. This will add you to the preload list, which means that the browser will automatically know you want an HTTPS connection before you have even visited the site, so removes the initial HTTP handshake the first time you specify the header. However, this has now been superseded and you should now submit your site at [https://hstspreload.org](https://hstspreload.org). This will add your site to Chrome's source to preload it in the future and it is the list that other browsers use as well. Note that it is difficult to remove yourself from the list (and can take months to get it rolled out to the browsers), so by submitting your site you are effectively guaranteeing working HTTPS for the rest of the life of your site. However, these days it shouldn't be a problem - use [Let's Encrypt](https://letsencrypt.org)!
+The `preload` tag tells Chrome that you want to be preloaded. This will add you to the preload list, which means that the browser will automatically know you want an HTTPS connection before you have even visited the site, so removes the initial HTTP handshake the first time you specify the header. However, this has now been superseded and you should now submit your site at [https://hstspreload.org](https://hstspreload.org). This will add your site to Chrome's source to preload it in the future and it is the list that other browsers use as well. Note that it is difficult to remove yourself from the list (and can take months to get it rolled out to the browsers), so by submitting your site you are effectively guaranteeing working HTTPS for the rest of the life of your site. However, these days it shouldn't be a problem - use [Let's Encrypt](https://letsencrypt.org)! **Note**: You should be careful about using this on deployment sites such as Heroku as it may cause issues.
+
+To use the Strict-Transport-Security header, you can configure and add it as so (default values are shown):
+
+```swift
+let strictTransportSecurityConfig = StrictTransportSecurityConfiguration(maxAge: 31536000, includeSubdomains: true, preload: true)
+let securityHeaders = SecurityHeaders(hstsConfiguration: strictTransportSecurityConfig)
+```
 
 ## Public-Key-Pins
 
