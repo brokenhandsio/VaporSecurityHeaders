@@ -254,6 +254,16 @@ class HeaderTests: XCTestCase {
         XCTAssertEqual(csp, response.headers[HeaderKey.contentSecurityPolicy])
     }
     
+    func testHeadersWithReportOnlyCSP() throws {
+        let csp = "default-src https:; report-uri https://csp-report.brokenhands.io"
+        let cspConfig = ContentSecurityPolicyReportOnlyConfiguration(value: csp)
+        let middleware = SecurityHeaders(contentSecurityPolicyReportOnlyConfiguration: cspConfig)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        
+        XCTAssertEqual(csp, response.headers[HeaderKey.contentSecurityPolicyReportOnly])
+    }
+    
     private func makeTestDroplet(middlewareToAdd: Middleware) throws -> Droplet {
         let drop = Droplet(arguments: ["dummy/path/", "prepare"])
         drop.middleware.append(middlewareToAdd)

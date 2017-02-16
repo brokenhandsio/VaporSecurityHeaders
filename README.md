@@ -45,7 +45,6 @@ You can test your site by visiting the awesome [Security Headers](https://securi
 
 The following features are on the roadmap to be implemented:
 
-* Content-Security-Policy-Report-Only Header
 * Public-Key-Pins (HPKP)
 * Public-Key-Pins-Report-Only
 * Per page Content Security Policies
@@ -73,7 +72,7 @@ The API default CSP is `default-src: 'none'` as an API should only return data a
 To configure your CSP you can add it to your `ContentSecurityPolicyConfiguration` like so:
 
 ```swift
-let cspConfig = ContentSecurityPolicyConfiguration(value: "default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style;")
+let cspConfig = ContentSecurityPolicyConfiguration(value: "default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style; report-uri https://csp-report.brokenhands.io")
 let securityHeaders = SecurityHeaders(contentSecurityPolicyConfiguration: cspConfig)
 ```
 
@@ -88,6 +87,22 @@ This policy means that by default everything is blocked, however:
 * Any HTTP requests will be sent over HTTPS
 * Any attempts to load HTTP content will be blocked
 * Any scripts and style links must have [SRI](https://scotthelme.co.uk/subresource-integrity/) values
+* Any policy violations will be sent to `https://csp-report.brokenhands.io`
+
+Check out [https://report-uri.io/](https://report-uri.io/) for a free tool to send all of your CSP reports to.
+
+## Content-Security-Policy-Report-Only
+
+Content-Security-Policy-Report-Only works in exactly the same way as Content-Security-Policy except that any violations will not block content, but they will be reported back to you. This is extremely useful for testing a CSP before rolling it out over your site. You can run both side by side - so for example have a fairly simply policy under Content-Security-Policy but test a more restrictive policy over Content-Security-Policy-Report-Only. The great thing about this is that your users do all your testing for you!
+
+To configure this, just pass in your policy to the `ContentSecurityPolicyReportOnlyConfiguration`:
+
+```swift
+let cspConfig = ContentSecurityPolicyConfiguration(value: "default-src https:; report-uri https://csp-report.brokenhands.io")
+let securityHeaders = SecurityHeaders(contentSecurityPolicyConfiguration: cspConfig)
+```
+
+The [above blog post](https://scotthelme.co.uk/content-security-policy-an-introduction/) goes into more details about this.
 
 ## X-XSS-Protection
 

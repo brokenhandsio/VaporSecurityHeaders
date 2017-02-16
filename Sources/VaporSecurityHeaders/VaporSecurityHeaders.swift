@@ -22,7 +22,8 @@ struct SecurityHeaders: Middleware {
          frameOptionsConfiguration: FrameOptionsConfiguration = FrameOptionsConfiguration(option: .deny),
          xssProtectionConfiguration: XssProtectionConfiguration = XssProtectionConfiguration(option: .block),
          hstsConfiguration: StrictTransportSecurityConfiguration? = nil,
-         serverConfiguration: ServerConfiguration? = nil) {
+         serverConfiguration: ServerConfiguration? = nil,
+         contentSecurityPolicyReportOnlyConfiguration: ContentSecurityPolicyReportOnlyConfiguration? = nil) {
         configurations = [contentTypeConfiguration, contentSecurityPolicyConfiguration, frameOptionsConfiguration, xssProtectionConfiguration]
         
         if let hstsConfiguration = hstsConfiguration {
@@ -31,6 +32,10 @@ struct SecurityHeaders: Middleware {
         
         if let serverConfiguration = serverConfiguration {
             configurations.append(serverConfiguration)
+        }
+        
+        if let contentSecurityPolicyReportOnlyConfiguration = contentSecurityPolicyReportOnlyConfiguration {
+            configurations.append(contentSecurityPolicyReportOnlyConfiguration)
         }
     }
     
@@ -147,6 +152,18 @@ struct ContentSecurityPolicyConfiguration: SecurityHeaderConfiguration {
     }
 }
 
+struct ContentSecurityPolicyReportOnlyConfiguration: SecurityHeaderConfiguration {
+    
+    private let value: String
+    
+    init(value: String) {
+        self.value = value
+    }
+    
+    func setHeader(on response: Response) {
+        response.headers[HeaderKey.contentSecurityPolicyReportOnly] = value
+    }
+}
 
 struct ContentTypeOptionsConfiguration: SecurityHeaderConfiguration {
     
@@ -188,5 +205,9 @@ extension HeaderKey {
     
     static public var xContentTypeOptions: HeaderKey {
         return HeaderKey("X-Content-Type-Options")
+    }
+    
+    static public var contentSecurityPolicyReportOnly: HeaderKey {
+        return HeaderKey("Content-Security-Policy-Report-Only")
     }
 }
