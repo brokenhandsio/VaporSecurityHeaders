@@ -12,6 +12,7 @@ A Middleware library for adding security headers to your Vapor application.
 Easily add headers to all your responses for improving the security of your site for you and your users. Currently supports:
 
 * Content-Security-Policy
+* Content-Security-Policy-Report-Only
 * X-XSS-Protection
 * X-Frame-Options
 * X-Content-Type-Options
