@@ -28,6 +28,8 @@ class HeaderTests: XCTestCase {
         ("testHeadersWithHSTSwithPreloadFalse", testHeadersWithHSTSwithPreloadFalse),
         ("testHeadersWithHSTSwithSubdomainAndPreloadFalse", testHeadersWithHSTSwithSubdomainAndPreloadFalse),
         ("testHeadersWithServerValue", testHeadersWithServerValue),
+        ("testHeadersWithCSP", testHeadersWithCSP),
+        ("testHeadersWithReportOnlyCSP", testHeadersWithReportOnlyCSP)
     ]
     
     private var request: Request!
