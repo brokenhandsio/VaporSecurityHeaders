@@ -31,6 +31,15 @@ let drop = Droplet()
 drop.middleware.append(securityHeaders)
 ```
 
+You will need to add it as a dependency in your `Package.swift` file:
+
+```swift
+dependencies: [
+    ...,
+    .Package(url: "https://github.com/brokenhandsio/VaporSecurityHeaders", majorVersion: 0)
+]
+```
+
 This will add default values to your site for Content-Security-Policy, X-XSS-Protection, X-Frame-Options and X-Content-Type-Options. If you are running an API you can choose a default configuration for that by creating it with:
 
 ```swift
@@ -98,8 +107,8 @@ Content-Security-Policy-Report-Only works in exactly the same way as Content-Sec
 To configure this, just pass in your policy to the `ContentSecurityPolicyReportOnlyConfiguration`:
 
 ```swift
-let cspConfig = ContentSecurityPolicyConfiguration(value: "default-src https:; report-uri https://csp-report.brokenhands.io")
-let securityHeaders = SecurityHeaders(contentSecurityPolicyConfiguration: cspConfig)
+let cspConfig = ContentSecurityPolicyReportOnlyConfiguration(value: "default-src https:; report-uri https://csp-report.brokenhands.io")
+let securityHeaders = SecurityHeaders(contentSecurityPolicyReportOnlyConfiguration: cspConfig)
 ```
 
 The [above blog post](https://scotthelme.co.uk/content-security-policy-an-introduction/) goes into more details about this.
