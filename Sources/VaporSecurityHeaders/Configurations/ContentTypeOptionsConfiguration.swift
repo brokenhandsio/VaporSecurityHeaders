@@ -1,14 +1,14 @@
 import HTTP
 
-struct ContentTypeOptionsConfiguration: SecurityHeaderConfiguration {
+public struct ContentTypeOptionsConfiguration: SecurityHeaderConfiguration {
     
     private let option: Options
     
-    init(option: Options) {
+    public init(option: Options) {
         self.option = option
     }
     
-    enum Options {
+    public enum Options {
         case nosniff
         case none
     }

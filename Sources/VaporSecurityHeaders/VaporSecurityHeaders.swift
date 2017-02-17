@@ -1,10 +1,10 @@
 import HTTP
 
-struct SecurityHeaders: Middleware {
+public struct SecurityHeaders: Middleware {
     
     private var configurations: [SecurityHeaderConfiguration]
     
-    static func api(hstsConfiguration: StrictTransportSecurityConfiguration? = nil, serverConfiguration: ServerConfiguration? = nil) -> SecurityHeaders {
+    public static func api(hstsConfiguration: StrictTransportSecurityConfiguration? = nil, serverConfiguration: ServerConfiguration? = nil) -> SecurityHeaders {
         return SecurityHeaders(contentTypeConfiguration: ContentTypeOptionsConfiguration(option: .nosniff),
                   contentSecurityPolicyConfiguration: ContentSecurityPolicyConfiguration(value: "default-src 'none'"),
                   frameOptionsConfiguration: FrameOptionsConfiguration(option: .deny),
@@ -13,7 +13,7 @@ struct SecurityHeaders: Middleware {
                   serverConfiguration: serverConfiguration)
     }
     
-    init(contentTypeConfiguration: ContentTypeOptionsConfiguration = ContentTypeOptionsConfiguration(option: .nosniff),
+    public init(contentTypeConfiguration: ContentTypeOptionsConfiguration = ContentTypeOptionsConfiguration(option: .nosniff),
          contentSecurityPolicyConfiguration: ContentSecurityPolicyConfiguration = ContentSecurityPolicyConfiguration(value: "default-src 'self'"),
          frameOptionsConfiguration: FrameOptionsConfiguration = FrameOptionsConfiguration(option: .deny),
          xssProtectionConfiguration: XssProtectionConfiguration = XssProtectionConfiguration(option: .block),
@@ -35,7 +35,7 @@ struct SecurityHeaders: Middleware {
         }
     }
     
-    func respond(to request: Request, chainingTo next: Responder) throws -> Response {
+    public func respond(to request: Request, chainingTo next: Responder) throws -> Response {
         let response = try next.respond(to: request)
         
         for spec in configurations {

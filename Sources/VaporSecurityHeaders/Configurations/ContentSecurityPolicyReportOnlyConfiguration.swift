@@ -1,10 +1,10 @@
 import HTTP
 
-struct ContentSecurityPolicyReportOnlyConfiguration: SecurityHeaderConfiguration {
+public struct ContentSecurityPolicyReportOnlyConfiguration: SecurityHeaderConfiguration {
     
     private let value: String
     
-    init(value: String) {
+    public init(value: String) {
         self.value = value
     }
     

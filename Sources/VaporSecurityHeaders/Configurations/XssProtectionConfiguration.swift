@@ -1,8 +1,8 @@
 import HTTP
 
-struct XssProtectionConfiguration: SecurityHeaderConfiguration {
+public struct XssProtectionConfiguration: SecurityHeaderConfiguration {
     
-    enum Options {
+    public enum Options {
         case disable
         case enable
         case block
@@ -10,7 +10,7 @@ struct XssProtectionConfiguration: SecurityHeaderConfiguration {
     
     private let option: Options
     
-    init(option: Options) {
+    public init(option: Options) {
         self.option = option
     }
     

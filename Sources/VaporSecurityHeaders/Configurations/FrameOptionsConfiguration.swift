@@ -1,8 +1,8 @@
 import HTTP
 
-struct FrameOptionsConfiguration: SecurityHeaderConfiguration {
+public struct FrameOptionsConfiguration: SecurityHeaderConfiguration {
     
-    enum Options {
+    public enum Options {
         case deny
         case sameOrigin
         case allow(from: String)
@@ -10,7 +10,7 @@ struct FrameOptionsConfiguration: SecurityHeaderConfiguration {
     
     private let option: Options
     
-    init(option: Options) {
+    public init(option: Options) {
         self.option = option
     }
     

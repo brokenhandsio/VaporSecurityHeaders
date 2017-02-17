@@ -3,7 +3,7 @@ import XCTest
 @testable import Vapor
 import HTTP
 
-@testable import VaporSecurityHeaders
+import VaporSecurityHeaders
 
 class HeaderTests: XCTestCase {
 

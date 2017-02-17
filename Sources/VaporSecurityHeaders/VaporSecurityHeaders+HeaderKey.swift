@@ -1,6 +1,6 @@
 import HTTP
 
-extension HeaderKey {
+public extension HeaderKey {
     static public var contentSecurityPolicy: HeaderKey {
         return HeaderKey("Content-Security-Policy")
     }

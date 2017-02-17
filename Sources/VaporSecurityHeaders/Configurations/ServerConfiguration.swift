@@ -1,9 +1,9 @@
 import HTTP
 
-struct ServerConfiguration: SecurityHeaderConfiguration {
+public struct ServerConfiguration: SecurityHeaderConfiguration {
     private let value: String
     
-    init(value: String) {
+    public init(value: String) {
         self.value = value
     }
     
