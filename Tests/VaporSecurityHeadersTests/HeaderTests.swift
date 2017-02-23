@@ -286,7 +286,7 @@ class HeaderTests: XCTestCase {
     
     func testHeadersWithReferrerPolicyNoReferrer() throws {
         let expected = "no-referrer"
-        let referrerConfig = ReferrerPolicyConfiguration(.empty)
+        let referrerConfig = ReferrerPolicyConfiguration(.noReferrer)
         let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
@@ -295,7 +295,7 @@ class HeaderTests: XCTestCase {
     
     func testHeadersWithReferrerPolicyNoReferrerWhenDowngrade() throws {
         let expected = "no-referrer-when-downgrade"
-        let referrerConfig = ReferrerPolicyConfiguration(.empty)
+        let referrerConfig = ReferrerPolicyConfiguration(.noReferrerWhenDowngrade)
         let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
@@ -304,7 +304,7 @@ class HeaderTests: XCTestCase {
     
     func testHeadersWithReferrerPolicySameOrigin() throws {
         let expected = "same-origin"
-        let referrerConfig = ReferrerPolicyConfiguration(.empty)
+        let referrerConfig = ReferrerPolicyConfiguration(.sameOrigin)
         let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
@@ -313,7 +313,7 @@ class HeaderTests: XCTestCase {
     
     func testHeadersWithReferrerPolicyOrigin() throws {
         let expected = "origin"
-        let referrerConfig = ReferrerPolicyConfiguration(.empty)
+        let referrerConfig = ReferrerPolicyConfiguration(.origin)
         let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
@@ -322,7 +322,7 @@ class HeaderTests: XCTestCase {
     
     func testHeadersWithReferrerPolicyStrictOrigin() throws {
         let expected = "strict-origin"
-        let referrerConfig = ReferrerPolicyConfiguration(.empty)
+        let referrerConfig = ReferrerPolicyConfiguration(.strictOrigin)
         let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
@@ -331,7 +331,7 @@ class HeaderTests: XCTestCase {
     
     func testHeadersWithReferrerPolicyOriginWhenCrossOrigin() throws {
         let expected = "origin-when-cross-origin"
-        let referrerConfig = ReferrerPolicyConfiguration(.empty)
+        let referrerConfig = ReferrerPolicyConfiguration(.originWhenCrossOrigin)
         let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
@@ -340,7 +340,7 @@ class HeaderTests: XCTestCase {
     
     func testHeadersWithReferrerPolicyStrictOriginWhenCrossOrigin() throws {
         let expected = "strict-origin-when-cross-origin"
-        let referrerConfig = ReferrerPolicyConfiguration(.empty)
+        let referrerConfig = ReferrerPolicyConfiguration(.strictOriginWhenCrossOrigin)
         let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
@@ -349,7 +349,7 @@ class HeaderTests: XCTestCase {
     
     func testHeadersWithReferrerPolicyUnsafeUrl() throws {
         let expected = "unsafe-url"
-        let referrerConfig = ReferrerPolicyConfiguration(.empty)
+        let referrerConfig = ReferrerPolicyConfiguration(.unsafeUrl)
         let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
