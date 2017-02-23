@@ -29,7 +29,16 @@ class HeaderTests: XCTestCase {
         ("testHeadersWithHSTSwithSubdomainAndPreloadFalse", testHeadersWithHSTSwithSubdomainAndPreloadFalse),
         ("testHeadersWithServerValue", testHeadersWithServerValue),
         ("testHeadersWithCSP", testHeadersWithCSP),
-        ("testHeadersWithReportOnlyCSP", testHeadersWithReportOnlyCSP)
+        ("testHeadersWithReportOnlyCSP", testHeadersWithReportOnlyCSP),
+        ("testHeadersWithReferrerPolicyEmpty", testHeadersWithReferrerPolicyEmpty),
+        ("testHeadersWithReferrerPolicyNoReferrer", testHeadersWithReferrerPolicyNoReferrer),
+        ("testHeadersWithReferrerPolicyNoReferrerWhenDowngrade", testHeadersWithReferrerPolicyNoReferrerWhenDowngrade),
+        ("testHeadersWithReferrerPolicySameOrigin", testHeadersWithReferrerPolicySameOrigin),
+        ("testHeadersWithReferrerPolicyOrigin", testHeadersWithReferrerPolicyOrigin),
+        ("testHeadersWithReferrerPolicyStrictOrigin", testHeadersWithReferrerPolicyStrictOrigin),
+        ("testHeadersWithReferrerPolicyOriginWhenCrossOrigin", testHeadersWithReferrerPolicyOriginWhenCrossOrigin),
+        ("testHeadersWithReferrerPolicyStrictOriginWhenCrossOrigin", testHeadersWithReferrerPolicyStrictOriginWhenCrossOrigin),
+        ("testHeadersWithReferrerPolicyUnsafeUrl", testHeadersWithReferrerPolicyUnsafeUrl),
     ]
     
     private var request: Request!
@@ -264,6 +273,87 @@ class HeaderTests: XCTestCase {
         let response = try drop.respond(to: request)
         
         XCTAssertEqual(csp, response.headers[HeaderKey.contentSecurityPolicyReportOnly])
+    }
+    
+    func testHeadersWithReferrerPolicyEmpty() throws {
+        let expected = ""
+        let referrerConfig = ReferrerPolicyConfiguration(.empty)
+        let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        XCTAssertEqual(expected, response.headers[HeaderKey.referrerPolicy])
+    }
+    
+    func testHeadersWithReferrerPolicyNoReferrer() throws {
+        let expected = "no-referrer"
+        let referrerConfig = ReferrerPolicyConfiguration(.empty)
+        let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        XCTAssertEqual(expected, response.headers[HeaderKey.referrerPolicy])
+    }
+    
+    func testHeadersWithReferrerPolicyNoReferrerWhenDowngrade() throws {
+        let expected = "no-referrer-when-downgrade"
+        let referrerConfig = ReferrerPolicyConfiguration(.empty)
+        let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        XCTAssertEqual(expected, response.headers[HeaderKey.referrerPolicy])
+    }
+    
+    func testHeadersWithReferrerPolicySameOrigin() throws {
+        let expected = "same-origin"
+        let referrerConfig = ReferrerPolicyConfiguration(.empty)
+        let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        XCTAssertEqual(expected, response.headers[HeaderKey.referrerPolicy])
+    }
+    
+    func testHeadersWithReferrerPolicyOrigin() throws {
+        let expected = "origin"
+        let referrerConfig = ReferrerPolicyConfiguration(.empty)
+        let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        XCTAssertEqual(expected, response.headers[HeaderKey.referrerPolicy])
+    }
+    
+    func testHeadersWithReferrerPolicyStrictOrigin() throws {
+        let expected = "strict-origin"
+        let referrerConfig = ReferrerPolicyConfiguration(.empty)
+        let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        XCTAssertEqual(expected, response.headers[HeaderKey.referrerPolicy])
+    }
+    
+    func testHeadersWithReferrerPolicyOriginWhenCrossOrigin() throws {
+        let expected = "origin-when-cross-origin"
+        let referrerConfig = ReferrerPolicyConfiguration(.empty)
+        let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        XCTAssertEqual(expected, response.headers[HeaderKey.referrerPolicy])
+    }
+    
+    func testHeadersWithReferrerPolicyStrictOriginWhenCrossOrigin() throws {
+        let expected = "strict-origin-when-cross-origin"
+        let referrerConfig = ReferrerPolicyConfiguration(.empty)
+        let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        XCTAssertEqual(expected, response.headers[HeaderKey.referrerPolicy])
+    }
+    
+    func testHeadersWithReferrerPolicyUnsafeUrl() throws {
+        let expected = "unsafe-url"
+        let referrerConfig = ReferrerPolicyConfiguration(.empty)
+        let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        XCTAssertEqual(expected, response.headers[HeaderKey.referrerPolicy])
     }
     
     private func makeTestDroplet(middlewareToAdd: Middleware) throws -> Droplet {
