@@ -34,6 +34,10 @@ public struct SecurityHeaders: Middleware {
         if let contentSecurityPolicyReportOnlyConfiguration = contentSecurityPolicyReportOnlyConfiguration {
             configurations.append(contentSecurityPolicyReportOnlyConfiguration)
         }
+        
+        if let referrerPolicyConfiguration = referrerPolicyConfiguration {
+            configurations.append(referrerPolicyConfiguration)
+        }
     }
     
     public func respond(to request: Request, chainingTo next: Responder) throws -> Response {
