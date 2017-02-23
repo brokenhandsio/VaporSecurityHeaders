@@ -18,6 +18,7 @@ Easily add headers to all your responses for improving the security of your site
 * X-Content-Type-Options
 * Strict-Transport-Security (HSTS)
 * Server
+* Referrer Policy
 
 These headers will *help* prevent cross-site scripting attacks, SSL downgrade attacks, content injection attacks, click-jacking etc. They will not help for any attacks directly against your server, but they will help your users and help secure sensitive information (CSRF tokens). Please note that this library does not guarantee anything and nothing is ever completely secure.
 
@@ -192,6 +193,24 @@ However, it can be fun to add in a custom server configuration for a bit of pers
 let serverConfig = ServerConfiguration(value: "brokenhands.io")
 let securityHeaders = SecurityHeaders(serverConfiguration: serverConfig)
 ```
+
+## Referrer Policy
+
+The Referrer Policy is the latest header to have been introduced (the spec can be found [here](https://www.w3.org/TR/referrer-policy/)). It basically defines when the `Referrer` header can be sent with a request. You may want to not send the header when going from HTTPS to HTTP for example.
+
+The different options are:
+
+* ""
+* "no-referrer"
+* "no-referrer-when-downgrade"
+* "same-origin"
+* "origin"
+* "strict-origin"
+* "origin-when-cross-origin"
+* "strict-origin-when-cross-origin"
+* "unsafe-url"
+
+I won't go into details about each one, I will point you in the direction of a far better explanation [by Scott Helme](https://scotthelme.co.uk/a-new-security-header-referrer-policy/).
 
 ## Public-Key-Pins
 

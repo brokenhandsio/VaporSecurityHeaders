@@ -20,4 +20,8 @@ public extension HeaderKey {
     static public var contentSecurityPolicyReportOnly: HeaderKey {
         return HeaderKey("Content-Security-Policy-Report-Only")
     }
+    
+    static public var referrerPolicy: HeaderKey {
+        return HeaderKey("Referrer-Policy")
+    }
 }
