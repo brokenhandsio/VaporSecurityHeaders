@@ -43,10 +43,14 @@ public struct SecurityHeaders: Middleware {
     public func respond(to request: Request, chainingTo next: Responder) throws -> Response {
         let response = try next.respond(to: request)
         
+        setHeaders(response: response)
+        
+        return response
+    }
+    
+    public func setHeaders(response: Response) {
         for spec in configurations {
             spec.setHeader(on: response)
         }
-        
-        return response
     }
 }
