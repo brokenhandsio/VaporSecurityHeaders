@@ -45,7 +45,7 @@ public struct SecurityHeaders: Middleware {
         let response = try next.respond(to: request)
         
         for spec in configurations {
-            spec.setHeader(on: response)
+            spec.setHeader(on: response, from: request)
         }
         
         return response
