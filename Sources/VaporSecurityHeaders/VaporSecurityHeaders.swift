@@ -4,13 +4,14 @@ public struct SecurityHeaders: Middleware {
     
     private var configurations: [SecurityHeaderConfiguration]
     
-    public static func api(hstsConfiguration: StrictTransportSecurityConfiguration? = nil, serverConfiguration: ServerConfiguration? = nil) -> SecurityHeaders {
+    public static func api(hstsConfiguration: StrictTransportSecurityConfiguration? = nil, serverConfiguration: ServerConfiguration? = nil, referrerPolicyConfiguration: ReferrerPolicyConfiguration? = nil) -> SecurityHeaders {
         return SecurityHeaders(contentTypeConfiguration: ContentTypeOptionsConfiguration(option: .nosniff),
                   contentSecurityPolicyConfiguration: ContentSecurityPolicyConfiguration(value: "default-src 'none'"),
                   frameOptionsConfiguration: FrameOptionsConfiguration(option: .deny),
                   xssProtectionConfiguration: XssProtectionConfiguration(option: .block),
                   hstsConfiguration: hstsConfiguration,
-                  serverConfiguration: serverConfiguration)
+                  serverConfiguration: serverConfiguration,
+                  referrerPolicyConfiguration: referrerPolicyConfiguration)
     }
     
     public init(contentTypeConfiguration: ContentTypeOptionsConfiguration = ContentTypeOptionsConfiguration(option: .nosniff),

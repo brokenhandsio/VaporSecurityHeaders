@@ -356,6 +356,15 @@ class HeaderTests: XCTestCase {
         XCTAssertEqual(expected, response.headers[HeaderKey.referrerPolicy])
     }
     
+    func testApiPolicyWithAddedReffererPolicy() throws {
+        let expected = "strict-origin"
+        let referrerConfig = ReferrerPolicyConfiguration(.strictOrigin)
+        let middleware = SecurityHeaders.api(referrerPolicyConfiguration: referrerConfig)
+        let drop = try makeTestDroplet(middlewareToAdd: middleware)
+        let response = try drop.respond(to: request)
+        XCTAssertEqual(expected, response.headers[HeaderKey.referrerPolicy])
+    }
+    
     private func makeTestDroplet(middlewareToAdd: Middleware) throws -> Droplet {
         let drop = Droplet(arguments: ["dummy/path/", "prepare"])
         drop.middleware.append(middlewareToAdd)
