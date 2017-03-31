@@ -7,7 +7,7 @@ public struct ServerConfiguration: SecurityHeaderConfiguration {
         self.value = value
     }
     
-    func setHeader(on response: Response) {
+    func setHeader(on response: Response, from request: Request) {
         response.headers[HeaderKey.server] = value
     }
 }

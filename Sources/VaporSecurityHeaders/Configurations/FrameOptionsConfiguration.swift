@@ -14,7 +14,7 @@ public struct FrameOptionsConfiguration: SecurityHeaderConfiguration {
         self.option = option
     }
     
-    func setHeader(on response: Response) {
+    func setHeader(on response: Response, from request: Request) {
         switch option {
         case .deny:
             response.headers[HeaderKey.xFrameOptions] = "DENY"

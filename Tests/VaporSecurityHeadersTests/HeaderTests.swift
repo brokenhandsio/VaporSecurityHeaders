@@ -39,12 +39,16 @@ class HeaderTests: XCTestCase {
         ("testHeadersWithReferrerPolicyOriginWhenCrossOrigin", testHeadersWithReferrerPolicyOriginWhenCrossOrigin),
         ("testHeadersWithReferrerPolicyStrictOriginWhenCrossOrigin", testHeadersWithReferrerPolicyStrictOriginWhenCrossOrigin),
         ("testHeadersWithReferrerPolicyUnsafeUrl", testHeadersWithReferrerPolicyUnsafeUrl),
+        ("testCustomCSPOnSingleRoute", testCustomCSPOnSingleRoute),
+        ("testDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute", testDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute),
     ]
     
     private var request: Request!
+    private var routeRequest: Request!
     
     override func setUp() {
-        request  = try! Request(method: .get, uri: "/test/")
+        request = try! Request(method: .get, uri: "/test/")
+        routeRequest = try! Request(method: .get, uri: "/route/")
     }
 
     func testDefaultHeaders() throws {
@@ -365,12 +369,43 @@ class HeaderTests: XCTestCase {
         XCTAssertEqual(expected, response.headers[HeaderKey.referrerPolicy])
     }
     
-    private func makeTestDroplet(middlewareToAdd: Middleware) throws -> Droplet {
+    func testCustomCSPOnSingleRoute() throws {
+        let expectedCsp = "default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style;"
+        let middleware = SecurityHeaders.api()
+        let cspSettingRouteHandler: (Request) throws -> ResponseRepresentable = { req in
+            req.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: expectedCsp)
+            return "Different CSP!"
+        }
+        let drop = try makeTestDroplet(middlewareToAdd: middleware, routeHandler: cspSettingRouteHandler)
+        let response = try drop.respond(to: routeRequest)
+        
+        XCTAssertEqual(expectedCsp, response.headers[HeaderKey.contentSecurityPolicy])
+    }
+    
+    func testDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute() throws {
+        let differentCsp = "default-src 'none'; script-src test;"
+        let middleware = SecurityHeaders.api()
+        let cspSettingRouteHandler: (Request) throws -> ResponseRepresentable = { req in
+            req.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: differentCsp)
+            return "Different CSP!"
+        }
+        let drop = try makeTestDroplet(middlewareToAdd: middleware, routeHandler: cspSettingRouteHandler)
+        let _ = try drop.respond(to: routeRequest)
+        let response = try drop.respond(to: request)
+        
+        XCTAssertEqual("default-src 'none'", response.headers[HeaderKey.contentSecurityPolicy])
+    }
+    
+    private func makeTestDroplet(middlewareToAdd: Middleware, routeHandler: ((Request) throws -> ResponseRepresentable)? = nil) throws -> Droplet {
         let drop = Droplet(arguments: ["dummy/path/", "prepare"])
         drop.middleware.append(middlewareToAdd)
         
         drop.get("test") { req in
             return "TEST"
+        }
+        
+        if let routeHandler = routeHandler {
+            drop.get("route", handler: routeHandler)
         }
         
         try drop.runCommands()

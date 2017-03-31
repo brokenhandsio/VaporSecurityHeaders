@@ -14,7 +14,7 @@ public struct XssProtectionConfiguration: SecurityHeaderConfiguration {
         self.option = option
     }
     
-    func setHeader(on response: Response) {
+    func setHeader(on response: Response, from request: Request) {
         switch option {
         case .disable:
             response.headers[HeaderKey.xXssProtection] = "0"
