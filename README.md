@@ -58,7 +58,6 @@ The following features are on the roadmap to be implemented:
 
 * Public-Key-Pins (HPKP)
 * Public-Key-Pins-Report-Only
-* Per page Content Security Policies
 
 # Server Configuration
 
@@ -101,6 +100,16 @@ This policy means that by default everything is blocked, however:
 * Any policy violations will be sent to `https://csp-report.brokenhands.io`
 
 Check out [https://report-uri.io/](https://report-uri.io/) for a free tool to send all of your CSP reports to.
+
+### Page Specific CSP
+
+Vapor Security Headers also supports setting the CSP on a route or request basis. If the middleware has been added to the Droplet, you can override the CSP for a request. This allows you to have a strict default CSP, but allow content from extra sources when required, such as only allowing the Javascript for blog comments on the blog page. Create a separate `ContentSecurityPolicyConfiguration` and then add it to the request. For example, inside a route handler, you could do:
+
+```swift
+let pageSpecificCSPVaue = "default-src 'none'; script-src https://comments.disqus.com;"
+let pageSpecificCSP = ContentSecurityPolicyConfiguration(value: pageSpecificCSPValue)
+request.contentSecurityPolicy = pageSpecificCSP
+```
 
 ## Content-Security-Policy-Report-Only
 
