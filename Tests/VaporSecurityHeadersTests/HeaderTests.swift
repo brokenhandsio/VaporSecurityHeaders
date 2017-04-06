@@ -5,6 +5,23 @@ import HTTP
 
 import VaporSecurityHeaders
 
+struct MockFileMiddleware: Middleware {
+    var cspConfig: ContentSecurityPolicyConfiguration?
+    init(cspConfig: ContentSecurityPolicyConfiguration? = nil) {
+        self.cspConfig = cspConfig
+    }
+    
+    func respond(to request: Request, chainingTo next: Responder) throws -> Response {
+        request.contentSecurityPolicy = self.cspConfig
+        
+        let body = "Hello World!".bytes
+        var headers: [HeaderKey: String] = [:]
+        headers["ETag"] = "1491512490-\(body.count)"
+        headers["Content-Type"] = "text/plain"
+        return Response(status: .ok, headers: headers, body: .data(body))
+    }
+}
+
 class HeaderTests: XCTestCase {
 
     static var allTests = [
@@ -41,14 +58,19 @@ class HeaderTests: XCTestCase {
         ("testHeadersWithReferrerPolicyUnsafeUrl", testHeadersWithReferrerPolicyUnsafeUrl),
         ("testCustomCSPOnSingleRoute", testCustomCSPOnSingleRoute),
         ("testDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute", testDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute),
+        ("testAbortMiddleware", testAbortMiddleware),
+        ("testMockFileMiddleware", testMockFileMiddleware),
+        ("testMockFileMiddlewareDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute", testMockFileMiddlewareDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute)
     ]
     
     private var request: Request!
     private var routeRequest: Request!
+    private var abortRequest: Request!
     
     override func setUp() {
         request = try! Request(method: .get, uri: "/test/")
         routeRequest = try! Request(method: .get, uri: "/route/")
+        abortRequest = try! Request(method: .get, uri: "/abort/")
     }
 
     func testDefaultHeaders() throws {
@@ -396,9 +418,63 @@ class HeaderTests: XCTestCase {
         XCTAssertEqual("default-src 'none'", response.headers[HeaderKey.contentSecurityPolicy])
     }
     
+    func testAbortMiddleware() throws {
+        let expectedXCTOHeaderValue = "nosniff"
+        let expectedCSPHeaderValue = "default-src 'none'"
+        let expectedXFOHeaderValue = "DENY"
+        let expectedXSSProtectionHeaderValue = "1; mode=block"
+        
+        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders.api())
+        let response = try drop.respond(to: abortRequest)
+        
+        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HeaderKey.xContentTypeOptions])
+        XCTAssertEqual(expectedCSPHeaderValue, response.headers[HeaderKey.contentSecurityPolicy])
+        XCTAssertEqual(expectedXFOHeaderValue, response.headers[HeaderKey.xFrameOptions])
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[HeaderKey.xXssProtection])
+    }
+    
+    func testMockFileMiddleware() throws {
+        let expectedXCTOHeaderValue = "nosniff"
+        let expectedCSPHeaderValue = "default-src 'none'"
+        let expectedXFOHeaderValue = "DENY"
+        let expectedXSSProtectionHeaderValue = "1; mode=block"
+        
+        let drop = try makeTestDroplet(middlewareToAdd: [SecurityHeaders.api(), MockFileMiddleware()])
+        let response = try drop.respond(to: abortRequest)
+        
+        XCTAssertEqual("Hello World!", try response.body.bytes?.string())
+        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HeaderKey.xContentTypeOptions])
+        XCTAssertEqual(expectedCSPHeaderValue, response.headers[HeaderKey.contentSecurityPolicy])
+        XCTAssertEqual(expectedXFOHeaderValue, response.headers[HeaderKey.xFrameOptions])
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[HeaderKey.xXssProtection])
+    }
+    
+    func testMockFileMiddlewareDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute() throws {
+        let expectedXCTOHeaderValue = "nosniff"
+        let expectedCSPHeaderValue = "default-src 'none'; script-src test;"
+        let expectedXFOHeaderValue = "DENY"
+        let expectedXSSProtectionHeaderValue = "1; mode=block"
+        
+        let drop = try makeTestDroplet(middlewareToAdd: [
+            SecurityHeaders.api(),
+            MockFileMiddleware(cspConfig: ContentSecurityPolicyConfiguration(value: expectedCSPHeaderValue))
+        ])
+        let response = try drop.respond(to: abortRequest)
+        
+        XCTAssertEqual("Hello World!", try response.body.bytes?.string())
+        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HeaderKey.xContentTypeOptions])
+        XCTAssertEqual(expectedCSPHeaderValue, response.headers[HeaderKey.contentSecurityPolicy])
+        XCTAssertEqual(expectedXFOHeaderValue, response.headers[HeaderKey.xFrameOptions])
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[HeaderKey.xXssProtection])
+    }
+    
     private func makeTestDroplet(middlewareToAdd: Middleware, routeHandler: ((Request) throws -> ResponseRepresentable)? = nil) throws -> Droplet {
+        return try self.makeTestDroplet(middlewareToAdd: [middlewareToAdd], routeHandler: routeHandler)
+    }
+    
+    private func makeTestDroplet(middlewareToAdd: [Middleware], routeHandler: ((Request) throws -> ResponseRepresentable)? = nil) throws -> Droplet {
         let drop = Droplet(arguments: ["dummy/path/", "prepare"])
-        drop.middleware.append(middlewareToAdd)
+        drop.middleware = middlewareToAdd + drop.middleware
         
         drop.get("test") { req in
             return "TEST"
@@ -406,6 +482,10 @@ class HeaderTests: XCTestCase {
         
         if let routeHandler = routeHandler {
             drop.get("route", handler: routeHandler)
+        }
+        
+        drop.get("abort") { req in
+            throw Abort.badRequest
         }
         
         try drop.runCommands()
