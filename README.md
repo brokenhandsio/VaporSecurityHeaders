@@ -30,8 +30,10 @@ To use Vapor Security Headers, just add the middleware to your `Droplet` and all
 import VaporSecurityHeaders
 let securityHeaders = SecurityHeaders()
 let drop = Droplet()
-drop.middleware.append(securityHeaders)
+drop.middleware.insert(securityHeaders, at: 0)
 ```
+
+***Note: The `SecurityHeaders` middleware should be the first item in the `drop.middleware` array so that the headers are added to every response.***
 
 You will need to add it as a dependency in your `Package.swift` file:
 
