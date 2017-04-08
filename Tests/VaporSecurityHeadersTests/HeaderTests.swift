@@ -439,7 +439,8 @@ class HeaderTests: XCTestCase {
         let expectedXFOHeaderValue = "DENY"
         let expectedXSSProtectionHeaderValue = "1; mode=block"
         
-        let drop = try makeTestDroplet(middlewareToAdd: [SecurityHeaders.api(), MockFileMiddleware()])
+        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders.api())
+        drop.middleware.append(MockFileMiddleware())
         let response = try drop.respond(to: abortRequest)
         
         XCTAssertEqual("Hello World!", try response.body.bytes?.string())
@@ -455,10 +456,8 @@ class HeaderTests: XCTestCase {
         let expectedXFOHeaderValue = "DENY"
         let expectedXSSProtectionHeaderValue = "1; mode=block"
         
-        let drop = try makeTestDroplet(middlewareToAdd: [
-            SecurityHeaders.api(),
-            MockFileMiddleware(cspConfig: ContentSecurityPolicyConfiguration(value: expectedCSPHeaderValue))
-        ])
+        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders.api())
+        drop.middleware.append(MockFileMiddleware(cspConfig: ContentSecurityPolicyConfiguration(value: expectedCSPHeaderValue)))
         let response = try drop.respond(to: abortRequest)
         
         XCTAssertEqual("Hello World!", try response.body.bytes?.string())
@@ -469,12 +468,8 @@ class HeaderTests: XCTestCase {
     }
     
     private func makeTestDroplet(middlewareToAdd: Middleware, routeHandler: ((Request) throws -> ResponseRepresentable)? = nil) throws -> Droplet {
-        return try self.makeTestDroplet(middlewareToAdd: [middlewareToAdd], routeHandler: routeHandler)
-    }
-    
-    private func makeTestDroplet(middlewareToAdd: [Middleware], routeHandler: ((Request) throws -> ResponseRepresentable)? = nil) throws -> Droplet {
         let drop = Droplet(arguments: ["dummy/path/", "prepare"])
-        drop.middleware = middlewareToAdd + drop.middleware
+        drop.middleware.insert(middlewareToAdd, at: 0)
         
         drop.get("test") { req in
             return "TEST"
