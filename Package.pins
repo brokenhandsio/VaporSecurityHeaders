@@ -23,7 +23,7 @@
       "package": "Console",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/console.git",
-      "version": "2.0.0-beta.3"
+      "version": "2.0.0-beta.4"
     },
     {
       "package": "Core",
@@ -95,19 +95,19 @@
       "package": "Sockets",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/socks.git",
-      "version": "2.0.0-beta.2"
+      "version": "2.0.0-beta.3"
     },
     {
       "package": "TLS",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/tls.git",
-      "version": "2.0.0-beta.1"
+      "version": "2.0.0-beta.2"
     },
     {
       "package": "Vapor",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/vapor.git",
-      "version": "2.0.0-beta.2"
+      "version": "2.0.0-beta.4"
     }
   ],
   "version": 1
