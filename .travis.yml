@@ -18,7 +18,6 @@ before_install:
         fi
 
 script:
-    - rm -f Package.pins
     - swift build
     - swift build -c release
     - swift test
