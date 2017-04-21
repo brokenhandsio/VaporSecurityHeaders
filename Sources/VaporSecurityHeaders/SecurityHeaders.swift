@@ -5,18 +5,6 @@ public struct SecurityHeaders {
     
     var configurations: [SecurityHeaderConfiguration]
     
-    public static func api(hstsConfiguration: StrictTransportSecurityConfiguration? = nil,
-                           serverConfiguration: ServerConfiguration? = nil,
-                           referrerPolicyConfiguration: ReferrerPolicyConfiguration? = nil) -> SecurityHeaders {
-        return SecurityHeaders(contentTypeConfiguration: ContentTypeOptionsConfiguration(option: .nosniff),
-                               contentSecurityPolicyConfiguration: ContentSecurityPolicyConfiguration(value: "default-src 'none'"),
-                               frameOptionsConfiguration: FrameOptionsConfiguration(option: .deny),
-                               xssProtectionConfiguration: XSSProtectionConfiguration(option: .block),
-                               hstsConfiguration: hstsConfiguration,
-                               serverConfiguration: serverConfiguration,
-                               referrerPolicyConfiguration: referrerPolicyConfiguration)
-    }
-    
     public init(contentTypeConfiguration: ContentTypeOptionsConfiguration = ContentTypeOptionsConfiguration(option: .nosniff),
                 contentSecurityPolicyConfiguration: ContentSecurityPolicyConfiguration = ContentSecurityPolicyConfiguration(value: "default-src 'self'"),
                 frameOptionsConfiguration: FrameOptionsConfiguration = FrameOptionsConfiguration(option: .deny),
@@ -43,7 +31,6 @@ public struct SecurityHeaders {
             configurations.append(referrerPolicyConfiguration)
         }
     }
-    
     
 }
 
