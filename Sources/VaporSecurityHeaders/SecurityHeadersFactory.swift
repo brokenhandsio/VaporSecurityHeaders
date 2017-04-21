@@ -14,47 +14,47 @@ public class SecurityHeadersFactory {
         return apiFactory
     }
     
-    @discardableResult func with(contentTypeOptions configuration: ContentTypeOptionsConfiguration) -> SecurityHeadersFactory {
+    @discardableResult public func with(contentTypeOptions configuration: ContentTypeOptionsConfiguration) -> SecurityHeadersFactory {
         contentTypeOptions = configuration
         return self
     }
     
-    @discardableResult func with(contentSecurityPolicy configuration: ContentSecurityPolicyConfiguration) -> SecurityHeadersFactory {
+    @discardableResult public func with(contentSecurityPolicy configuration: ContentSecurityPolicyConfiguration) -> SecurityHeadersFactory {
         contentSecurityPolicy = configuration
         return self
     }
     
-    @discardableResult func with(frameOptions configuration: FrameOptionsConfiguration) -> SecurityHeadersFactory {
+    @discardableResult public func with(frameOptions configuration: FrameOptionsConfiguration) -> SecurityHeadersFactory {
         frameOptions = configuration
         return self
     }
     
-    @discardableResult func with(XSSProtection configuration: XSSProtectionConfiguration) -> SecurityHeadersFactory {
+    @discardableResult public func with(XSSProtection configuration: XSSProtectionConfiguration) -> SecurityHeadersFactory {
         xssProtection = configuration
         return self
     }
     
-    @discardableResult func with(strictTransportSecurity configuration: StrictTransportSecurityConfiguration) -> SecurityHeadersFactory {
+    @discardableResult public func with(strictTransportSecurity configuration: StrictTransportSecurityConfiguration) -> SecurityHeadersFactory {
         hsts = configuration
         return self
     }
     
-    @discardableResult func with(server configuration: ServerConfiguration) -> SecurityHeadersFactory {
+    @discardableResult public func with(server configuration: ServerConfiguration) -> SecurityHeadersFactory {
         server = configuration
         return self
     }
     
-    @discardableResult func with(referrerPolicy configuration: ReferrerPolicyConfiguration) -> SecurityHeadersFactory {
+    @discardableResult public func with(referrerPolicy configuration: ReferrerPolicyConfiguration) -> SecurityHeadersFactory {
         referrerPolicy = configuration
         return self
     }
     
-    @discardableResult func with(contentSecurityPolicyReportOnly configuration: ContentSecurityPolicyReportOnlyConfiguration) -> SecurityHeadersFactory {
+    @discardableResult public func with(contentSecurityPolicyReportOnly configuration: ContentSecurityPolicyReportOnlyConfiguration) -> SecurityHeadersFactory {
         contentSecurityPolicyReportOnly = configuration
         return self
     }
     
-    func build() -> SecurityHeaders {
+    public func build() -> SecurityHeaders {
         return SecurityHeaders(contentTypeConfiguration: contentTypeOptions,
                                contentSecurityPolicyConfiguration: contentSecurityPolicy,
                                frameOptionsConfiguration: frameOptions,

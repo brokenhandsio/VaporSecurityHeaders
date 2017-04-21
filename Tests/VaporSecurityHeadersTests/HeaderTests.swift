@@ -94,7 +94,7 @@ class HeaderTests: XCTestCase {
         let expectedXFOHeaderValue = "DENY"
         let expectedXSSProtectionHeaderValue = "1; mode=block"
 
-        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders.api())
+        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeadersFactory.api().build())
         let response = try drop.respond(to: request)
 
         XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HeaderKey.xContentTypeOptions])
@@ -110,7 +110,7 @@ class HeaderTests: XCTestCase {
         let expectedXSSProtectionHeaderValue = "1; mode=block"
         let expectedHSTSHeaderValue = "max-age=31536000; includeSubDomains; preload"
 
-        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders.api(hstsConfiguration: StrictTransportSecurityConfiguration()))
+        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeadersFactory.api().with(strictTransportSecurity: StrictTransportSecurityConfiguration()).build())
         let response = try drop.respond(to: request)
 
         XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HeaderKey.xContentTypeOptions])
@@ -368,7 +368,7 @@ class HeaderTests: XCTestCase {
     func testApiPolicyWithAddedReffererPolicy() throws {
         let expected = "strict-origin"
         let referrerConfig = ReferrerPolicyConfiguration(.strictOrigin)
-        let middleware = SecurityHeaders.api(referrerPolicyConfiguration: referrerConfig)
+        let middleware = SecurityHeadersFactory.api().with(referrerPolicy: referrerConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
         XCTAssertEqual(expected, response.headers[HeaderKey.referrerPolicy])
@@ -376,7 +376,7 @@ class HeaderTests: XCTestCase {
 
     func testCustomCSPOnSingleRoute() throws {
         let expectedCsp = "default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style;"
-        let middleware = SecurityHeaders.api()
+        let middleware = SecurityHeadersFactory.api().build()
         let cspSettingRouteHandler: (Request) throws -> ResponseRepresentable = { req in
             req.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: expectedCsp)
             return "Different CSP!"
@@ -389,7 +389,7 @@ class HeaderTests: XCTestCase {
 
     func testDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute() throws {
         let differentCsp = "default-src 'none'; script-src test;"
-        let middleware = SecurityHeaders.api()
+        let middleware = SecurityHeadersFactory.api().build()
         let cspSettingRouteHandler: (Request) throws -> ResponseRepresentable = { req in
             req.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: differentCsp)
             return "Different CSP!"
@@ -407,7 +407,7 @@ class HeaderTests: XCTestCase {
         let expectedXFOHeaderValue = "DENY"
         let expectedXSSProtectionHeaderValue = "1; mode=block"
 
-        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders.api())
+        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeadersFactory.api().build())
         let response = try drop.respond(to: abortRequest)
 
         XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HeaderKey.xContentTypeOptions])
@@ -422,7 +422,7 @@ class HeaderTests: XCTestCase {
         let expectedXFOHeaderValue = "DENY"
         let expectedXSSProtectionHeaderValue = "1; mode=block"
 
-        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders.api(), extraMiddleware: StubFileMiddleware())
+        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeadersFactory.api().build(), extraMiddleware: StubFileMiddleware())
         let response = try drop.respond(to: abortRequest)
 
         XCTAssertEqual("Hello World!", try response.body.bytes?.string())
@@ -438,7 +438,7 @@ class HeaderTests: XCTestCase {
         let expectedXFOHeaderValue = "DENY"
         let expectedXSSProtectionHeaderValue = "1; mode=block"
 
-        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders.api(), extraMiddleware: StubFileMiddleware(cspConfig: ContentSecurityPolicyConfiguration(value: expectedCSPHeaderValue)))
+        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeadersFactory.api().build(), extraMiddleware: StubFileMiddleware(cspConfig: ContentSecurityPolicyConfiguration(value: expectedCSPHeaderValue)))
         let response = try drop.respond(to: abortRequest)
 
         XCTAssertEqual("Hello World!", try response.body.bytes?.string())
