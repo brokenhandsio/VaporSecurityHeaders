@@ -1,6 +1,6 @@
 import HTTP
 
-public struct XssProtectionConfiguration: SecurityHeaderConfiguration {
+public struct XSSProtectionConfiguration: SecurityHeaderConfiguration {
     
     public enum Options {
         case disable

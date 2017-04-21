@@ -1,0 +1,63 @@
+public class SecurityHeadersFactory {
+    var contentTypeOptions = ContentTypeOptionsConfiguration(option: .nosniff)
+    var contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: "default-src 'self'")
+    var frameOptions = FrameOptionsConfiguration(option: .deny)
+    var xssProtection = XSSProtectionConfiguration(option: .block)
+    var hsts: StrictTransportSecurityConfiguration? = nil
+    var server: ServerConfiguration? = nil
+    var referrerPolicy: ReferrerPolicyConfiguration? = nil
+    var contentSecurityPolicyReportOnly: ContentSecurityPolicyReportOnlyConfiguration? = nil
+    
+    @discardableResult func with(contentTypeOptions configuration: ContentTypeOptionsConfiguration) -> SecurityHeadersFactory {
+        contentTypeOptions = configuration
+        return self
+    }
+    
+    @discardableResult func with(contentSecurityPolicy configuration: ContentSecurityPolicyConfiguration) -> SecurityHeadersFactory {
+        contentSecurityPolicy = configuration
+        return self
+    }
+    
+    @discardableResult func with(frameOptions configuration: FrameOptionsConfiguration) -> SecurityHeadersFactory {
+        frameOptions = configuration
+        return self
+    }
+    
+    @discardableResult func with(XSSProtection configuration: XSSProtectionConfiguration) -> SecurityHeadersFactory {
+        xssProtection = configuration
+        return self
+    }
+    
+    @discardableResult func with(strictTransportSecurity configuration: StrictTransportSecurityConfiguration) -> SecurityHeadersFactory {
+        hsts = configuration
+        return self
+    }
+    
+    @discardableResult func with(server configuration: ServerConfiguration) -> SecurityHeadersFactory {
+        server = configuration
+        return self
+    }
+    
+    @discardableResult func with(referrerPolicy configuration: ReferrerPolicyConfiguration) -> SecurityHeadersFactory {
+        referrerPolicy = configuration
+        return self
+    }
+    
+    @discardableResult func with(contentSecurityPolicyReportOnly configuration: ContentSecurityPolicyReportOnlyConfiguration) -> SecurityHeadersFactory {
+        contentSecurityPolicyReportOnly = configuration
+        return self
+    }
+    
+    func build() -> SecurityHeaders {
+        return SecurityHeaders(contentTypeConfiguration: contentTypeOptions,
+                               contentSecurityPolicyConfiguration: contentSecurityPolicy,
+                               frameOptionsConfiguration: frameOptions,
+                               xssProtectionConfiguration: xssProtection,
+                               hstsConfiguration: hsts,
+                               serverConfiguration: server,
+                               contentSecurityPolicyReportOnlyConfiguration: contentSecurityPolicyReportOnly,
+                               referrerPolicyConfiguration: referrerPolicy)
+    }
+    
+    
+}
