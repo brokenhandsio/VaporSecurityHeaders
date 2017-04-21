@@ -8,6 +8,8 @@ public class SecurityHeadersFactory {
     var referrerPolicy: ReferrerPolicyConfiguration? = nil
     var contentSecurityPolicyReportOnly: ContentSecurityPolicyReportOnlyConfiguration? = nil
     
+    public init() {}
+    
     public static func api() -> SecurityHeadersFactory {
         let apiFactory = SecurityHeadersFactory()
         apiFactory.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: "default-src 'none'")

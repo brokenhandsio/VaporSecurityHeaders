@@ -5,7 +5,7 @@ public struct SecurityHeaders {
     
     var configurations: [SecurityHeaderConfiguration]
     
-    public init(contentTypeConfiguration: ContentTypeOptionsConfiguration = ContentTypeOptionsConfiguration(option: .nosniff),
+    init(contentTypeConfiguration: ContentTypeOptionsConfiguration = ContentTypeOptionsConfiguration(option: .nosniff),
                 contentSecurityPolicyConfiguration: ContentSecurityPolicyConfiguration = ContentSecurityPolicyConfiguration(value: "default-src 'self'"),
                 frameOptionsConfiguration: FrameOptionsConfiguration = FrameOptionsConfiguration(option: .deny),
                 xssProtectionConfiguration: XSSProtectionConfiguration = XSSProtectionConfiguration(option: .block),

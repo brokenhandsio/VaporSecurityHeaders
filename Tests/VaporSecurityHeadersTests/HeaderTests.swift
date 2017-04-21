@@ -62,7 +62,7 @@ class HeaderTests: XCTestCase {
         let expectedXFOHeaderValue = "DENY"
         let expectedXSSProtectionHeaderValue = "1; mode=block"
 
-        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders())
+        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeadersFactory().build())
         let response = try drop.respond(to: request)
 
         XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HeaderKey.xContentTypeOptions])
@@ -78,7 +78,7 @@ class HeaderTests: XCTestCase {
         let expectedXSSProtectionHeaderValue = "1; mode=block"
         let expectedHSTSHeaderValue = "max-age=31536000; includeSubDomains; preload"
 
-        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeaders(hstsConfiguration: StrictTransportSecurityConfiguration()))
+        let drop = try makeTestDroplet(middlewareToAdd: SecurityHeadersFactory().with(strictTransportSecurity: StrictTransportSecurityConfiguration()).build())
         let response = try drop.respond(to: request)
 
         XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HeaderKey.xContentTypeOptions])
@@ -122,7 +122,7 @@ class HeaderTests: XCTestCase {
 
     func testHeadersWithContentTypeOptionsTurnedOff() throws {
         let contentTypeConfig = ContentTypeOptionsConfiguration(option: .none)
-        let middleware = SecurityHeaders(contentTypeConfiguration: contentTypeConfig)
+        let middleware = SecurityHeadersFactory().with(contentTypeOptions: contentTypeConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
 
@@ -131,7 +131,7 @@ class HeaderTests: XCTestCase {
 
     func testHeadersWithContentTypeOptionsNosniff() throws {
         let contentTypeConfig = ContentTypeOptionsConfiguration(option: .nosniff)
-        let middleware = SecurityHeaders(contentTypeConfiguration: contentTypeConfig)
+        let middleware = SecurityHeadersFactory().with(contentTypeOptions: contentTypeConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
 
@@ -140,7 +140,7 @@ class HeaderTests: XCTestCase {
 
     func testHeaderWithFrameOptionsDeny() throws {
         let frameOptionsConfig = FrameOptionsConfiguration(option: .deny)
-        let middleware = SecurityHeaders(frameOptionsConfiguration: frameOptionsConfig)
+        let middleware = SecurityHeadersFactory().with(frameOptions: frameOptionsConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
 
@@ -149,7 +149,7 @@ class HeaderTests: XCTestCase {
 
     func testHeaderWithFrameOptionsSameOrigin() throws {
         let frameOptionsConfig = FrameOptionsConfiguration(option: .sameOrigin)
-        let middleware = SecurityHeaders(frameOptionsConfiguration: frameOptionsConfig)
+        let middleware = SecurityHeadersFactory().with(frameOptions: frameOptionsConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
 
@@ -158,7 +158,7 @@ class HeaderTests: XCTestCase {
 
     func testHeaderWithFrameOptionsAllowFrom() throws {
         let frameOptionsConfig = FrameOptionsConfiguration(option: .allow(from: "https://test.com"))
-        let middleware = SecurityHeaders(frameOptionsConfiguration: frameOptionsConfig)
+        let middleware = SecurityHeadersFactory().with(frameOptions: frameOptionsConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
 
@@ -167,7 +167,7 @@ class HeaderTests: XCTestCase {
 
     func testHeaderWithXssProtectionDisable() throws {
         let xssProtectionConfig = XSSProtectionConfiguration(option: .disable)
-        let middleware = SecurityHeaders(xssProtectionConfiguration: xssProtectionConfig)
+        let middleware = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
 
@@ -176,7 +176,7 @@ class HeaderTests: XCTestCase {
 
     func testHeaderWithXssProtectionEnable() throws {
         let xssProtectionConfig = XSSProtectionConfiguration(option: .enable)
-        let middleware = SecurityHeaders(xssProtectionConfiguration: xssProtectionConfig)
+        let middleware = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
 
@@ -185,7 +185,7 @@ class HeaderTests: XCTestCase {
 
     func testHeaderWithXssProtectionBlock() throws {
         let xssProtectionConfig = XSSProtectionConfiguration(option: .block)
-        let middleware = SecurityHeaders(xssProtectionConfiguration: xssProtectionConfig)
+        let middleware = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
 
@@ -194,7 +194,7 @@ class HeaderTests: XCTestCase {
 
     func testHeaderWithHSTSwithMaxAge() throws {
         let hstsConfig = StrictTransportSecurityConfiguration(maxAge: 30)
-        let middleware = SecurityHeaders(hstsConfiguration: hstsConfig)
+        let middleware = SecurityHeadersFactory().with(strictTransportSecurity: hstsConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
 
@@ -203,7 +203,7 @@ class HeaderTests: XCTestCase {
 
     func testHeadersWithHSTSwithSubdomains() throws {
         let hstsConfig = StrictTransportSecurityConfiguration(maxAge: 30, includeSubdomains: true)
-        let middleware = SecurityHeaders(hstsConfiguration: hstsConfig)
+        let middleware = SecurityHeadersFactory().with(strictTransportSecurity: hstsConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
 
@@ -212,7 +212,7 @@ class HeaderTests: XCTestCase {
 
     func testHeadersWithHSTSwithPreload() throws {
         let hstsConfig = StrictTransportSecurityConfiguration(maxAge: 30, preload: true)
-        let middleware = SecurityHeaders(hstsConfiguration: hstsConfig)
+        let middleware = SecurityHeadersFactory().with(strictTransportSecurity: hstsConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
 
@@ -221,7 +221,7 @@ class HeaderTests: XCTestCase {
 
     func testHeadersWithHSTSwithPreloadAndSubdomain() throws {
         let hstsConfig = StrictTransportSecurityConfiguration(maxAge: 30, includeSubdomains: true, preload: true)
-        let middleware = SecurityHeaders(hstsConfiguration: hstsConfig)
+        let middleware = SecurityHeadersFactory().with(strictTransportSecurity: hstsConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
 
@@ -230,7 +230,7 @@ class HeaderTests: XCTestCase {
 
     func testHeadersWithHSTSwithSubdomainsFalse() throws {
         let hstsConfig = StrictTransportSecurityConfiguration(maxAge: 30, includeSubdomains: false)
-        let middleware = SecurityHeaders(hstsConfiguration: hstsConfig)
+        let middleware = SecurityHeadersFactory().with(strictTransportSecurity: hstsConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
 
@@ -239,7 +239,7 @@ class HeaderTests: XCTestCase {
 
     func testHeadersWithHSTSwithPreloadFalse() throws {
         let hstsConfig = StrictTransportSecurityConfiguration(maxAge: 30, preload: false)
-        let middleware = SecurityHeaders(hstsConfiguration: hstsConfig)
+        let middleware = SecurityHeadersFactory().with(strictTransportSecurity: hstsConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
 
@@ -248,7 +248,7 @@ class HeaderTests: XCTestCase {
 
     func testHeadersWithHSTSwithSubdomainAndPreloadFalse() throws {
         let hstsConfig = StrictTransportSecurityConfiguration(maxAge: 30, includeSubdomains: false, preload: false)
-        let middleware = SecurityHeaders(hstsConfiguration: hstsConfig)
+        let middleware = SecurityHeadersFactory().with(strictTransportSecurity: hstsConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
 
@@ -257,7 +257,7 @@ class HeaderTests: XCTestCase {
 
     func testHeadersWithServerValue() throws {
         let serverConfig = ServerConfiguration(value: "brokenhands.io")
-        let middleware = SecurityHeaders(serverConfiguration: serverConfig)
+        let middleware = SecurityHeadersFactory().with(server: serverConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
 
@@ -267,7 +267,7 @@ class HeaderTests: XCTestCase {
     func testHeadersWithCSP() throws {
         let csp = "default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style;"
         let cspConfig = ContentSecurityPolicyConfiguration(value: csp)
-        let middleware = SecurityHeaders(contentSecurityPolicyConfiguration: cspConfig)
+        let middleware = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
 
@@ -277,7 +277,7 @@ class HeaderTests: XCTestCase {
     func testHeadersWithReportOnlyCSP() throws {
         let csp = "default-src https:; report-uri https://csp-report.brokenhands.io"
         let cspConfig = ContentSecurityPolicyReportOnlyConfiguration(value: csp)
-        let middleware = SecurityHeaders(contentSecurityPolicyReportOnlyConfiguration: cspConfig)
+        let middleware = SecurityHeadersFactory().with(contentSecurityPolicyReportOnly: cspConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
 
@@ -287,7 +287,7 @@ class HeaderTests: XCTestCase {
     func testHeadersWithReferrerPolicyEmpty() throws {
         let expected = ""
         let referrerConfig = ReferrerPolicyConfiguration(.empty)
-        let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
+        let middleware = SecurityHeadersFactory().with(referrerPolicy: referrerConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
         XCTAssertEqual(expected, response.headers[HeaderKey.referrerPolicy])
@@ -296,7 +296,7 @@ class HeaderTests: XCTestCase {
     func testHeadersWithReferrerPolicyNoReferrer() throws {
         let expected = "no-referrer"
         let referrerConfig = ReferrerPolicyConfiguration(.noReferrer)
-        let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
+        let middleware = SecurityHeadersFactory().with(referrerPolicy: referrerConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
         XCTAssertEqual(expected, response.headers[HeaderKey.referrerPolicy])
@@ -305,7 +305,7 @@ class HeaderTests: XCTestCase {
     func testHeadersWithReferrerPolicyNoReferrerWhenDowngrade() throws {
         let expected = "no-referrer-when-downgrade"
         let referrerConfig = ReferrerPolicyConfiguration(.noReferrerWhenDowngrade)
-        let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
+        let middleware = SecurityHeadersFactory().with(referrerPolicy: referrerConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
         XCTAssertEqual(expected, response.headers[HeaderKey.referrerPolicy])
@@ -314,7 +314,7 @@ class HeaderTests: XCTestCase {
     func testHeadersWithReferrerPolicySameOrigin() throws {
         let expected = "same-origin"
         let referrerConfig = ReferrerPolicyConfiguration(.sameOrigin)
-        let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
+        let middleware = SecurityHeadersFactory().with(referrerPolicy: referrerConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
         XCTAssertEqual(expected, response.headers[HeaderKey.referrerPolicy])
@@ -323,7 +323,7 @@ class HeaderTests: XCTestCase {
     func testHeadersWithReferrerPolicyOrigin() throws {
         let expected = "origin"
         let referrerConfig = ReferrerPolicyConfiguration(.origin)
-        let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
+        let middleware = SecurityHeadersFactory().with(referrerPolicy: referrerConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
         XCTAssertEqual(expected, response.headers[HeaderKey.referrerPolicy])
@@ -332,7 +332,7 @@ class HeaderTests: XCTestCase {
     func testHeadersWithReferrerPolicyStrictOrigin() throws {
         let expected = "strict-origin"
         let referrerConfig = ReferrerPolicyConfiguration(.strictOrigin)
-        let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
+        let middleware = SecurityHeadersFactory().with(referrerPolicy: referrerConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
         XCTAssertEqual(expected, response.headers[HeaderKey.referrerPolicy])
@@ -341,7 +341,7 @@ class HeaderTests: XCTestCase {
     func testHeadersWithReferrerPolicyOriginWhenCrossOrigin() throws {
         let expected = "origin-when-cross-origin"
         let referrerConfig = ReferrerPolicyConfiguration(.originWhenCrossOrigin)
-        let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
+        let middleware = SecurityHeadersFactory().with(referrerPolicy: referrerConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
         XCTAssertEqual(expected, response.headers[HeaderKey.referrerPolicy])
@@ -350,7 +350,7 @@ class HeaderTests: XCTestCase {
     func testHeadersWithReferrerPolicyStrictOriginWhenCrossOrigin() throws {
         let expected = "strict-origin-when-cross-origin"
         let referrerConfig = ReferrerPolicyConfiguration(.strictOriginWhenCrossOrigin)
-        let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
+        let middleware = SecurityHeadersFactory().with(referrerPolicy: referrerConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
         XCTAssertEqual(expected, response.headers[HeaderKey.referrerPolicy])
@@ -359,7 +359,7 @@ class HeaderTests: XCTestCase {
     func testHeadersWithReferrerPolicyUnsafeUrl() throws {
         let expected = "unsafe-url"
         let referrerConfig = ReferrerPolicyConfiguration(.unsafeUrl)
-        let middleware = SecurityHeaders(referrerPolicyConfiguration: referrerConfig)
+        let middleware = SecurityHeadersFactory().with(referrerPolicy: referrerConfig).build()
         let drop = try makeTestDroplet(middlewareToAdd: middleware)
         let response = try drop.respond(to: request)
         XCTAssertEqual(expected, response.headers[HeaderKey.referrerPolicy])
