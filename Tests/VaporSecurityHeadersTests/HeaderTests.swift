@@ -449,10 +449,27 @@ class HeaderTests: XCTestCase {
     }
     
     func testBuilderWorks() throws {
-        let config = try Config()
+        var config = try Config()
+        try config.set("droplet.middleware", ["vapor-security-headers"])
         let securityHeadersFactory = SecurityHeadersFactory()
         config.addConfigurable(middleware: securityHeadersFactory.builder(), name: "vapor-security-headers")
-        _ = try Droplet(config)
+        let drop = try Droplet(config)
+        
+        drop.get("test") { req in
+            return "TEST"
+        }
+        
+        let expectedXCTOHeaderValue = "nosniff"
+        let expectedCSPHeaderValue = "default-src 'self'"
+        let expectedXFOHeaderValue = "DENY"
+        let expectedXSSProtectionHeaderValue = "1; mode=block"
+        
+        let response = try drop.respond(to: request)
+        
+        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HeaderKey.xContentTypeOptions])
+        XCTAssertEqual(expectedCSPHeaderValue, response.headers[HeaderKey.contentSecurityPolicy])
+        XCTAssertEqual(expectedXFOHeaderValue, response.headers[HeaderKey.xFrameOptions])
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[HeaderKey.xXssProtection])
     }
 
     private func makeTestDroplet(middlewareToAdd: SecurityHeaders, extraMiddleware: Middleware? = nil, routeHandler: ((Request) throws -> ResponseRepresentable)? = nil) throws -> Droplet {
