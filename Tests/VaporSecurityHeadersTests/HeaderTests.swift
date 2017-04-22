@@ -1,6 +1,6 @@
 import XCTest
 
-@testable import Vapor
+import Vapor
 import HTTP
 
 import VaporSecurityHeaders
