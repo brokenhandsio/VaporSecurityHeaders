@@ -447,15 +447,16 @@ class HeaderTests: XCTestCase {
         XCTAssertEqual(expectedXFOHeaderValue, response.headers[HeaderKey.xFrameOptions])
         XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[HeaderKey.xXssProtection])
     }
+    
+    func testBuilderWorks() throws {
+        let config = try Config()
+        let securityHeadersFactory = SecurityHeadersFactory()
+        config.addConfigurable(middleware: securityHeadersFactory.builder(), name: "vapor-security-headers")
+        _ = try Droplet(config)
+    }
 
     private func makeTestDroplet(middlewareToAdd: SecurityHeaders, extraMiddleware: Middleware? = nil, routeHandler: ((Request) throws -> ResponseRepresentable)? = nil) throws -> Droplet {
         let config = try Config()
-        
-//        let middlewareReturner: (Config) throws -> (SecurityHeaders) = { config in
-//            return middlewareToAdd
-//            
-//        }
-//        config.addConfigurable(middleware: middlewareReturner, name: "vapor-security-headers")
         
         var middlewareArray: [Middleware] = [middlewareToAdd, ErrorMiddleware.init(.test, try config.resolveLog())]
         if let extraMiddleware = extraMiddleware {

@@ -1,3 +1,5 @@
+import Vapor
+
 public class SecurityHeadersFactory {
     var contentTypeOptions = ContentTypeOptionsConfiguration(option: .nosniff)
     var contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: "default-src 'self'")
@@ -65,6 +67,12 @@ public class SecurityHeadersFactory {
                                serverConfiguration: server,
                                contentSecurityPolicyReportOnlyConfiguration: contentSecurityPolicyReportOnly,
                                referrerPolicyConfiguration: referrerPolicy)
+    }
+    
+    public func builder() -> ((Config) throws -> SecurityHeaders) {
+        return { _ in
+            return self.build()
+        }
     }
     
     
