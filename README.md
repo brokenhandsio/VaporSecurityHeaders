@@ -54,7 +54,7 @@ Each different header has its own configuration and options, details of which ca
 
 You can test your site by visiting the awesome [Security Headers](https://securityheaders.io) (no affiliation) websites
 
-## [Vapor 2](#vapor-2)
+## Vapor 2
 
 For those working with the Vapor 2 Betas, things have changed somewhat. To start with, using the `SecurityHeaders` object has now been deprecated in favour of using the new `SecurityHeadersFactory`. This should make it easier to read and customise everything. To create your middleware, it is now:
 
