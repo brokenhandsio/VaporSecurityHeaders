@@ -59,16 +59,16 @@ You can test your site by visiting the awesome [Security Headers](https://securi
 For those working with the Vapor 2 Betas, things have changed somewhat. To start with, using the `SecurityHeaders` object has now been deprecated in favour of using the new `SecurityHeadersFactory`. This should make it easier to read and customise everything. To create your middleware, it is now:
 
 ```swift
-let securityHeadersMiddleware = SecurityHeadersFactory()
+let securityHeadersMiddleware = SecurityHeadersFactory().build()
 ```
 
 For the API:
 
 ```swift
-let securityHeadersAPIMiddleware = SecurityHeadersFactory.api()
+let securityHeadersAPIMiddleware = SecurityHeadersFactory.api().build()
 ```
 
-If you want to add your own values, it is easy to do to the factory. For instance, to add a content security policy configuration, just do:
+If you want to add your own values, it is easy to do using the factory. For instance, to add a content security policy configuration, just do:
 
 ```swift
 let cspValue = "default-src 'none'; script-src https://static.brokenhands.io;"
@@ -76,7 +76,7 @@ let cspConfig = ContentSecurityPolicyConfiguration(value: cspValue)
 let securityHeadersMiddlewareFactory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
 ```
 
-To add the middleware to your `Droplet`, you should add it to your `Config` and then to your `droplet.json`:
+To add the middleware to your `Droplet`, you should add it to your `Config` and then to your `droplet.json`. Vapor Security Headers makes this easy to do with a `builder` function on the factory:
 
 ```swift
 let config = Config()
