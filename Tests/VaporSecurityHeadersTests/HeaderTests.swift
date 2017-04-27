@@ -423,12 +423,10 @@ class HeaderTests: XCTestCase {
         let expectedXFOHeaderValue = "DENY"
         let expectedXSSProtectionHeaderValue = "1; mode=block"
 
-        let config = try Config()
         let securityHeaders = SecurityHeadersFactory.api().build()
         let middlewareArray: [Middleware] = [securityHeaders, StubFileMiddleware()]
-        config.override(middleware: middlewareArray)
         
-        let drop = try Droplet(config)
+        let drop = try Droplet(middleware: middlewareArray)
         
         drop.get("abort") { req in
             throw Abort.badRequest
@@ -449,12 +447,10 @@ class HeaderTests: XCTestCase {
         let expectedXFOHeaderValue = "DENY"
         let expectedXSSProtectionHeaderValue = "1; mode=block"
 
-        let config = try Config()
         let securityHeaders = SecurityHeadersFactory.api().build()
         let middlewareArray: [Middleware] = [securityHeaders, StubFileMiddleware(cspConfig: ContentSecurityPolicyConfiguration(value: expectedCSPHeaderValue))]
-        config.override(middleware: middlewareArray)
         
-        let drop = try Droplet(config)
+        let drop = try Droplet(middleware: middlewareArray)
         
         drop.get("abort") { req in
             throw Abort.badRequest
@@ -475,8 +471,7 @@ class HeaderTests: XCTestCase {
         
         let middlewareArray: [Middleware] = [securityHeaders, ErrorMiddleware.init(.test, try config.resolveLog())]
         
-        config.override(middleware: middlewareArray)
-        let drop = try Droplet(config)
+        let drop = try Droplet(middleware: middlewareArray)
         
         drop.get("test") { req in
             return "TEST"
