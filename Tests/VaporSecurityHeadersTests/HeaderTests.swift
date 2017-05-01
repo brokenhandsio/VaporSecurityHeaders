@@ -52,9 +52,9 @@ class HeaderTests: XCTestCase {
     private var abortRequest: Request!
 
     override func setUp() {
-        request = try! Request(method: .get, uri: "/test/")
-        routeRequest = try! Request(method: .get, uri: "/route/")
-        abortRequest = try! Request(method: .get, uri: "/abort/")
+        request = Request(method: .get, uri: "/test/")
+        routeRequest = Request(method: .get, uri: "/route/")
+        abortRequest = Request(method: .get, uri: "/abort/")
     }
 
     func testDefaultHeaders() throws {
@@ -434,7 +434,7 @@ class HeaderTests: XCTestCase {
         
         let response = try drop.respond(to: abortRequest)
 
-        XCTAssertEqual("Hello World!", try response.body.bytes?.string())
+        XCTAssertEqual("Hello World!", response.body.bytes?.makeString())
         XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HeaderKey.xContentTypeOptions])
         XCTAssertEqual(expectedCSPHeaderValue, response.headers[HeaderKey.contentSecurityPolicy])
         XCTAssertEqual(expectedXFOHeaderValue, response.headers[HeaderKey.xFrameOptions])
@@ -458,7 +458,7 @@ class HeaderTests: XCTestCase {
         
         let response = try drop.respond(to: abortRequest)
 
-        XCTAssertEqual("Hello World!", try response.body.bytes?.string())
+        XCTAssertEqual("Hello World!", response.body.bytes?.makeString())
         XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HeaderKey.xContentTypeOptions])
         XCTAssertEqual(expectedCSPHeaderValue, response.headers[HeaderKey.contentSecurityPolicy])
         XCTAssertEqual(expectedXFOHeaderValue, response.headers[HeaderKey.xFrameOptions])
