@@ -80,11 +80,22 @@ To add the middleware to your `Droplet`, you should add it to your `Config` and 
 
 ```swift
 let config = Config()
-config.addConfigurable(middleware: securityHeadersFactory.builder(), name: "vapor-security-headers"))
+config.addConfigurable(middleware: securityHeadersFactory.builder(), name: "security-headers"))
 let drop = Droplet(config)
 ```
 
-***Note:*** You should ensure you set the security headers as the first middleware in your `droplet.json` to make sure the headers get added to all responses.
+***Note:*** You should ensure you set the security headers as the first middleware in your `droplet.json` to make sure the headers get added to all responses:
+
+```json
+{
+    ...
+    "middleware": [
+        "security-headers",
+        ...
+    ],
+    ...
+}
+```
 
 # Roadmap
 
