@@ -24,59 +24,7 @@ These headers will *help* prevent cross-site scripting attacks, SSL downgrade at
 
 # Usage
 
-To use Vapor Security Headers, just add the middleware to your `Droplet` and all the responses will have the headers added:
-
-```swift
-import VaporSecurityHeaders
-let securityHeaders = SecurityHeaders()
-let drop = Droplet()
-drop.middleware.insert(securityHeaders, at: 0)
-```
-
-***Note: The `SecurityHeaders` middleware should be the first item in the `drop.middleware` array so that the headers are added to every response.***
-
-You will need to add it as a dependency in your `Package.swift` file:
-
-```swift
-dependencies: [
-    ...,
-    .Package(url: "https://github.com/brokenhandsio/VaporSecurityHeaders", majorVersion: 0)
-]
-```
-
-This will add default values to your site for Content-Security-Policy, X-XSS-Protection, X-Frame-Options and X-Content-Type-Options. If you are running an API you can choose a default configuration for that by creating it with:
-
-```swift
-let securityHeaders = SecurityHeaders.api()
-```
-
-Each different header has its own configuration and options, details of which can be found below.
-
-You can test your site by visiting the awesome [Security Headers](https://securityheaders.io) (no affiliation) websites
-
-## Vapor 2
-
-For those working with the Vapor 2 Betas, things have changed somewhat. To start with, using the `SecurityHeaders` object has now been deprecated in favour of using the new `SecurityHeadersFactory`. This should make it easier to read and customise everything. To create your middleware, it is now:
-
-```swift
-let securityHeadersMiddleware = SecurityHeadersFactory().build()
-```
-
-For the API:
-
-```swift
-let securityHeadersAPIMiddleware = SecurityHeadersFactory.api().build()
-```
-
-If you want to add your own values, it is easy to do using the factory. For instance, to add a content security policy configuration, just do:
-
-```swift
-let cspValue = "default-src 'none'; script-src https://static.brokenhands.io;"
-let cspConfig = ContentSecurityPolicyConfiguration(value: cspValue)
-let securityHeadersMiddlewareFactory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
-```
-
-To add the middleware to your `Droplet`, you should add it to your `Config` and then to your `droplet.json`. Vapor Security Headers makes this easy to do with a `builder` function on the factory:
+To use Vapor Security Headers, just add the middleware to your `Config` and then to your `droplet.json`. Vapor Security Headers makes this easy to do with a `builder` function on the factory:
 
 ```swift
 let config = Config()
@@ -95,6 +43,43 @@ let drop = Droplet(config)
     ],
     ...
 }
+```
+
+If you want to add your own values, it is easy to do using the factory. For instance, to add a content security policy configuration, just do:
+
+```swift
+let cspValue = "default-src 'none'; script-src https://static.brokenhands.io;"
+let cspConfig = ContentSecurityPolicyConfiguration(value: cspValue)
+let securityHeadersMiddlewareFactory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
+```
+
+***Note: The `SecurityHeaders` middleware should be the first item in the `droplet.json` middleware array so that the headers are added to every response.***
+
+You will need to add it as a dependency in your `Package.swift` file:
+
+```swift
+dependencies: [
+    ...,
+    .Package(url: "https://github.com/brokenhandsio/VaporSecurityHeaders", majorVersion: 0)
+]
+```
+
+This will add default values to your site for Content-Security-Policy, X-XSS-Protection, X-Frame-Options and X-Content-Type-Options. If you are running an API you can choose a default configuration for that by creating it with:
+
+```swift
+let securityHeaders = SecurityHeadersFactory.api()
+```
+
+Each different header has its own configuration and options, details of which can be found below.
+
+You can test your site by visiting the awesome [Security Headers](https://securityheaders.io) (no affiliation) websites
+
+## Manual Initialisation
+
+You can also build the middleware manually like so:
+
+```swift
+let securityHeadersMiddleware = SecurityHeadersFactory().build()
 ```
 
 # Roadmap
