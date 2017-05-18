@@ -28,9 +28,12 @@ To use Vapor Security Headers, just add the middleware to your `Config` and then
 
 ```swift
 let config = Config()
+let securityHeadersFactory = SecurityHeadersFactory()
 config.addConfigurable(middleware: securityHeadersFactory.builder(), name: "security-headers"))
 let drop = Droplet(config)
 ```
+
+The default factory will add default values to your site for Content-Security-Policy, X-XSS-Protection, X-Frame-Options and X-Content-Type-Options.
 
 ***Note:*** You should ensure you set the security headers as the first middleware in your `droplet.json` to make sure the headers get added to all responses:
 
@@ -53,8 +56,6 @@ let cspConfig = ContentSecurityPolicyConfiguration(value: cspValue)
 let securityHeadersMiddlewareFactory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
 ```
 
-***Note: The `SecurityHeaders` middleware should be the first item in the `droplet.json` middleware array so that the headers are added to every response.***
-
 You will need to add it as a dependency in your `Package.swift` file:
 
 ```swift
@@ -64,15 +65,17 @@ dependencies: [
 ]
 ```
 
-This will add default values to your site for Content-Security-Policy, X-XSS-Protection, X-Frame-Options and X-Content-Type-Options. If you are running an API you can choose a default configuration for that by creating it with:
+Each different header has its own configuration and options, details of which can be found below.
+
+You can test your site by visiting the awesome [Security Headers](https://securityheaders.io) (no affiliation) websites
+
+## API Headers
+
+If you are running an API you can choose a default configuration for that by creating it with:
 
 ```swift
 let securityHeaders = SecurityHeadersFactory.api()
 ```
-
-Each different header has its own configuration and options, details of which can be found below.
-
-You can test your site by visiting the awesome [Security Headers](https://securityheaders.io) (no affiliation) websites
 
 ## Manual Initialisation
 
@@ -95,9 +98,9 @@ The following features are on the roadmap to be implemented:
 
 If you are running Vapor on it's own (i.e. not as a CGI application or behind and reverse proxy) then you do not need to do anything more to get it running!
 
-## Nginx and Apache
+## Nginx, Apache and 3rd Party Services
 
-Both web servers should pass on the response headers from Vapor without issue when running as a reverse proxy.
+Both web servers should pass on the response headers from Vapor without issue when running as a reverse proxy. Some servers and providers (such as Heroku) will inject their own headers or block certain headers (such as HSTS to stop you locking out their whole site). You will need to check with your provider to see what is enabled and allowed. 
 
 # Security Header Information
 
