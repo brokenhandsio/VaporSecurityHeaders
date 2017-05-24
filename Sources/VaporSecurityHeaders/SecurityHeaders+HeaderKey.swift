@@ -2,26 +2,26 @@ import HTTP
 
 public extension HeaderKey {
     static public var contentSecurityPolicy: HeaderKey {
-        return HeaderKey("Content-Security-Policy")
+        return HeaderKey("content-security-policy")
     }
     
     static public var xXssProtection: HeaderKey {
-        return HeaderKey("X-XSS-Protection")
+        return HeaderKey("x-xss-protection")
     }
     
     static public var xFrameOptions: HeaderKey {
-        return HeaderKey("X-Frame-Options")
+        return HeaderKey("x-frame-options")
     }
     
     static public var xContentTypeOptions: HeaderKey {
-        return HeaderKey("X-Content-Type-Options")
+        return HeaderKey("x-content-type-options")
     }
     
     static public var contentSecurityPolicyReportOnly: HeaderKey {
-        return HeaderKey("Content-Security-Policy-Report-Only")
+        return HeaderKey("content-security-policy-report-only")
     }
     
     static public var referrerPolicy: HeaderKey {
-        return HeaderKey("Referrer-Policy")
+        return HeaderKey("referrer-policy")
     }
 }
