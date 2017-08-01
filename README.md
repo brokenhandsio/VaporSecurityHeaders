@@ -172,11 +172,12 @@ let xssProtectionConfig = XssProtectionConfiguration(option: .enable)
 ```
 
 Or to disable:
+
 ```swift
 let xssProtectionConfig = XssProtectionConfiguration(option: .disable)
 ```
 
-## X-Content-Type-Options
+## X-Content-Type-Options
 
 X-Content-Type-Options stops a browser from trying to MIME-sniff content types from requests and makes sure that the declared content type is used. It only has one option, which is `nosniff`. To use this, set your `ContentTypeOptionsConfiguration` as so (this is set by default on any `SecurityHeaders` object):
 
@@ -190,7 +191,7 @@ To disable it:
 let contentTypeConfig = ContentTypeOptionsConfiguration(option: .none)
 ```
 
-## X-Frame-Options
+## X-Frame-Options
 
 The X-Frame-Options header is for click-jacking attacks and tells the browser whether your site can be framed. To stop your site from being framed completely (the default setting):
 
