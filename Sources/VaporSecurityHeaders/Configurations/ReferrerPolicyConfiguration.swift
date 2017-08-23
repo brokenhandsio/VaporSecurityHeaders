@@ -1,7 +1,7 @@
 import HTTP
 
 public struct ReferrerPolicyConfiguration: SecurityHeaderConfiguration {
-    
+
     public enum Options: String {
         case empty = ""
         case noReferrer = "no-referrer"
@@ -13,13 +13,13 @@ public struct ReferrerPolicyConfiguration: SecurityHeaderConfiguration {
         case strictOriginWhenCrossOrigin = "strict-origin-when-cross-origin"
         case unsafeUrl = "unsafe-url"
     }
-    
+
     private let option: Options
-    
+
     public init(_ option: Options) {
         self.option = option
     }
-    
+
     func setHeader(on response: Response, from request: Request) {
         response.headers[HeaderKey.referrerPolicy] = option.rawValue
     }
