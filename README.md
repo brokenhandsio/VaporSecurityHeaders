@@ -1,9 +1,20 @@
-# Vapor Security Headers
-
-[![Language](https://img.shields.io/badge/Swift-3.1-brightgreen.svg)](http://swift.org)
-[![Build Status](https://travis-ci.org/brokenhandsio/VaporSecurityHeaders.svg?branch=master)](https://travis-ci.org/brokenhandsio/VaporSecurityHeaders)
-[![codecov](https://codecov.io/gh/brokenhandsio/VaporSecurityHeaders/branch/master/graph/badge.svg)](https://codecov.io/gh/brokenhandsio/VaporSecurityHeaders)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/brokenhandsio/VaporSecurityHeaders/master/LICENSE)
+<p align="center">
+    <img src="https://user-images.githubusercontent.com/9938337/29741110-2e0ae9ca-8a5e-11e7-8fbf-58b256d4dd57.png" alt="Vapor Security Headers">
+    <br>
+    <br>
+    <a href="https://swift.org">
+        <img src="http://img.shields.io/badge/Swift-3.1-brightgreen.svg" alt="Language">
+    </a>
+    <a href="https://travis-ci.org/brokenhandsio/VaporSecurityHeaders">
+        <img src="https://travis-ci.org/brokenhandsio/VaporSecurityHeaders.svg?branch=master" alt="Build Status">
+    </a>
+    <a href="https://codecov.io/gh/brokenhandsio/VaporSecurityHeaders">
+        <img src="https://codecov.io/gh/brokenhandsio/VaporSecurityHeaders/branch/master/graph/badge.svg" alt="Code Coverage">
+    </a>
+    <a href="https://raw.githubusercontent.com/brokenhandsio/VaporSecurityHeaders/master/LICENSE">
+        <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License">
+    </a>
+</p>
 
 A Middleware library for adding security headers to your Vapor application.
 
