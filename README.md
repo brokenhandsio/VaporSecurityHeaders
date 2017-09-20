@@ -72,7 +72,7 @@ You will need to add it as a dependency in your `Package.swift` file:
 ```swift
 dependencies: [
     ...,
-    .Package(url: "https://github.com/brokenhandsio/VaporSecurityHeaders", majorVersion: 0)
+    .package(url: "https://github.com/brokenhandsio/VaporSecurityHeaders", from: "1.1.0")
 ]
 ```
 
@@ -111,7 +111,7 @@ If you are running Vapor on it's own (i.e. not as a CGI application or behind an
 
 ## Nginx, Apache and 3rd Party Services
 
-Both web servers should pass on the response headers from Vapor without issue when running as a reverse proxy. Some servers and providers (such as Heroku) will inject their own headers or block certain headers (such as HSTS to stop you locking out their whole site). You will need to check with your provider to see what is enabled and allowed. 
+Both web servers should pass on the response headers from Vapor without issue when running as a reverse proxy. Some servers and providers (such as Heroku) will inject their own headers or block certain headers (such as HSTS to stop you locking out their whole site). You will need to check with your provider to see what is enabled and allowed.
 
 # Security Header Information
 
