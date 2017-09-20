@@ -16,7 +16,7 @@ before_install:
             sudo apt-get install vapor;
             sudo chmod -R a+rx /usr/;
             sudo apt-get remove swift
-            sudo apt-get install swift-beta
+            sudo apt-get install swift
         fi
 
 script:
