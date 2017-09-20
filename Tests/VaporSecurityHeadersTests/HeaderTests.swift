@@ -6,12 +6,15 @@ import HTTP
 import VaporSecurityHeaders
 
 class HeaderTests: XCTestCase {
+    
+    // MARK: - All Tests
 
     static var allTests = [
+        ("testLinuxTestSuiteIncludesAllTests", testLinuxTestSuiteIncludesAllTests),
         ("testDefaultHeaders", testDefaultHeaders),
+        ("testDefaultHeadersWithHSTS", testDefaultHeadersWithHSTS),
         ("testAllHeadersForApi", testAllHeadersForApi),
         ("testAPIHeadersWithHSTS", testAPIHeadersWithHSTS),
-        ("testDefaultHeadersWithHSTS", testDefaultHeadersWithHSTS),
         ("testHeadersWithContentTypeOptionsTurnedOff", testHeadersWithContentTypeOptionsTurnedOff),
         ("testHeadersWithContentTypeOptionsNosniff", testHeadersWithContentTypeOptionsNosniff),
         ("testHeaderWithFrameOptionsDeny", testHeaderWithFrameOptionsDeny),
@@ -39,6 +42,7 @@ class HeaderTests: XCTestCase {
         ("testHeadersWithReferrerPolicyOriginWhenCrossOrigin", testHeadersWithReferrerPolicyOriginWhenCrossOrigin),
         ("testHeadersWithReferrerPolicyStrictOriginWhenCrossOrigin", testHeadersWithReferrerPolicyStrictOriginWhenCrossOrigin),
         ("testHeadersWithReferrerPolicyUnsafeUrl", testHeadersWithReferrerPolicyUnsafeUrl),
+        ("testApiPolicyWithAddedReferrerPolicy", testApiPolicyWithAddedReferrerPolicy),
         ("testCustomCSPOnSingleRoute", testCustomCSPOnSingleRoute),
         ("testDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute", testDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute),
         ("testAbortMiddleware", testAbortMiddleware),
@@ -46,15 +50,32 @@ class HeaderTests: XCTestCase {
         ("testMockFileMiddlewareDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute", testMockFileMiddlewareDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute),
         ("testBuildWorks", testBuildWorks),
     ]
+    
+    // MARK: - Properties
 
     private var request: Request!
     private var routeRequest: Request!
     private var abortRequest: Request!
 
+    // MARK: - Overrides
+    
     override func setUp() {
         request = Request(method: .get, uri: "/test/")
         routeRequest = Request(method: .get, uri: "/route/")
         abortRequest = Request(method: .get, uri: "/abort/")
+    }
+    
+    // MARK: - Tests
+    
+    func testLinuxTestSuiteIncludesAllTests() {
+        #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
+            let thisClass = type(of: self)
+            let linuxCount = thisClass.allTests.count
+            let darwinCount = Int(thisClass
+                .defaultTestSuite.testCaseCount)
+            XCTAssertEqual(linuxCount, darwinCount,
+                           "\(darwinCount - linuxCount) tests are missing from allTests")
+        #endif
     }
 
     func testDefaultHeaders() throws {
@@ -366,7 +387,7 @@ class HeaderTests: XCTestCase {
         XCTAssertEqual(expected, response.headers[HeaderKey.referrerPolicy])
     }
 
-    func testApiPolicyWithAddedReffererPolicy() throws {
+    func testApiPolicyWithAddedReferrerPolicy() throws {
         let expected = "strict-origin"
         let referrerConfig = ReferrerPolicyConfiguration(.strictOrigin)
         let factory = SecurityHeadersFactory.api().with(referrerPolicy: referrerConfig)
@@ -489,6 +510,8 @@ class HeaderTests: XCTestCase {
         XCTAssertEqual(expectedXFOHeaderValue, response.headers[HeaderKey.xFrameOptions])
         XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[HeaderKey.xXssProtection])
     }
+    
+    // MARK: - Private functions
 
     private func makeTestDroplet(securityHeadersToAdd: SecurityHeadersFactory, routeHandler: ((Request) throws -> ResponseRepresentable)? = nil) throws -> Droplet {
         var config = try Config()
