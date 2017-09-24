@@ -72,7 +72,7 @@ You will need to add it as a dependency in your `Package.swift` file:
 ```swift
 dependencies: [
     ...,
-    .package(url: "https://github.com/brokenhandsio/VaporSecurityHeaders", from: "1.1.0")
+    .package(url: "https://github.com/brokenhandsio/VaporSecurityHeaders.git", from: "1.1.0")
 ]
 ```
 
