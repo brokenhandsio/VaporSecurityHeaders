@@ -96,13 +96,6 @@ You can also build the middleware manually like so:
 let securityHeadersMiddleware = SecurityHeadersFactory().build()
 ```
 
-# Roadmap
-
-The following features are on the roadmap to be implemented:
-
-* Public-Key-Pins (HPKP)
-* Public-Key-Pins-Report-Only
-
 # Server Configuration
 
 ## Vapor
@@ -265,7 +258,3 @@ The different options are:
 * "unsafe-url"
 
 I won't go into details about each one, I will point you in the direction of a far better explanation [by Scott Helme](https://scotthelme.co.uk/a-new-security-header-referrer-policy/).
-
-## Public-Key-Pins
-
-Coming soon
