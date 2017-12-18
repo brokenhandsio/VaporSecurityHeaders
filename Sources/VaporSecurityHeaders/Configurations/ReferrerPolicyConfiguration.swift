@@ -1,4 +1,4 @@
-import HTTP
+import Vapor
 
 public struct ReferrerPolicyConfiguration: SecurityHeaderConfiguration {
 
@@ -21,6 +21,6 @@ public struct ReferrerPolicyConfiguration: SecurityHeaderConfiguration {
     }
 
     func setHeader(on response: Response, from request: Request) {
-        response.headers[HeaderKey.referrerPolicy] = option.rawValue
+        response.headers[HTTPHeaders.referrerPolicy] = option.rawValue
     }
 }

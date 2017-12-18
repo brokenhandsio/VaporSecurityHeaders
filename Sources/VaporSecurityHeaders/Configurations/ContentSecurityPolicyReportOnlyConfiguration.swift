@@ -1,4 +1,4 @@
-import HTTP
+import Vapor
 
 public struct ContentSecurityPolicyReportOnlyConfiguration: SecurityHeaderConfiguration {
 
@@ -9,6 +9,6 @@ public struct ContentSecurityPolicyReportOnlyConfiguration: SecurityHeaderConfig
     }
 
     func setHeader(on response: Response, from request: Request) {
-        response.headers[HeaderKey.contentSecurityPolicyReportOnly] = value
+        response.headers[HTTPHeaders.contentSecurityPolicyReportOnly] = value
     }
 }

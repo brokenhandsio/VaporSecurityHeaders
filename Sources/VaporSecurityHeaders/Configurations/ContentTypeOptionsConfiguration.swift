@@ -1,4 +1,4 @@
-import HTTP
+import Vapor
 
 public struct ContentTypeOptionsConfiguration: SecurityHeaderConfiguration {
 
@@ -16,7 +16,7 @@ public struct ContentTypeOptionsConfiguration: SecurityHeaderConfiguration {
     func setHeader(on response: Response, from request: Request) {
         switch option {
         case .nosniff:
-            response.headers[HeaderKey.xContentTypeOptions] = "nosniff"
+            response.headers[HTTPHeaders.xContentTypeOptions] = "nosniff"
         default:
             break
         }

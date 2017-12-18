@@ -1,4 +1,4 @@
-import HTTP
+import Vapor
 
 public struct XSSProtectionConfiguration: SecurityHeaderConfiguration {
 
@@ -17,11 +17,11 @@ public struct XSSProtectionConfiguration: SecurityHeaderConfiguration {
     func setHeader(on response: Response, from request: Request) {
         switch option {
         case .disable:
-            response.headers[HeaderKey.xXssProtection] = "0"
+            response.headers[HTTPHeaders.xXssProtection] = "0"
         case .enable:
-            response.headers[HeaderKey.xXssProtection] = "1"
+            response.headers[HTTPHeaders.xXssProtection] = "1"
         case .block:
-            response.headers[HeaderKey.xXssProtection] = "1; mode=block"
+            response.headers[HTTPHeaders.xXssProtection] = "1; mode=block"
         }
     }
 }

@@ -1,4 +1,4 @@
-import HTTP
+import Vapor
 
 public struct StrictTransportSecurityConfiguration: SecurityHeaderConfiguration {
 
@@ -21,6 +21,6 @@ public struct StrictTransportSecurityConfiguration: SecurityHeaderConfiguration 
             headerValue += " preload"
         }
 
-        response.headers[HeaderKey.strictTransportSecurity] = headerValue
+        response.headers[.strictTransportSecurity] = headerValue
     }
 }

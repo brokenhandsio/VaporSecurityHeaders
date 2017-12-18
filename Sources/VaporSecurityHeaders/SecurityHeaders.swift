@@ -35,13 +35,16 @@ public struct SecurityHeaders {
 }
 
 extension SecurityHeaders: Middleware {
-    public func respond(to request: Request, chainingTo next: Responder) throws -> Response {
+
+    public func respond(to request: Request, chainingTo next: Responder) throws -> Future<Response> {
         let response = try next.respond(to: request)
 
-        for spec in configurations {
-            spec.setHeader(on: response, from: request)
-        }
+        return response.map { response in
+            for spec in self.configurations {
+                spec.setHeader(on: response, from: request)
+            }
 
-        return response
+            return response
+        }
     }
 }
