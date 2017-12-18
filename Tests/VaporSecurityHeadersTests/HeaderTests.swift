@@ -84,11 +84,7 @@ class HeaderTests: XCTestCase {
         let expectedXFOHeaderValue = "DENY"
         let expectedXSSProtectionHeaderValue = "1; mode=block"
 
-        let app = try makeTestApplication(securityHeadersToAdd: SecurityHeadersFactory())
-
-        let responder = try app.make(Responder.self)
-        let wrappedRequest = Request(http: request, using: app)
-        let response = try responder.respond(to: wrappedRequest).blockingAwait()
+        let response = try makeTestResponse(for: request, securityHeadersToAdd: SecurityHeadersFactory())
 
         XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HTTPHeaders.xContentTypeOptions])
         XCTAssertEqual(expectedCSPHeaderValue, response.headers[HTTPHeaders.contentSecurityPolicy])
@@ -103,7 +99,7 @@ class HeaderTests: XCTestCase {
 //        let expectedXSSProtectionHeaderValue = "1; mode=block"
 //        let expectedHSTSHeaderValue = "max-age=31536000; includeSubDomains; preload"
 //
-//        let drop = try makeTestApplication(securityHeadersToAdd: SecurityHeadersFactory().with(strictTransportSecurity: StrictTransportSecurityConfiguration()))
+//        let response = try makeTestResponse(securityHeadersToAdd: SecurityHeadersFactory().with(strictTransportSecurity: StrictTransportSecurityConfiguration()))
 //        let response = try drop.respond(to: request)
 //
 //        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[.xContentTypeOptions])
@@ -119,7 +115,7 @@ class HeaderTests: XCTestCase {
 //        let expectedXFOHeaderValue = "DENY"
 //        let expectedXSSProtectionHeaderValue = "1; mode=block"
 //
-//        let drop = try makeTestApplication(securityHeadersToAdd: SecurityHeadersFactory.api())
+//        let response = try makeTestResponse(securityHeadersToAdd: SecurityHeadersFactory.api())
 //        let response = try drop.respond(to: request)
 //
 //        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[.xContentTypeOptions])
@@ -135,7 +131,7 @@ class HeaderTests: XCTestCase {
 //        let expectedXSSProtectionHeaderValue = "1; mode=block"
 //        let expectedHSTSHeaderValue = "max-age=31536000; includeSubDomains; preload"
 //
-//        let drop = try makeTestApplication(securityHeadersToAdd: SecurityHeadersFactory.api().with(strictTransportSecurity: StrictTransportSecurityConfiguration()))
+//        let response = try makeTestResponse(securityHeadersToAdd: SecurityHeadersFactory.api().with(strictTransportSecurity: StrictTransportSecurityConfiguration()))
 //        let response = try drop.respond(to: request)
 //
 //        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[.xContentTypeOptions])
@@ -148,7 +144,7 @@ class HeaderTests: XCTestCase {
 //    func testHeadersWithContentTypeOptionsTurnedOff() throws {
 //        let contentTypeConfig = ContentTypeOptionsConfiguration(option: .none)
 //        let factory = SecurityHeadersFactory().with(contentTypeOptions: contentTypeConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //
 //        XCTAssertNil(response.headers[.xContentTypeOptions])
@@ -157,7 +153,7 @@ class HeaderTests: XCTestCase {
 //    func testHeadersWithContentTypeOptionsNosniff() throws {
 //        let contentTypeConfig = ContentTypeOptionsConfiguration(option: .nosniff)
 //        let factory = SecurityHeadersFactory().with(contentTypeOptions: contentTypeConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //
 //        XCTAssertEqual("nosniff", response.headers[.xContentTypeOptions])
@@ -166,7 +162,7 @@ class HeaderTests: XCTestCase {
 //    func testHeaderWithFrameOptionsDeny() throws {
 //        let frameOptionsConfig = FrameOptionsConfiguration(option: .deny)
 //        let factory = SecurityHeadersFactory().with(frameOptions: frameOptionsConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //
 //        XCTAssertEqual("DENY", response.headers[.xFrameOptions])
@@ -175,7 +171,7 @@ class HeaderTests: XCTestCase {
 //    func testHeaderWithFrameOptionsSameOrigin() throws {
 //        let frameOptionsConfig = FrameOptionsConfiguration(option: .sameOrigin)
 //        let factory = SecurityHeadersFactory().with(frameOptions: frameOptionsConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //
 //        XCTAssertEqual("SAMEORIGIN", response.headers[.xFrameOptions])
@@ -184,7 +180,7 @@ class HeaderTests: XCTestCase {
 //    func testHeaderWithFrameOptionsAllowFrom() throws {
 //        let frameOptionsConfig = FrameOptionsConfiguration(option: .allow(from: "https://test.com"))
 //        let factory = SecurityHeadersFactory().with(frameOptions: frameOptionsConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //
 //        XCTAssertEqual("ALLOW-FROM https://test.com", response.headers[.xFrameOptions])
@@ -193,7 +189,7 @@ class HeaderTests: XCTestCase {
 //    func testHeaderWithXssProtectionDisable() throws {
 //        let xssProtectionConfig = XSSProtectionConfiguration(option: .disable)
 //        let factory = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //
 //        XCTAssertEqual("0", response.headers[.xXssProtection])
@@ -202,7 +198,7 @@ class HeaderTests: XCTestCase {
 //    func testHeaderWithXssProtectionEnable() throws {
 //        let xssProtectionConfig = XSSProtectionConfiguration(option: .enable)
 //        let factory = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //
 //        XCTAssertEqual("1", response.headers[.xXssProtection])
@@ -211,7 +207,7 @@ class HeaderTests: XCTestCase {
 //    func testHeaderWithXssProtectionBlock() throws {
 //        let xssProtectionConfig = XSSProtectionConfiguration(option: .block)
 //        let factory = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //
 //        XCTAssertEqual("1; mode=block", response.headers[.xXssProtection])
@@ -220,7 +216,7 @@ class HeaderTests: XCTestCase {
 //    func testHeaderWithHSTSwithMaxAge() throws {
 //        let hstsConfig = StrictTransportSecurityConfiguration(maxAge: 30)
 //        let factory = SecurityHeadersFactory().with(strictTransportSecurity: hstsConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //
 //        XCTAssertEqual("max-age=30; includeSubDomains; preload", response.headers[.strictTransportSecurity])
@@ -229,7 +225,7 @@ class HeaderTests: XCTestCase {
 //    func testHeadersWithHSTSwithSubdomains() throws {
 //        let hstsConfig = StrictTransportSecurityConfiguration(maxAge: 30, includeSubdomains: true)
 //        let factory = SecurityHeadersFactory().with(strictTransportSecurity: hstsConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //
 //        XCTAssertEqual("max-age=30; includeSubDomains; preload", response.headers[.strictTransportSecurity])
@@ -238,7 +234,7 @@ class HeaderTests: XCTestCase {
 //    func testHeadersWithHSTSwithPreload() throws {
 //        let hstsConfig = StrictTransportSecurityConfiguration(maxAge: 30, preload: true)
 //        let factory = SecurityHeadersFactory().with(strictTransportSecurity: hstsConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //
 //        XCTAssertEqual("max-age=30; includeSubDomains; preload", response.headers[.strictTransportSecurity])
@@ -247,7 +243,7 @@ class HeaderTests: XCTestCase {
 //    func testHeadersWithHSTSwithPreloadAndSubdomain() throws {
 //        let hstsConfig = StrictTransportSecurityConfiguration(maxAge: 30, includeSubdomains: true, preload: true)
 //        let factory = SecurityHeadersFactory().with(strictTransportSecurity: hstsConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //
 //        XCTAssertEqual("max-age=30; includeSubDomains; preload", response.headers[.strictTransportSecurity])
@@ -256,7 +252,7 @@ class HeaderTests: XCTestCase {
 //    func testHeadersWithHSTSwithSubdomainsFalse() throws {
 //        let hstsConfig = StrictTransportSecurityConfiguration(maxAge: 30, includeSubdomains: false)
 //        let factory = SecurityHeadersFactory().with(strictTransportSecurity: hstsConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //
 //        XCTAssertEqual("max-age=30; preload", response.headers[.strictTransportSecurity])
@@ -265,7 +261,7 @@ class HeaderTests: XCTestCase {
 //    func testHeadersWithHSTSwithPreloadFalse() throws {
 //        let hstsConfig = StrictTransportSecurityConfiguration(maxAge: 30, preload: false)
 //        let factory = SecurityHeadersFactory().with(strictTransportSecurity: hstsConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //
 //        XCTAssertEqual("max-age=30; includeSubDomains;", response.headers[.strictTransportSecurity])
@@ -274,7 +270,7 @@ class HeaderTests: XCTestCase {
 //    func testHeadersWithHSTSwithSubdomainAndPreloadFalse() throws {
 //        let hstsConfig = StrictTransportSecurityConfiguration(maxAge: 30, includeSubdomains: false, preload: false)
 //        let factory = SecurityHeadersFactory().with(strictTransportSecurity: hstsConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //
 //        XCTAssertEqual("max-age=30;", response.headers[.strictTransportSecurity])
@@ -283,7 +279,7 @@ class HeaderTests: XCTestCase {
 //    func testHeadersWithServerValue() throws {
 //        let serverConfig = ServerConfiguration(value: "brokenhands.io")
 //        let factory = SecurityHeadersFactory().with(server: serverConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //
 //        XCTAssertEqual("brokenhands.io", response.headers[.server])
@@ -293,7 +289,7 @@ class HeaderTests: XCTestCase {
 //        let csp = "default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style;"
 //        let cspConfig = ContentSecurityPolicyConfiguration(value: csp)
 //        let factory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //
 //        XCTAssertEqual(csp, response.headers[.contentSecurityPolicy])
@@ -303,7 +299,7 @@ class HeaderTests: XCTestCase {
 //        let csp = "default-src https:; report-uri https://csp-report.brokenhands.io"
 //        let cspConfig = ContentSecurityPolicyReportOnlyConfiguration(value: csp)
 //        let factory = SecurityHeadersFactory().with(contentSecurityPolicyReportOnly: cspConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //
 //        XCTAssertEqual(csp, response.headers[.contentSecurityPolicyReportOnly])
@@ -313,7 +309,7 @@ class HeaderTests: XCTestCase {
 //        let expected = ""
 //        let referrerConfig = ReferrerPolicyConfiguration(.empty)
 //        let factory = SecurityHeadersFactory().with(referrerPolicy: referrerConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //        XCTAssertEqual(expected, response.headers[.referrerPolicy])
 //    }
@@ -322,7 +318,7 @@ class HeaderTests: XCTestCase {
 //        let expected = "no-referrer"
 //        let referrerConfig = ReferrerPolicyConfiguration(.noReferrer)
 //        let factory = SecurityHeadersFactory().with(referrerPolicy: referrerConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //        XCTAssertEqual(expected, response.headers[.referrerPolicy])
 //    }
@@ -331,7 +327,7 @@ class HeaderTests: XCTestCase {
 //        let expected = "no-referrer-when-downgrade"
 //        let referrerConfig = ReferrerPolicyConfiguration(.noReferrerWhenDowngrade)
 //        let factory = SecurityHeadersFactory().with(referrerPolicy: referrerConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //        XCTAssertEqual(expected, response.headers[.referrerPolicy])
 //    }
@@ -340,7 +336,7 @@ class HeaderTests: XCTestCase {
 //        let expected = "same-origin"
 //        let referrerConfig = ReferrerPolicyConfiguration(.sameOrigin)
 //        let factory = SecurityHeadersFactory().with(referrerPolicy: referrerConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //        XCTAssertEqual(expected, response.headers[.referrerPolicy])
 //    }
@@ -349,7 +345,7 @@ class HeaderTests: XCTestCase {
 //        let expected = "origin"
 //        let referrerConfig = ReferrerPolicyConfiguration(.origin)
 //        let factory = SecurityHeadersFactory().with(referrerPolicy: referrerConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //        XCTAssertEqual(expected, response.headers[.referrerPolicy])
 //    }
@@ -358,7 +354,7 @@ class HeaderTests: XCTestCase {
 //        let expected = "strict-origin"
 //        let referrerConfig = ReferrerPolicyConfiguration(.strictOrigin)
 //        let factory = SecurityHeadersFactory().with(referrerPolicy: referrerConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //        XCTAssertEqual(expected, response.headers[.referrerPolicy])
 //    }
@@ -367,7 +363,7 @@ class HeaderTests: XCTestCase {
 //        let expected = "origin-when-cross-origin"
 //        let referrerConfig = ReferrerPolicyConfiguration(.originWhenCrossOrigin)
 //        let factory = SecurityHeadersFactory().with(referrerPolicy: referrerConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //        XCTAssertEqual(expected, response.headers[.referrerPolicy])
 //    }
@@ -376,7 +372,7 @@ class HeaderTests: XCTestCase {
 //        let expected = "strict-origin-when-cross-origin"
 //        let referrerConfig = ReferrerPolicyConfiguration(.strictOriginWhenCrossOrigin)
 //        let factory = SecurityHeadersFactory().with(referrerPolicy: referrerConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //        XCTAssertEqual(expected, response.headers[.referrerPolicy])
 //    }
@@ -385,7 +381,7 @@ class HeaderTests: XCTestCase {
 //        let expected = "unsafe-url"
 //        let referrerConfig = ReferrerPolicyConfiguration(.unsafeUrl)
 //        let factory = SecurityHeadersFactory().with(referrerPolicy: referrerConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //        XCTAssertEqual(expected, response.headers[.referrerPolicy])
 //    }
@@ -394,7 +390,7 @@ class HeaderTests: XCTestCase {
 //        let expected = "strict-origin"
 //        let referrerConfig = ReferrerPolicyConfiguration(.strictOrigin)
 //        let factory = SecurityHeadersFactory.api().with(referrerPolicy: referrerConfig)
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory)
 //        let response = try drop.respond(to: request)
 //        XCTAssertEqual(expected, response.headers[.referrerPolicy])
 //    }
@@ -406,7 +402,7 @@ class HeaderTests: XCTestCase {
 //            req.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: expectedCsp)
 //            return "Different CSP!"
 //        }
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory, routeHandler: cspSettingRouteHandler)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory, routeHandler: cspSettingRouteHandler)
 //        let response = try drop.respond(to: routeRequest)
 //
 //        XCTAssertEqual(expectedCsp, response.headers[.contentSecurityPolicy])
@@ -420,7 +416,7 @@ class HeaderTests: XCTestCase {
 //            req.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: differentCsp)
 //            return "Different CSP!"
 //        }
-//        let drop = try makeTestApplication(securityHeadersToAdd: factory, routeHandler: cspSettingRouteHandler)
+//        let response = try makeTestResponse(securityHeadersToAdd: factory, routeHandler: cspSettingRouteHandler)
 //        _ = try drop.respond(to: routeRequest)
 //        let response = try drop.respond(to: request)
 //
@@ -434,7 +430,7 @@ class HeaderTests: XCTestCase {
 //        let expectedXFOHeaderValue = "DENY"
 //        let expectedXSSProtectionHeaderValue = "1; mode=block"
 //
-//        let drop = try makeTestApplication(securityHeadersToAdd: SecurityHeadersFactory.api())
+//        let response = try makeTestResponse(securityHeadersToAdd: SecurityHeadersFactory.api())
 //        let response = try drop.respond(to: abortRequest)
 //
 //        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[.xContentTypeOptions])
@@ -522,19 +518,29 @@ class HeaderTests: XCTestCase {
     // MARK: - Private functions
 
 //    private func makeTestApplication(securityHeadersToAdd: SecurityHeadersFactory, routeHandler: ((Request) throws -> ResponseRepresentable)? = nil) throws -> Application {
-    private func makeTestApplication(securityHeadersToAdd: SecurityHeadersFactory) throws -> Application {
+    private func makeTestResponse(for request: HTTPRequest, securityHeadersToAdd: SecurityHeadersFactory) throws -> Response {
 
-        var config = Config.default()
-        var env = Environment.detect()
         var services = Services.default()
+
+//        let responder = try worker.make(Responder.self, for: ServeCommand.self)
+//
+//        let middleware = try worker
+//            .make(MiddlewareConfig.self, for: ServeCommand.self)
+//            .resolve(for: worker)
+
+        var middlewareConfig = MiddlewareConfig()
+        middlewareConfig.use(securityHeadersToAdd.build())
+        middlewareConfig.use(ErrorMiddleware.self)
+        services.register(middlewareConfig)
 
         // Configure
 
-        let app = try Application(
-            config: config,
-            environment: env,
-            services: services
-        )
+        let app = try Application(services: services)
+
+        let router = try app.make(Router.self)
+        router.get("test") { req in
+            return "TEST"
+        }
 
 
 //        var config = try Config()
@@ -564,7 +570,9 @@ class HeaderTests: XCTestCase {
 //
 //        return drop
 
-        return app
+        let responder = try app.make(Responder.self)
+        let wrappedRequest = Request(http: request, using: app)
+        return try responder.respond(to: wrappedRequest).blockingAwait()
     }
 
 }
