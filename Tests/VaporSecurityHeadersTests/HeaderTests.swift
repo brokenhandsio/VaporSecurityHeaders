@@ -55,6 +55,7 @@ class HeaderTests: XCTestCase {
     private var request: HTTPRequest!
     private var routeRequest: HTTPRequest!
     private var abortRequest: HTTPRequest!
+    private var fileRequest: HTTPRequest!
 
     // MARK: - Overrides
     
@@ -62,6 +63,7 @@ class HeaderTests: XCTestCase {
         request = HTTPRequest(method: .get, uri: "/test/")
         routeRequest = HTTPRequest(method: .get, uri: "/route/")
         abortRequest = HTTPRequest(method: .get, uri: "/abort/")
+        fileRequest = HTTPRequest(method: .get, uri: "/file/")
     }
     
     // MARK: - Tests
@@ -402,61 +404,47 @@ class HeaderTests: XCTestCase {
     }
 
     func testMockFileMiddleware() throws {
-//        let expectedXCTOHeaderValue = "nosniff"
-//        let expectedCSPHeaderValue = "default-src 'none'"
-//        let expectedXFOHeaderValue = "DENY"
-//        let expectedXSSProtectionHeaderValue = "1; mode=block"
-//
-//        let securityHeaders = SecurityHeadersFactory.api().build()
-//        let middlewareArray: [Middleware] = [securityHeaders, StubFileMiddleware()]
-//
-//        let drop = try Droplet(middleware: middlewareArray)
-//
-//        drop.get("abort") { req in
-//            throw Abort.badRequest
-//        }
-//
-//        let response = try drop.respond(to: abortRequest)
-//
-//        XCTAssertEqual("Hello World!", response.body.bytes?.makeString())
-//        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HTTPHeaders.xContentTypeOptions])
-//        XCTAssertEqual(expectedCSPHeaderValue, response.headers[HTTPHeaders.contentSecurityPolicy])
-//        XCTAssertEqual(expectedXFOHeaderValue, response.headers[.xFrameOptions])
-//        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[HTTPHeaders.xXssProtection])
-        XCTAssertTrue(false)
+        let expectedXCTOHeaderValue = "nosniff"
+        let expectedCSPHeaderValue = "default-src 'none'"
+        let expectedXFOHeaderValue = "DENY"
+        let expectedXSSProtectionHeaderValue = "1; mode=block"
+
+        let response = try makeTestResponse(for: fileRequest, securityHeadersToAdd: SecurityHeadersFactory.api(), fileMiddleware: StubFileMiddleware())
+
+        XCTAssertEqual("Hello World!", String(data: response.body.data!, encoding: String.Encoding.utf8))
+        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HTTPHeaders.xContentTypeOptions])
+        XCTAssertEqual(expectedCSPHeaderValue, response.headers[HTTPHeaders.contentSecurityPolicy])
+        XCTAssertEqual(expectedXFOHeaderValue, response.headers[.xFrameOptions])
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[HTTPHeaders.xXssProtection])
     }
 
     func testMockFileMiddlewareDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute() throws {
-//        let expectedXCTOHeaderValue = "nosniff"
-//        let expectedCSPHeaderValue = "default-src 'none'; script-src test;"
-//        let expectedXFOHeaderValue = "DENY"
-//        let expectedXSSProtectionHeaderValue = "1; mode=block"
-//
-//        let securityHeaders = SecurityHeadersFactory.api().build()
-//        let middlewareArray: [Middleware] = [securityHeaders, StubFileMiddleware(cspConfig: ContentSecurityPolicyConfiguration(value: expectedCSPHeaderValue))]
-//
-//        let drop = try Droplet(middleware: middlewareArray)
-//
-//        drop.get("abort") { req in
-//            throw Abort.badRequest
-//        }
-//
-//        let response = try drop.respond(to: abortRequest)
-//
-//        XCTAssertEqual("Hello World!", response.body.bytes?.makeString())
-//        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HTTPHeaders.xContentTypeOptions])
-//        XCTAssertEqual(expectedCSPHeaderValue, response.headers[HTTPHeaders.contentSecurityPolicy])
-//        XCTAssertEqual(expectedXFOHeaderValue, response.headers[.xFrameOptions])
-//        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[HTTPHeaders.xXssProtection])
-        XCTAssertTrue(false)
+        let expectedXCTOHeaderValue = "nosniff"
+        let expectedCSPHeaderValue = "default-src 'none'; script-src test;"
+        let expectedXFOHeaderValue = "DENY"
+        let expectedXSSProtectionHeaderValue = "1; mode=block"
+
+        let response = try makeTestResponse(for: fileRequest, securityHeadersToAdd: SecurityHeadersFactory.api(), fileMiddleware: StubFileMiddleware(cspConfig: ContentSecurityPolicyConfiguration(value: expectedCSPHeaderValue)))
+
+        XCTAssertEqual("Hello World!", String(data: response.body.data!, encoding: String.Encoding.utf8))
+        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HTTPHeaders.xContentTypeOptions])
+        XCTAssertEqual(expectedCSPHeaderValue, response.headers[HTTPHeaders.contentSecurityPolicy])
+        XCTAssertEqual(expectedXFOHeaderValue, response.headers[.xFrameOptions])
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[HTTPHeaders.xXssProtection])
     }
     
     // MARK: - Private functions
 
-    private func makeTestResponse(for request: HTTPRequest, securityHeadersToAdd: SecurityHeadersFactory, routeHandler: ((Request) throws -> String)? = nil) throws -> Response {
+    private func makeTestResponse(for request: HTTPRequest, securityHeadersToAdd: SecurityHeadersFactory, routeHandler: ((Request) throws -> String)? = nil, fileMiddleware: StubFileMiddleware? = nil) throws -> Response {
 
         var services = Services.default()
         var middlewareConfig = MiddlewareConfig()
+
+        if let fileMiddleware = fileMiddleware {
+            middlewareConfig.use(StubFileMiddleware.self)
+            services.register(fileMiddleware)
+        }
+
         middlewareConfig.use(ErrorMiddleware.self)
         services.register { worker in
             return try ErrorMiddleware(environment: worker.environment, log: worker.make(for: ErrorMiddleware.self))
@@ -489,4 +477,8 @@ class HeaderTests: XCTestCase {
         return try responderWithMiddleware.respond(to: wrappedRequest).blockingAwait()
     }
 
+}
+
+struct ResponseData: Content {
+    let string: String
 }
