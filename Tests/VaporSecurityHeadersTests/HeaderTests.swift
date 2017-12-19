@@ -1,6 +1,6 @@
 import XCTest
 
-import Vapor
+@testable import Vapor
 import HTTP
 
 import VaporSecurityHeaders
@@ -492,8 +492,9 @@ class HeaderTests: XCTestCase {
 
         var services = Services.default()
         var middlewareConfig = MiddlewareConfig()
-        middlewareConfig.use(securityHeadersToAdd.build())
-        middlewareConfig.use(ErrorMiddleware.self)
+        middlewareConfig.use(SecurityHeaders.self)
+        services.register(securityHeadersToAdd.build())
+//        middlewareConfig.use(ErrorMiddleware.self)
         services.register(middlewareConfig)
 
         let app = try Application(services: services)
@@ -531,8 +532,15 @@ class HeaderTests: XCTestCase {
 //        return drop
 
         let responder = try app.make(Responder.self)
+
+        let middleware = try app.make(MiddlewareConfig.self).resolve(for: app)
+        let responderWithMiddleware = middleware.makeResponder(chainedto: responder)
+
         let wrappedRequest = Request(http: request, using: app)
-        return try responder.respond(to: wrappedRequest).blockingAwait()
+        return try responderWithMiddleware.respond(to: wrappedRequest).blockingAwait()
+
+
+
     }
 
 }
