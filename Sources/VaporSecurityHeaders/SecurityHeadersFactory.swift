@@ -69,10 +69,4 @@ public class SecurityHeadersFactory {
                                referrerPolicyConfiguration: referrerPolicy)
     }
 
-    public func builder() -> ((Config) throws -> SecurityHeaders) {
-        return { _ in
-            return self.build()
-        }
-    }
-
 }

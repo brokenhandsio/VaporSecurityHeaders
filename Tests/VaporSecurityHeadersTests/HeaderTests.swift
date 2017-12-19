@@ -48,7 +48,6 @@ class HeaderTests: XCTestCase {
         ("testAbortMiddleware", testAbortMiddleware),
         ("testMockFileMiddleware", testMockFileMiddleware),
         ("testMockFileMiddlewareDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute", testMockFileMiddlewareDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute),
-        ("testBuildWorks", testBuildWorks),
     ]
     
     // MARK: - Properties
@@ -452,45 +451,18 @@ class HeaderTests: XCTestCase {
         XCTAssertTrue(false)
     }
     
-    func testBuildWorks() throws {
-//        let config = try Config()
-//        let securityHeaders = SecurityHeadersFactory().build()
-//
-//        let middlewareArray: [Middleware] = [securityHeaders, ErrorMiddleware.init(.test, try config.resolveLog())]
-//
-//        let drop = try Droplet(middleware: middlewareArray)
-//
-//        drop.get("test") { req in
-//            return "TEST"
-//        }
-//
-//        let expectedXCTOHeaderValue = "nosniff"
-//        let expectedCSPHeaderValue = "default-src 'self'"
-//        let expectedXFOHeaderValue = "DENY"
-//        let expectedXSSProtectionHeaderValue = "1; mode=block"
-//
-//        let response = try drop.respond(to: request)
-//
-//        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HTTPHeaders.xContentTypeOptions])
-//        XCTAssertEqual(expectedCSPHeaderValue, response.headers[HTTPHeaders.contentSecurityPolicy])
-//        XCTAssertEqual(expectedXFOHeaderValue, response.headers[.xFrameOptions])
-//        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[HTTPHeaders.xXssProtection])
-        XCTAssertTrue(false)
-    }
-    
     // MARK: - Private functions
 
-//    private func makeTestApplication(securityHeadersToAdd: SecurityHeadersFactory, routeHandler: ((Request) throws -> ResponseRepresentable)? = nil) throws -> Application {
     private func makeTestResponse(for request: HTTPRequest, securityHeadersToAdd: SecurityHeadersFactory, routeHandler: ((Request) throws -> String)? = nil) throws -> Response {
 
         var services = Services.default()
         var middlewareConfig = MiddlewareConfig()
-        middlewareConfig.use(SecurityHeaders.self)
-        services.register(securityHeadersToAdd.build())
         middlewareConfig.use(ErrorMiddleware.self)
         services.register { worker in
             return try ErrorMiddleware(environment: worker.environment, log: worker.make(for: ErrorMiddleware.self))
         }
+        middlewareConfig.use(SecurityHeaders.self)
+        services.register(securityHeadersToAdd.build())
         services.register(middlewareConfig)
 
         let app = try Application(services: services)
@@ -508,19 +480,6 @@ class HeaderTests: XCTestCase {
             throw Abort(.badRequest)
         }
 
-
-//        var config = try Config()
-//        try config.set("droplet.middleware", ["vapor-security-headers", "error"])
-//
-//
-//        config.addConfigurable(middleware: securityHeadersToAdd.builder(), name: "vapor-security-headers")
-//
-//        let errorReturner: (Config) throws -> ErrorMiddleware = { config in
-//            return ErrorMiddleware(.test, try config.resolveLog())
-//        }
-//        config.addConfigurable(middleware: errorReturner, name: "error")
-//
-
         let responder = try app.make(Responder.self)
 
         let middleware = try app.make(MiddlewareConfig.self).resolve(for: app)
@@ -528,9 +487,6 @@ class HeaderTests: XCTestCase {
 
         let wrappedRequest = Request(http: request, using: app)
         return try responderWithMiddleware.respond(to: wrappedRequest).blockingAwait()
-
-
-
     }
 
 }
