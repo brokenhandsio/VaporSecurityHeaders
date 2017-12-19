@@ -365,48 +365,41 @@ class HeaderTests: XCTestCase {
     }
 
     func testCustomCSPOnSingleRoute() throws {
-//        let expectedCsp = "default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style;"
-//        let factory = SecurityHeadersFactory.api()
-//        let cspSettingRouteHandler: (Request) throws -> ResponseRepresentable = { req in
-//            req.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: expectedCsp)
-//            return "Different CSP!"
-//        }
-//        let response = try makeTestResponse(securityHeadersToAdd: factory, routeHandler: cspSettingRouteHandler)
-//        let response = try drop.respond(to: routeRequest)
-//
-//        XCTAssertEqual(expectedCsp, response.headers[HTTPHeaders.contentSecurityPolicy])
-        XCTAssertTrue(false)
+        let expectedCsp = "default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style;"
+        let factory = SecurityHeadersFactory.api()
+        let cspSettingRouteHandler: (Request) throws -> String = { req in
+            req.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: expectedCsp)
+            return "Different CSP!"
+        }
+        let response = try makeTestResponse(for: routeRequest, securityHeadersToAdd: factory, routeHandler: cspSettingRouteHandler)
+
+        XCTAssertEqual(expectedCsp, response.headers[HTTPHeaders.contentSecurityPolicy])
     }
 
     func testDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute() throws {
-//        let differentCsp = "default-src 'none'; script-src test;"
-//        let factory = SecurityHeadersFactory.api()
-//        let cspSettingRouteHandler: (Request) throws -> ResponseRepresentable = { req in
-//            req.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: differentCsp)
-//            return "Different CSP!"
-//        }
-//        let response = try makeTestResponse(securityHeadersToAdd: factory, routeHandler: cspSettingRouteHandler)
-//        _ = try drop.respond(to: routeRequest)
-//        let response = try drop.respond(to: request)
-//
-//        XCTAssertEqual("default-src 'none'", response.headers[HTTPHeaders.contentSecurityPolicy])
-        XCTAssertTrue(false)
+        let differentCsp = "default-src 'none'; script-src test;"
+        let factory = SecurityHeadersFactory.api()
+        let cspSettingRouteHandler: (Request) throws -> String = { req in
+            req.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: differentCsp)
+            return "Different CSP!"
+        }
+        let response = try makeTestResponse(for: request, securityHeadersToAdd: factory, routeHandler: cspSettingRouteHandler)
+
+        XCTAssertEqual("default-src 'none'", response.headers[HTTPHeaders.contentSecurityPolicy])
     }
 
     func testAbortMiddleware() throws {
-//        let expectedXCTOHeaderValue = "nosniff"
-//        let expectedCSPHeaderValue = "default-src 'none'"
-//        let expectedXFOHeaderValue = "DENY"
-//        let expectedXSSProtectionHeaderValue = "1; mode=block"
-//
-//        let response = try makeTestResponse(securityHeadersToAdd: SecurityHeadersFactory.api())
-//        let response = try drop.respond(to: abortRequest)
-//
-//        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HTTPHeaders.xContentTypeOptions])
-//        XCTAssertEqual(expectedCSPHeaderValue, response.headers[HTTPHeaders.contentSecurityPolicy])
-//        XCTAssertEqual(expectedXFOHeaderValue, response.headers[.xFrameOptions])
-//        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[HTTPHeaders.xXssProtection])
-        XCTFail()
+        let expectedXCTOHeaderValue = "nosniff"
+        let expectedCSPHeaderValue = "default-src 'none'"
+        let expectedXFOHeaderValue = "DENY"
+        let expectedXSSProtectionHeaderValue = "1; mode=block"
+
+        let response = try makeTestResponse(for: abortRequest, securityHeadersToAdd: SecurityHeadersFactory.api())
+
+        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[HTTPHeaders.xContentTypeOptions])
+        XCTAssertEqual(expectedCSPHeaderValue, response.headers[HTTPHeaders.contentSecurityPolicy])
+        XCTAssertEqual(expectedXFOHeaderValue, response.headers[.xFrameOptions])
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[HTTPHeaders.xXssProtection])
     }
 
     func testMockFileMiddleware() throws {
@@ -488,13 +481,16 @@ class HeaderTests: XCTestCase {
     // MARK: - Private functions
 
 //    private func makeTestApplication(securityHeadersToAdd: SecurityHeadersFactory, routeHandler: ((Request) throws -> ResponseRepresentable)? = nil) throws -> Application {
-    private func makeTestResponse(for request: HTTPRequest, securityHeadersToAdd: SecurityHeadersFactory) throws -> Response {
+    private func makeTestResponse(for request: HTTPRequest, securityHeadersToAdd: SecurityHeadersFactory, routeHandler: ((Request) throws -> String)? = nil) throws -> Response {
 
         var services = Services.default()
         var middlewareConfig = MiddlewareConfig()
         middlewareConfig.use(SecurityHeaders.self)
         services.register(securityHeadersToAdd.build())
-//        middlewareConfig.use(ErrorMiddleware.self)
+        middlewareConfig.use(ErrorMiddleware.self)
+        services.register { worker in
+            return try ErrorMiddleware(environment: worker.environment, log: worker.make(for: ErrorMiddleware.self))
+        }
         services.register(middlewareConfig)
 
         let app = try Application(services: services)
@@ -503,6 +499,15 @@ class HeaderTests: XCTestCase {
         router.get("test") { req in
             return "TEST"
         }
+
+        if let routeHandler = routeHandler {
+            router.get("route", use: routeHandler)
+        }
+
+        router.get("abort") { req -> Response in
+            throw Abort(.badRequest)
+        }
+
 
 //        var config = try Config()
 //        try config.set("droplet.middleware", ["vapor-security-headers", "error"])
@@ -515,21 +520,6 @@ class HeaderTests: XCTestCase {
 //        }
 //        config.addConfigurable(middleware: errorReturner, name: "error")
 //
-//        let drop = try Droplet(config)
-//
-//        drop.get("test") { req in
-//            return "TEST"
-//        }
-//
-//        if let routeHandler = routeHandler {
-//            drop.get("route", handler: routeHandler)
-//        }
-//
-//        drop.get("abort") { req in
-//            throw Abort.badRequest
-//        }
-//
-//        return drop
 
         let responder = try app.make(Responder.self)
 

@@ -20,13 +20,12 @@ public struct ContentSecurityPolicyConfiguration: SecurityHeaderConfiguration {
 extension Request {
 
     public var contentSecurityPolicy: ContentSecurityPolicyConfiguration? {
-        return nil
-//        get {
-//            return storage["cspConfig"] as? ContentSecurityPolicyConfiguration
-//        }
-//        set {
-//            storage["cspConfig"] = newValue
-//        }
+        get {
+            return extend.storage["cspConfig"] as? ContentSecurityPolicyConfiguration
+        }
+        set {
+            extend.storage["cspConfig"] = newValue
+        }
     }
 }
 
