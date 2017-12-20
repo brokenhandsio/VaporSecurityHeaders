@@ -368,9 +368,9 @@ class HeaderTests: XCTestCase {
     func testCustomCSPOnSingleRoute() throws {
         let expectedCsp = "default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style;"
         let factory = SecurityHeadersFactory.api()
-        let cspSettingRouteHandler: (Request) throws -> String = { req in
+        let cspSettingRouteHandler: (Request) throws -> Future<String> = { req in
             req.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: expectedCsp)
-            return "Different CSP!"
+            return Future("Different CSP!")
         }
         let response = try makeTestResponse(for: routeRequest, securityHeadersToAdd: factory, routeHandler: cspSettingRouteHandler)
 
@@ -380,9 +380,9 @@ class HeaderTests: XCTestCase {
     func testDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute() throws {
         let differentCsp = "default-src 'none'; script-src test;"
         let factory = SecurityHeadersFactory.api()
-        let cspSettingRouteHandler: (Request) throws -> String = { req in
+        let cspSettingRouteHandler: (Request) throws -> Future<String> = { req in
             req.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: differentCsp)
-            return "Different CSP!"
+            return Future("Different CSP!")
         }
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory, routeHandler: cspSettingRouteHandler)
 
@@ -435,14 +435,16 @@ class HeaderTests: XCTestCase {
     
     // MARK: - Private functions
 
-    private func makeTestResponse(for request: HTTPRequest, securityHeadersToAdd: SecurityHeadersFactory, routeHandler: ((Request) throws -> String)? = nil, fileMiddleware: StubFileMiddleware? = nil) throws -> Response {
+    private func makeTestResponse(for request: HTTPRequest, securityHeadersToAdd: SecurityHeadersFactory, routeHandler: ((Request) throws -> Future<String>)? = nil, fileMiddleware: StubFileMiddleware? = nil) throws -> Response {
 
         var services = Services.default()
         var middlewareConfig = MiddlewareConfig()
 
         if let fileMiddleware = fileMiddleware {
             middlewareConfig.use(StubFileMiddleware.self)
-            services.register(fileMiddleware)
+            services.register { worker in
+                fileMiddleware
+            }
         }
 
         middlewareConfig.use(ErrorMiddleware.self)
@@ -450,21 +452,25 @@ class HeaderTests: XCTestCase {
             return try ErrorMiddleware(environment: worker.environment, log: worker.make(for: ErrorMiddleware.self))
         }
         middlewareConfig.use(SecurityHeaders.self)
-        services.register(securityHeadersToAdd.build())
-        services.register(middlewareConfig)
+        services.register { worker in
+            securityHeadersToAdd.build()
+        }
+        services.register { worker in
+            middlewareConfig
+        }
 
         let app = try Application(services: services)
 
         let router = try app.make(Router.self)
         router.get("test") { req in
-            return "TEST"
+            return Future("TEST")
         }
 
         if let routeHandler = routeHandler {
             router.get("route", use: routeHandler)
         }
 
-        router.get("abort") { req -> Response in
+        router.get("abort") { req -> Future<Response> in
             throw Abort(.badRequest)
         }
 

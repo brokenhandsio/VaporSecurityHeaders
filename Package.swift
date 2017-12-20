@@ -8,7 +8,8 @@ let package = Package(
         .library(name: "VaporSecurityHeaders", targets: ["VaporSecurityHeaders"]),
     ],
     dependencies: [
-    	.package(url: "https://github.com/vapor/vapor.git", .exact("3.0.0-alpha.12")),
+    	.package(url: "https://github.com/vapor/vapor.git", .branch("beta")),
+    	.package(url: "https://github.com/vapor/engine.git", .branch("beta")),
     ],
     targets: [
         .target(name: "VaporSecurityHeaders", dependencies: ["Vapor", "HTTP"]),
