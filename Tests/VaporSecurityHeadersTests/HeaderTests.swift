@@ -442,7 +442,7 @@ class HeaderTests: XCTestCase {
 
         if let fileMiddleware = fileMiddleware {
             middlewareConfig.use(StubFileMiddleware.self)
-            services.instance(fileMiddleware)
+            services.use(fileMiddleware)
         }
 
         middlewareConfig.use(ErrorMiddleware.self)
@@ -450,8 +450,8 @@ class HeaderTests: XCTestCase {
             return try ErrorMiddleware(environment: worker.environment, log: worker.make(for: ErrorMiddleware.self))
         }
         middlewareConfig.use(SecurityHeaders.self)
-        services.instance(securityHeadersToAdd.build())
-        services.instance(middlewareConfig)
+        services.use(securityHeadersToAdd.build())
+        services.use(middlewareConfig)
 
         let app = try Application(services: services)
 
