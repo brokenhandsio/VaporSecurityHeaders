@@ -18,11 +18,11 @@ public struct FrameOptionsConfiguration: SecurityHeaderConfiguration {
     func setHeader(on response: Response, from request: Request) {
         switch option {
         case .deny:
-            response.headers[.xFrameOptions] = "DENY"
+            response.http.headers[.xFrameOptions] = "DENY"
         case .sameOrigin:
-            response.headers[.xFrameOptions] = "SAMEORIGIN"
+            response.http.headers[.xFrameOptions] = "SAMEORIGIN"
         case .allow(let from):
-            response.headers[.xFrameOptions] = "ALLOW-FROM \(from)"
+            response.http.headers[.xFrameOptions] = "ALLOW-FROM \(from)"
         }
     }
 }

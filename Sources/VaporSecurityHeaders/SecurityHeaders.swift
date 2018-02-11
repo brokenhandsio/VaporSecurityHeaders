@@ -34,7 +34,7 @@ public struct SecurityHeaders {
 
 }
 
-extension SecurityHeaders: Middleware {
+extension SecurityHeaders: Middleware, Service {
 
     public func respond(to request: Request, chainingTo next: Responder) throws -> Future<Response> {
         let response = try next.respond(to: request)

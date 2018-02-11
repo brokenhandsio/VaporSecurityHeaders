@@ -17,11 +17,11 @@ public struct XSSProtectionConfiguration: SecurityHeaderConfiguration {
     func setHeader(on response: Response, from request: Request) {
         switch option {
         case .disable:
-            response.headers[HTTPHeaders.xXssProtection] = "0"
+            response.http.headers[HTTPHeaders.xXssProtection] = "0"
         case .enable:
-            response.headers[HTTPHeaders.xXssProtection] = "1"
+            response.http.headers[HTTPHeaders.xXssProtection] = "1"
         case .block:
-            response.headers[HTTPHeaders.xXssProtection] = "1; mode=block"
+            response.http.headers[HTTPHeaders.xXssProtection] = "1; mode=block"
         }
     }
 }

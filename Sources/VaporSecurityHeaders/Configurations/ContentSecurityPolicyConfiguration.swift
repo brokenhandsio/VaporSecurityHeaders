@@ -9,23 +9,23 @@ public struct ContentSecurityPolicyConfiguration: SecurityHeaderConfiguration {
     }
 
     func setHeader(on response: Response, from request: Request) {
-        if let requestCsp = request.contentSecurityPolicy {
-            response.headers[HTTPHeaders.contentSecurityPolicy] = requestCsp.value
-        } else {
-            response.headers[HTTPHeaders.contentSecurityPolicy] = value
-        }
+//        if let requestCsp = request.contentSecurityPolicy {
+//            response.headers[HTTPHeaders.contentSecurityPolicy] = requestCsp.value
+//        } else {
+            response.http.headers[HTTPHeaders.contentSecurityPolicy] = value
+//        }
     }
 }
 
-extension Request {
-
-    public var contentSecurityPolicy: ContentSecurityPolicyConfiguration? {
-        get {
-            return extend.storage["cspConfig"] as? ContentSecurityPolicyConfiguration
-        }
-        set {
-            extend.storage["cspConfig"] = newValue
-        }
-    }
-}
+//extension Request {
+//
+//    public var contentSecurityPolicy: ContentSecurityPolicyConfiguration? {
+//        get {
+//            return extend.storage["cspConfig"] as? ContentSecurityPolicyConfiguration
+//        }
+//        set {
+//            extend.storage["cspConfig"] = newValue
+//        }
+//    }
+//}
 
