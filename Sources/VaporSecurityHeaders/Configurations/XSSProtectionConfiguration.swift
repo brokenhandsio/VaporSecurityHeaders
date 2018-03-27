@@ -6,6 +6,7 @@ public struct XSSProtectionConfiguration: SecurityHeaderConfiguration {
         case disable
         case enable
         case block
+        case report(uri: String)
     }
 
     private let option: Options
@@ -22,6 +23,8 @@ public struct XSSProtectionConfiguration: SecurityHeaderConfiguration {
             response.headers[HeaderKey.xXssProtection] = "1"
         case .block:
             response.headers[HeaderKey.xXssProtection] = "1; mode=block"
+        case .report(let uri):
+            response.headers[HeaderKey.xXssProtection] = "1; report=\(uri)"
         }
     }
 }
