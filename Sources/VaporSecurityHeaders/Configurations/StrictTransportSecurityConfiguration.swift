@@ -21,6 +21,6 @@ public struct StrictTransportSecurityConfiguration: SecurityHeaderConfiguration 
             headerValue += " preload"
         }
 
-        response.http.headers[.strictTransportSecurity] = headerValue
+        response.http.headers.replaceOrAdd(name: .strictTransportSecurity, value: headerValue)
     }
 }

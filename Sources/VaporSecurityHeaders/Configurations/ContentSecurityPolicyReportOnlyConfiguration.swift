@@ -9,6 +9,6 @@ public struct ContentSecurityPolicyReportOnlyConfiguration: SecurityHeaderConfig
     }
 
     func setHeader(on response: Response, from request: Request) {
-        response.http.headers[HTTPHeaders.contentSecurityPolicyReportOnly] = value
+        response.http.headers.replaceOrAdd(name: .contentSecurityPolicyReportOnly, value: value)
     }
 }

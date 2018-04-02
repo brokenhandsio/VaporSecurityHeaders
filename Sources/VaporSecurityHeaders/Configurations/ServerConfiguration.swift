@@ -9,6 +9,6 @@ public struct ServerConfiguration: SecurityHeaderConfiguration {
     }
 
     func setHeader(on response: Response, from request: Request) {
-        response.http.headers[.server] = value
+        response.http.headers.replaceOrAdd(name: .server, value: value)
     }
 }

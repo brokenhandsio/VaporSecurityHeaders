@@ -12,7 +12,7 @@ public struct ContentSecurityPolicyConfiguration: SecurityHeaderConfiguration {
 //        if let requestCsp = request.contentSecurityPolicy {
 //            response.headers[HTTPHeaders.contentSecurityPolicy] = requestCsp.value
 //        } else {
-            response.http.headers[HTTPHeaders.contentSecurityPolicy] = value
+            response.http.headers.replaceOrAdd(name: .contentSecurityPolicy, value: value)
 //        }
     }
 }
