@@ -175,6 +175,12 @@ To just enable the protection:
 let xssProtectionConfig = XssProtectionConfiguration(option: .enable)
 ```
 
+To sanitize the page and report the violation:
+
+```swift
+let xssProtectionConfig = XssProtectionConfiguration(option: .report("https://report-uri.com"))
+```
+
 Or to disable:
 
 ```swift

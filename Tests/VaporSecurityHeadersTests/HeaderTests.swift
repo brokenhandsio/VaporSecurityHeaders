@@ -23,6 +23,7 @@ class HeaderTests: XCTestCase {
         ("testHeaderWithXssProtectionDisable", testHeaderWithXssProtectionDisable),
         ("testHeaderWithXssProtectionEnable", testHeaderWithXssProtectionEnable),
         ("testHeaderWithXssProtectionBlock", testHeaderWithXssProtectionBlock),
+        ("testHeaderWithXssProtectionReport", testHeaderWithXssProtectionReport),
         ("testHeaderWithHSTSwithMaxAge", testHeaderWithHSTSwithMaxAge),
         ("testHeadersWithHSTSwithSubdomains", testHeadersWithHSTSwithSubdomains),
         ("testHeadersWithHSTSwithPreload", testHeadersWithHSTSwithPreload),
@@ -201,6 +202,15 @@ class HeaderTests: XCTestCase {
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
         XCTAssertEqual("1; mode=block", response.http.headers[HTTPHeaders.xXssProtection])
+    }
+
+    func testHeaderWithXssProtectionReport() throws {
+        let xssProtectionConfig = XSSProtectionConfiguration(option: .report(uri: "https://test.com"))
+        let factory = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig)
+        let drop = try makeTestDroplet(securityHeadersToAdd: factory)
+        let response = try drop.respond(to: request)
+
+        XCTAssertEqual("1; report=https://test.com", response.headers[HeaderKey.xXssProtection])
     }
 
     func testHeaderWithHSTSwithMaxAge() throws {
