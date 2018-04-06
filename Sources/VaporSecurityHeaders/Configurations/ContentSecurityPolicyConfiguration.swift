@@ -9,23 +9,33 @@ public struct ContentSecurityPolicyConfiguration: SecurityHeaderConfiguration {
     }
 
     func setHeader(on response: Response, from request: Request) {
-//        if let requestCsp = request.contentSecurityPolicy {
-//            response.headers[HTTPHeaders.contentSecurityPolicy] = requestCsp.value
-//        } else {
+        if let requestCSP = request.contentSecurityPolicy {
+            response.http.headers.replaceOrAdd(name: .contentSecurityPolicy, value: requestCSP.value)
+        } else {
             response.http.headers.replaceOrAdd(name: .contentSecurityPolicy, value: value)
-//        }
+        }
     }
 }
 
-//extension Request {
-//
-//    public var contentSecurityPolicy: ContentSecurityPolicyConfiguration? {
-//        get {
-//            return extend.storage["cspConfig"] as? ContentSecurityPolicyConfiguration
-//        }
-//        set {
-//            extend.storage["cspConfig"] = newValue
-//        }
-//    }
-//}
+public class CSPRequestConfiguration: Service {
+    var configuration: ContentSecurityPolicyConfiguration?
+    public init() {}
+}
 
+extension Request {
+    public var contentSecurityPolicy: ContentSecurityPolicyConfiguration? {
+        get {
+            if let requestConfig = try? privateContainer.make(CSPRequestConfiguration.self) {
+                return requestConfig.configuration
+            } else {
+                return nil
+            }
+
+        }
+        set {
+            if let requestConfig = try? privateContainer.make(CSPRequestConfiguration.self) {
+                requestConfig.configuration = newValue
+            }
+        }
+    }
+}

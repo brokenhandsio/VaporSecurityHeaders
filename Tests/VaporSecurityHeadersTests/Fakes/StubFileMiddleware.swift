@@ -10,7 +10,7 @@ struct StubFileMiddleware: Middleware, Service {
 
     func respond(to request: Request, chainingTo next: Responder) throws -> Future<Response> {
         if request.http.url.path == "/file" {
-//            request.contentSecurityPolicy = self.cspConfig
+            request.contentSecurityPolicy = self.cspConfig
 
             let body = try "Hello World!".makeBody()
             var headers = HTTPHeaders()
