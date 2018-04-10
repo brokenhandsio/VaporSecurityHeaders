@@ -35,15 +35,15 @@ These headers will *help* prevent cross-site scripting attacks, SSL downgrade at
 
 # Usage
 
-To use Vapor Security Headers, just register the middleware with your services and add it to your `MiddlewareConfig`. Vapor Security Headers makes this easy to do with a `builder` function on the factory. In `configure.swift` add:
+To use Vapor Security Headers, just register the middleware with your services and add it to your `MiddlewareConfig`. Vapor Security Headers makes this easy to do with a `build` function on the factory. In `configure.swift` add:
 
 ```swift
-services.register(securityHeadersToAdd.build())
 let securityHeadersFactory = SecurityHeadersFactory()
+services.register(securityHeadersFactory.build())
 
 var middlewareConfig = MiddlewareConfig()
-middlewareConfig.use(SecurityHeaders.self)
 // ...
+middlewareConfig.use(SecurityHeaders.self)
 services.register(middlewareConfig)
 ```
 
