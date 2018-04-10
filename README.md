@@ -35,21 +35,21 @@ These headers will *help* prevent cross-site scripting attacks, SSL downgrade at
 
 # Usage
 
-To use Vapor Security Headers, just register the middleware with your services and add it to your `MiddlewareConfig`. Vapor Security Headers makes this easy to do with a `builder` function on the factory. In `configure.swift` add:
+To use Vapor Security Headers, just register the middleware with your services and add it to your `MiddlewareConfig`. Vapor Security Headers makes this easy to do with a `build` function on the factory. In `configure.swift` add:
 
 ```swift
-services.register(securityHeadersToAdd.build())
 let securityHeadersFactory = SecurityHeadersFactory()
+services.register(securityHeadersFactory.build())
 
 var middlewareConfig = MiddlewareConfig()
-middlewareConfig.use(SecurityHeaders.self)
 // ...
+middlewareConfig.use(SecurityHeaders.self)
 services.register(middlewareConfig)
 ```
 
 The default factory will add default values to your site for Content-Security-Policy, X-XSS-Protection, X-Frame-Options and X-Content-Type-Options.
 
-***Note:*** You should ensure you set the security headers as the first middleware in your `MiddlewareConfig` to make sure the headers get added to all responses
+***Note:*** You should ensure you set the security headers as the last middleware in your `MiddlewareConfig` (i.e., the first middleware to be applied to responses) to make sure the headers get added to all responses.
 
 If you want to add your own values, it is easy to do using the factory. For instance, to add a content security policy configuration, just do:
 
