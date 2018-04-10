@@ -49,7 +49,7 @@ services.register(middlewareConfig)
 
 The default factory will add default values to your site for Content-Security-Policy, X-XSS-Protection, X-Frame-Options and X-Content-Type-Options.
 
-***Note:*** You should ensure you set the security headers as the first middleware in your `MiddlewareConfig` to make sure the headers get added to all responses
+***Note:*** You should ensure you set the security headers as the last middleware in your `MiddlewareConfig` (i.e., the first middleware to be applied to responses) to make sure the headers get added to all responses.
 
 If you want to add your own values, it is easy to do using the factory. For instance, to add a content security policy configuration, just do:
 
