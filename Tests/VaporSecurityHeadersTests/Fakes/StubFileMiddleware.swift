@@ -12,7 +12,7 @@ struct StubFileMiddleware: Middleware, Service {
         if request.http.url.path == "/file" {
             request.contentSecurityPolicy = self.cspConfig
 
-            let body = try "Hello World!".makeBody()
+            let body = HTTPBody(string: "Hello World!")
             var headers = HTTPHeaders()
             headers.add(name: .eTag, value: "1491512490-\(body.count ?? 0)")
             headers.add(name: .contentType, value: "text/plain")
