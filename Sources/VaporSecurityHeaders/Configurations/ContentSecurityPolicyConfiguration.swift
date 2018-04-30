@@ -30,7 +30,6 @@ extension Request {
             } else {
                 return nil
             }
-
         }
         set {
             if let requestConfig = try? privateContainer.make(CSPRequestConfiguration.self) {
