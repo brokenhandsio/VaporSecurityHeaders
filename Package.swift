@@ -8,7 +8,7 @@ let package = Package(
         .library(name: "VaporSecurityHeaders", targets: ["VaporSecurityHeaders"]),
     ],
     dependencies: [
-    	.package(url: "https://github.com/vapor/vapor.git", from: "3.0.0-rc"),
+    	.package(url: "https://github.com/vapor/vapor.git", from: "3.0.0"),
     ],
     targets: [
         .target(name: "VaporSecurityHeaders", dependencies: ["Vapor"]),

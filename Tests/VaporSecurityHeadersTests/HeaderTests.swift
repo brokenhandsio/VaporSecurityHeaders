@@ -469,7 +469,9 @@ class HeaderTests: XCTestCase {
 
         middlewareConfig.use(ErrorMiddleware.self)
         services.register { worker in
-            return try ErrorMiddleware(environment: worker.environment, log: worker.make())
+          return ErrorMiddleware() { request, error in
+            return request.makeResponse()
+          }
         }
         middlewareConfig.use(SecurityHeaders.self)
         services.register(securityHeadersToAdd.build())
