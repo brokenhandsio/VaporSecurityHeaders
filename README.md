@@ -3,7 +3,7 @@
     <br>
     <br>
     <a href="https://swift.org">
-        <img src="http://img.shields.io/badge/Swift-4-brightgreen.svg" alt="Language">
+        <img src="http://img.shields.io/badge/Swift-4.1-brightgreen.svg" alt="Language">
     </a>
     <a href="https://travis-ci.org/brokenhandsio/VaporSecurityHeaders">
         <img src="https://travis-ci.org/brokenhandsio/VaporSecurityHeaders.svg?branch=master" alt="Build Status">
@@ -35,29 +35,21 @@ These headers will *help* prevent cross-site scripting attacks, SSL downgrade at
 
 # Usage
 
-To use Vapor Security Headers, just add the middleware to your `Config` and then to your `droplet.json`. Vapor Security Headers makes this easy to do with a `builder` function on the factory:
+To use Vapor Security Headers, just register the middleware with your services and add it to your `MiddlewareConfig`. Vapor Security Headers makes this easy to do with a `build` function on the factory. In `configure.swift` add:
 
 ```swift
-let config = Config()
 let securityHeadersFactory = SecurityHeadersFactory()
-config.addConfigurable(middleware: securityHeadersFactory.builder(), name: "security-headers"))
-let drop = Droplet(config)
+services.register(securityHeadersFactory.build())
+
+var middlewareConfig = MiddlewareConfig()
+// ...
+middlewareConfig.use(SecurityHeaders.self)
+services.register(middlewareConfig)
 ```
 
 The default factory will add default values to your site for Content-Security-Policy, X-XSS-Protection, X-Frame-Options and X-Content-Type-Options.
 
-***Note:*** You should ensure you set the security headers as the first middleware in your `droplet.json` to make sure the headers get added to all responses:
-
-```json
-{
-    ...
-    "middleware": [
-        "security-headers",
-        ...
-    ],
-    ...
-}
-```
+***Note:*** You should ensure you set the security headers as the last middleware in your `MiddlewareConfig` (i.e., the first middleware to be applied to responses) to make sure the headers get added to all responses.
 
 If you want to add your own values, it is easy to do using the factory. For instance, to add a content security policy configuration, just do:
 
@@ -72,7 +64,7 @@ You will need to add it as a dependency in your `Package.swift` file:
 ```swift
 dependencies: [
     ...,
-    .package(url: "https://github.com/brokenhandsio/VaporSecurityHeaders.git", from: "1.1.0")
+    .package(url: "https://github.com/brokenhandsio/VaporSecurityHeaders.git", from: "2.0.0")
 ]
 ```
 
@@ -140,12 +132,20 @@ Check out [https://report-uri.io/](https://report-uri.io/) for a free tool to se
 
 ### Page Specific CSP
 
-Vapor Security Headers also supports setting the CSP on a route or request basis. If the middleware has been added to the Droplet, you can override the CSP for a request. This allows you to have a strict default CSP, but allow content from extra sources when required, such as only allowing the Javascript for blog comments on the blog page. Create a separate `ContentSecurityPolicyConfiguration` and then add it to the request. For example, inside a route handler, you could do:
+Vapor Security Headers also supports setting the CSP on a route or request basis. If the middleware has been added to the `MiddlewareConfig`, you can override the CSP for a request. This allows you to have a strict default CSP, but allow content from extra sources when required, such as only allowing the Javascript for blog comments on the blog page. Create a separate `ContentSecurityPolicyConfiguration` and then add it to the request. For example, inside a route handler, you could do:
 
 ```swift
 let pageSpecificCSPVaue = "default-src 'none'; script-src https://comments.disqus.com;"
 let pageSpecificCSP = ContentSecurityPolicyConfiguration(value: pageSpecificCSPValue)
 request.contentSecurityPolicy = pageSpecificCSP
+```
+
+You must also enable the `CSPRequestConfiguration` service for this to work. In `configure.swift` add:
+
+```swift
+services.register { _ in
+    return CSPRequestConfiguration()
+}
 ```
 
 ## Content-Security-Policy-Report-Only
@@ -175,7 +175,7 @@ To just enable the protection:
 let xssProtectionConfig = XssProtectionConfiguration(option: .enable)
 ```
 
-To sanitize the page and report the violation:
+To sanitise the page and report the violation:
 
 ```swift
 let xssProtectionConfig = XssProtectionConfiguration(option: .report("https://report-uri.com"))

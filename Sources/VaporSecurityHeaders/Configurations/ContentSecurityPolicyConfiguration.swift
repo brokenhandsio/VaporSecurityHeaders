@@ -1,4 +1,4 @@
-import HTTP
+import Vapor
 
 public struct ContentSecurityPolicyConfiguration: SecurityHeaderConfiguration {
 
@@ -9,22 +9,32 @@ public struct ContentSecurityPolicyConfiguration: SecurityHeaderConfiguration {
     }
 
     func setHeader(on response: Response, from request: Request) {
-        if let requestCsp = request.contentSecurityPolicy {
-            response.headers[HeaderKey.contentSecurityPolicy] = requestCsp.value
+        if let requestCSP = request.contentSecurityPolicy {
+            response.http.headers.replaceOrAdd(name: .contentSecurityPolicy, value: requestCSP.value)
         } else {
-            response.headers[HeaderKey.contentSecurityPolicy] = value
+            response.http.headers.replaceOrAdd(name: .contentSecurityPolicy, value: value)
         }
     }
 }
 
-extension Request {
+public class CSPRequestConfiguration: Service {
+    var configuration: ContentSecurityPolicyConfiguration?
+    public init() {}
+}
 
+extension Request {
     public var contentSecurityPolicy: ContentSecurityPolicyConfiguration? {
         get {
-            return storage["cspConfig"] as? ContentSecurityPolicyConfiguration
+            if let requestConfig = try? privateContainer.make(CSPRequestConfiguration.self) {
+                return requestConfig.configuration
+            } else {
+                return nil
+            }
         }
         set {
-            storage["cspConfig"] = newValue
+            if let requestConfig = try? privateContainer.make(CSPRequestConfiguration.self) {
+                requestConfig.configuration = newValue
+            }
         }
     }
 }
