@@ -462,11 +462,6 @@ class HeaderTests: XCTestCase {
         var services = Services.default()
         var middlewareConfig = MiddlewareConfig()
 
-        if let fileMiddleware = fileMiddleware {
-            middlewareConfig.use(StubFileMiddleware.self)
-            services.register(fileMiddleware)
-        }
-
         middlewareConfig.use(ErrorMiddleware.self)
         services.register { worker in
           return ErrorMiddleware() { request, error in
@@ -475,6 +470,12 @@ class HeaderTests: XCTestCase {
         }
         middlewareConfig.use(SecurityHeaders.self)
         services.register(securityHeadersToAdd.build())
+        
+        if let fileMiddleware = fileMiddleware {
+            middlewareConfig.use(StubFileMiddleware.self)
+            services.register(fileMiddleware)
+        }
+        
         services.register(middlewareConfig)
 
         if perRouteCSP {
