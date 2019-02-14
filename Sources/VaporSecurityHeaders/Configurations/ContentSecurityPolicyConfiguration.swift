@@ -2,7 +2,7 @@ import Vapor
 import Foundation
 
 public struct ContentSecurityPolicyConfiguration: SecurityHeaderConfiguration {
-
+    
     private let value: String
 
     public init(value: ContentSecurityPolicy) {
@@ -145,7 +145,7 @@ public class ContentSecurityPolicy {
 
     func reportTo(reportToObject: CSPReportTo) -> ContentSecurityPolicy {
         let encoder = JSONEncoder()
-        let data = try! encoder.encode(reportToObject)
+        guard let data = try? encoder.encode(reportToObject) else { return self }
         guard let jsonString = String(data: data, encoding: .utf8) else { return self }
         policy.append("report-to \(String(describing: jsonString))")
         return self
@@ -165,7 +165,7 @@ public class ContentSecurityPolicy {
         policy.append("script-src \(sources.joined(separator: " "))")
         return self
     }
-    
+
     func styleSrc(sources: String...) -> ContentSecurityPolicy {
         policy.append("style-src \(sources.joined(separator: " "))")
         return self
