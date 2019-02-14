@@ -41,24 +41,36 @@ extension Request {
 }
 
 public struct CSPReportTo: Codable {
-    var group: String?
-    var max_age: Int
-    var endpoints: [CSPReportToEndpoint]
-    var include_subdomains: Bool?
+    private let group: String?
+    private let max_age: Int
+    private let endpoints: [CSPReportToEndpoint]
+    private let include_subdomains: Bool?
+
+    public init(group: String? = nil, max_age: Int,
+                endpoints: [CSPReportToEndpoint], include_subdomains: Bool? = nil) {
+        self.group = group
+        self.max_age = max_age
+        self.endpoints = endpoints
+        self.include_subdomains = include_subdomains
+    }
 }
 
 public struct CSPReportToEndpoint: Codable {
-    var url: String
+    private let url: String
+
+    public init(url: String) {
+        self.url = url
+    }
 }
 
 public struct CSPKeywords {
-    static let all = "*"
-    static let none = "'none'"
-    static let `self` = "'self'"
-    static let strictDynamic = "'strict-dynamic'"
-    static let unsafeEval = "'unsafe-eval'"
-    static let unsafeHashedAttributes = "'unsafe-hashed-attributes'"
-    static let unsafeInline = "'unsafe-inline'"
+    public static let all = "*"
+    public static let none = "'none'"
+    public static let `self` = "'self'"
+    public static let strictDynamic = "'strict-dynamic'"
+    public static let unsafeEval = "'unsafe-eval'"
+    public static let unsafeHashedAttributes = "'unsafe-hashed-attributes'"
+    public static let unsafeInline = "'unsafe-inline'"
 }
 
 public class ContentSecurityPolicy {
