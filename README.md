@@ -108,11 +108,94 @@ The Vapor Security Headers package will set a default CSP of `default-src: 'self
 
 The API default CSP is `default-src: 'none'` as an API should only return data and never be loading scripts or images to display!
 
-I plan on massively improving creating the CSP configurations, but for now to configure your CSP you can add it to your `ContentSecurityPolicyConfiguration` like so:
+You can build a CSP header (`ContentSecurityPolicy`) with the following directives: baseUri(sources), blockAllMixedContent(), connectSrc(sources), defaultSrc(sources), fontSrc(sources), formAction(sources), frameAncestors(sources), frameSrc(sources), imgSrc(sources), manifestSrc(sources), mediaSrc(sources), objectSrc(sources), pluginTypes(types), reportTo(json_object), reportUri(uri), requireSriFor(values), sandbox(values), scriptSrc(sources), styleSrc(sources), upgradeInsecureRequests(), workerSrc(sources)
+
+*Example:*
 
 ```swift
-let cspConfig = ContentSecurityPolicyConfiguration(value: "default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style; report-uri https://csp-report.brokenhands.io")
+let cspConfig = ContentSecurityPolicy()
+        .scriptSrc(sources: "https://static.brokenhands.io")
+        .styleSrc(sources: "https://static.brokenhands.io")
+        .imgSrc(sources: "https://static.brokenhands.io")
+```
+
+```http
+Content-Security-Policy: script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io
+```
+
+You can set a custom header with set(value).
+
+```swift
+ContentSecurityPolicy().set(value: "default-src: 'none'")
+```
+
+```http
+Content-Security-Policy: default-src: 'none'
+```
+
+The following CSP keywords (`CSPKeywords`) are also available to you: 
+
+* CSPKeywords.all = *
+* CSPKeywords.none = 'none'
+* CSPKeywords.\`self\` = 'self'
+* CSPKeywords.strictDynamic = 'strict-dynamic'
+* CSPKeywords.unsafeEval = 'unsafe-eval'
+* CSPKeywords.unsafeHashedAttributes = 'unsafe-hashed-attributes'
+* CSPKeywords.unsafeInline = 'unsafe-inline'
+
+*Example:*
+
+``` swift
+CSPKeywords.`self` // “‘self’”
+ContentSecurityPolicy().defaultSrc(sources: CSPKeywords.`self`)
+```
+
+```http
+Content-Security-Policy: default-src 'self'
+```
+
+You can also utilize the `Report-To` directive:
+
+```swift
+let reportToEndpoint = CSPReportToEndpoint(url: "https://csp-report.brokenhands.io/csp-reports")
+
+let reportToValue = CSPReportTo(group: "vapor-csp", max_age: 10886400, endpoints: [reportToEndpoint], include_subdomains: true)
+
+let cspValue = ContentSecurityPolicy()
+    .defaultSrc(sources: CSPKeywords.none)
+    .scriptSrc(sources: "https://static.brokenhands.io")
+    .reportTo(reportToObject: reportToValue)
+```
+
+```http
+Content-Security-Policy: default-src 'none'; script-src https://static.brokenhands.io; report-to {"group":"vapor-csp","endpoints":[{"url":"https:\/\/csp-report.brokenhands.io\/csp-reports"}],"include_subdomains":true,"max_age":10886400}
+```
+
+See [Google Developers - The Reporting API](https://developers.google.com/web/updates/2018/09/reportingapi) for more information on the Report-To directive. 
+
+#### Content Security Policy Configuration
+
+To configure your CSP you can add it to your `ContentSecurityPolicyConfiguration` like so:
+
+```swift
+let cspConfig = ContentSecurityPolicy()
+        .defaultSrc(sources: CSPKeywords.none)
+        .scriptSrc(sources: "https://static.brokenhands.io")
+        .styleSrc(sources: "https://static.brokenhands.io")
+        .imgSrc(sources: "https://static.brokenhands.io")
+        .fontSrc(sources: "https://static.brokenhands.io")
+        .connectSrc(sources: "https://*.brokenhands.io")
+        .formAction(sources: CSPKeywords.`self`)
+        .upgradeInsecureRequests()
+        .blockAllMixedContent()
+        .requireSriFor(values: "script", "style")
+        .reportUri(uri: "https://csp-report.brokenhands.io")
+        
 let securityHeaders = SecurityHeaders(contentSecurityPolicyConfiguration: cspConfig)
+```
+
+```http
+Content-Security-Policy: default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style; report-uri https://csp-report.brokenhands.io
 ```
 
 This policy means that by default everything is blocked, however:
@@ -135,9 +218,16 @@ Check out [https://report-uri.io/](https://report-uri.io/) for a free tool to se
 Vapor Security Headers also supports setting the CSP on a route or request basis. If the middleware has been added to the `MiddlewareConfig`, you can override the CSP for a request. This allows you to have a strict default CSP, but allow content from extra sources when required, such as only allowing the Javascript for blog comments on the blog page. Create a separate `ContentSecurityPolicyConfiguration` and then add it to the request. For example, inside a route handler, you could do:
 
 ```swift
-let pageSpecificCSPVaue = "default-src 'none'; script-src https://comments.disqus.com;"
+let cspConfig = ContentSecurityPolicy()
+        .defaultSrc(sources: CSPKeywords.none)
+        .scriptSrc(sources: "https://comments.disqus.com")
+
 let pageSpecificCSP = ContentSecurityPolicyConfiguration(value: pageSpecificCSPValue)
 request.contentSecurityPolicy = pageSpecificCSP
+```
+
+```http
+Content-Security-Policy: default-src 'none'; script-src https://comments.disqus.com
 ```
 
 You must also enable the `CSPRequestConfiguration` service for this to work. In `configure.swift` add:

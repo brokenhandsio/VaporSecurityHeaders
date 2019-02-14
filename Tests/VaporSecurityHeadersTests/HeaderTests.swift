@@ -278,8 +278,18 @@ class HeaderTests: XCTestCase {
     }
 
     func testHeadersWithCSP() throws {
-        let csp = "default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style;"
-        let cspConfig = ContentSecurityPolicyConfiguration(value: csp)
+        let csp = "default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style"
+        let cspBuilder = ContentSecurityPolicy()
+            .defaultSrc(sources: CSPKeywords.none)
+            .scriptSrc(sources: "https://static.brokenhands.io").styleSrc(sources: "https://static.brokenhands.io")
+            .imgSrc(sources: "https://static.brokenhands.io")
+            .fontSrc(sources: "https://static.brokenhands.io")
+            .connectSrc(sources: "https://*.brokenhands.io")
+            .formAction(sources: CSPKeywords.`self`)
+            .upgradeInsecureRequests()
+            .blockAllMixedContent()
+            .requireSriFor(values: "script", "style")
+        let cspConfig = ContentSecurityPolicyConfiguration(value: cspBuilder)
         let factory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
@@ -376,10 +386,20 @@ class HeaderTests: XCTestCase {
     }
 
     func testCustomCSPOnSingleRoute() throws {
-        let expectedCsp = "default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style;"
+        let expectedCsp = "default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style"
+        let expectedCspBuilder = ContentSecurityPolicy()
+            .defaultSrc(sources: CSPKeywords.none)
+            .scriptSrc(sources: "https://static.brokenhands.io").styleSrc(sources: "https://static.brokenhands.io")
+            .imgSrc(sources: "https://static.brokenhands.io")
+            .fontSrc(sources: "https://static.brokenhands.io")
+            .connectSrc(sources: "https://*.brokenhands.io")
+            .formAction(sources: CSPKeywords.`self`)
+            .upgradeInsecureRequests()
+            .blockAllMixedContent()
+            .requireSriFor(values: "script", "style")
         let factory = SecurityHeadersFactory.api()
         let cspSettingRouteHandler: (Request) throws -> String = { req in
-            req.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: expectedCsp)
+            req.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: expectedCspBuilder)
             return "Different CSP!"
         }
         let response = try makeTestResponse(for: routeRequest, securityHeadersToAdd: factory, routeHandler: cspSettingRouteHandler, perRouteCSP: true)
@@ -388,7 +408,16 @@ class HeaderTests: XCTestCase {
     }
 
     func testCustomCSPDoesntAffectSecondRoute() throws {
-        let customCSP = "default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style;"
+        let customCSP = ContentSecurityPolicy()
+            .defaultSrc(sources: CSPKeywords.none)
+            .scriptSrc(sources: "https://static.brokenhands.io").styleSrc(sources: "https://static.brokenhands.io")
+            .imgSrc(sources: "https://static.brokenhands.io")
+            .fontSrc(sources: "https://static.brokenhands.io")
+            .connectSrc(sources: "https://*.brokenhands.io")
+            .formAction(sources: CSPKeywords.`self`)
+            .upgradeInsecureRequests()
+            .blockAllMixedContent()
+            .requireSriFor(values: "script", "style")
         let factory = SecurityHeadersFactory.api()
         let cspSettingRouteHandler: (Request) throws -> String = { req in
             req.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: customCSP)
@@ -401,7 +430,9 @@ class HeaderTests: XCTestCase {
     }
 
     func testDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute() throws {
-        let differentCsp = "default-src 'none'; script-src test;"
+        let differentCsp = ContentSecurityPolicy()
+            .defaultSrc(sources: CSPKeywords.none)
+            .scriptSrc(sources: "test")
         let factory = SecurityHeadersFactory.api()
         let cspSettingRouteHandler: (Request) throws -> String = { req in
             req.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: differentCsp)
@@ -431,7 +462,7 @@ class HeaderTests: XCTestCase {
         let expectedCSPHeaderValue = "default-src 'none'"
         let expectedXFOHeaderValue = "DENY"
         let expectedXSSProtectionHeaderValue = "1; mode=block"
-         let response = try makeTestResponse(for: fileRequest, securityHeadersToAdd: SecurityHeadersFactory.api(), fileMiddleware: StubFileMiddleware())
+        let response = try makeTestResponse(for: fileRequest, securityHeadersToAdd: SecurityHeadersFactory.api(), fileMiddleware: StubFileMiddleware())
 
         XCTAssertEqual("Hello World!", String(data: response.http.body.data!, encoding: String.Encoding.utf8))
         XCTAssertEqual(expectedXCTOHeaderValue, response.http.headers[.xContentTypeOptions].first)
@@ -443,10 +474,13 @@ class HeaderTests: XCTestCase {
     func testMockFileMiddlewareDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute() throws {
         let expectedXCTOHeaderValue = "nosniff"
         let expectedCSPHeaderValue = "default-src 'none'; script-src test;"
+        let expectedCSPHeaderValueBuilder = ContentSecurityPolicy()
+            .defaultSrc(sources: CSPKeywords.none)
+            .scriptSrc(sources: "test")
         let expectedXFOHeaderValue = "DENY"
         let expectedXSSProtectionHeaderValue = "1; mode=block"
 
-        let response = try makeTestResponse(for: fileRequest, securityHeadersToAdd: SecurityHeadersFactory.api(), fileMiddleware: StubFileMiddleware(cspConfig: ContentSecurityPolicyConfiguration(value: expectedCSPHeaderValue)), perRouteCSP: true)
+        let response = try makeTestResponse(for: fileRequest, securityHeadersToAdd: SecurityHeadersFactory.api(), fileMiddleware: StubFileMiddleware(cspConfig: ContentSecurityPolicyConfiguration(value: expectedCSPHeaderValueBuilder)), perRouteCSP: true)
 
         XCTAssertEqual("Hello World!", String(data: response.http.body.data!, encoding: String.Encoding.utf8))
         XCTAssertEqual(expectedXCTOHeaderValue, response.http.headers[.xContentTypeOptions].first)

@@ -2,7 +2,7 @@ import Vapor
 
 public class SecurityHeadersFactory {
     var contentTypeOptions = ContentTypeOptionsConfiguration(option: .nosniff)
-    var contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: "default-src 'self'")
+    var contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: ContentSecurityPolicy().defaultSrc(sources: CSPKeywords.`self`))
     var frameOptions = FrameOptionsConfiguration(option: .deny)
     var xssProtection = XSSProtectionConfiguration(option: .block)
     var hsts: StrictTransportSecurityConfiguration?
@@ -14,7 +14,7 @@ public class SecurityHeadersFactory {
 
     public static func api() -> SecurityHeadersFactory {
         let apiFactory = SecurityHeadersFactory()
-        apiFactory.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: "default-src 'none'")
+        apiFactory.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: ContentSecurityPolicy().defaultSrc(sources: CSPKeywords.none))
         return apiFactory
     }
 
