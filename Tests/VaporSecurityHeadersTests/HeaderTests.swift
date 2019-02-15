@@ -387,7 +387,7 @@ class HeaderTests: XCTestCase {
 
     func testCustomCSPOnSingleRoute() throws {
         let expectedCsp = "default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style"
-        let expectedCspBuilder = ContentSecurityPolicy()
+        let cspBuilder = ContentSecurityPolicy()
             .defaultSrc(sources: CSPKeywords.none)
             .scriptSrc(sources: "https://static.brokenhands.io").styleSrc(sources: "https://static.brokenhands.io")
             .imgSrc(sources: "https://static.brokenhands.io")
@@ -399,7 +399,7 @@ class HeaderTests: XCTestCase {
             .requireSriFor(values: "script", "style")
         let factory = SecurityHeadersFactory.api()
         let cspSettingRouteHandler: (Request) throws -> String = { req in
-            req.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: expectedCspBuilder)
+            req.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: cspBuilder)
             return "Different CSP!"
         }
         let response = try makeTestResponse(for: routeRequest, securityHeadersToAdd: factory, routeHandler: cspSettingRouteHandler, perRouteCSP: true)
@@ -473,14 +473,14 @@ class HeaderTests: XCTestCase {
 
     func testMockFileMiddlewareDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute() throws {
         let expectedXCTOHeaderValue = "nosniff"
-        let expectedCSPHeaderValue = "default-src 'none'; script-src test;"
-        let expectedCSPHeaderValueBuilder = ContentSecurityPolicy()
+        let expectedCSPHeaderValue = "default-src 'none'; script-src test"
+        let csp = ContentSecurityPolicy()
             .defaultSrc(sources: CSPKeywords.none)
             .scriptSrc(sources: "test")
         let expectedXFOHeaderValue = "DENY"
         let expectedXSSProtectionHeaderValue = "1; mode=block"
 
-        let response = try makeTestResponse(for: fileRequest, securityHeadersToAdd: SecurityHeadersFactory.api(), fileMiddleware: StubFileMiddleware(cspConfig: ContentSecurityPolicyConfiguration(value: expectedCSPHeaderValueBuilder)), perRouteCSP: true)
+        let response = try makeTestResponse(for: fileRequest, securityHeadersToAdd: SecurityHeadersFactory.api(), fileMiddleware: StubFileMiddleware(cspConfig: ContentSecurityPolicyConfiguration(value: csp)), perRouteCSP: true)
 
         XCTAssertEqual("Hello World!", String(data: response.http.body.data!, encoding: String.Encoding.utf8))
         XCTAssertEqual(expectedXCTOHeaderValue, response.http.headers[.xContentTypeOptions].first)
@@ -496,11 +496,6 @@ class HeaderTests: XCTestCase {
         var services = Services.default()
         var middlewareConfig = MiddlewareConfig()
 
-        if let fileMiddleware = fileMiddleware {
-            middlewareConfig.use(StubFileMiddleware.self)
-            services.register(fileMiddleware)
-        }
-
         middlewareConfig.use(ErrorMiddleware.self)
         services.register { worker in
           return ErrorMiddleware() { request, error in
@@ -509,6 +504,12 @@ class HeaderTests: XCTestCase {
         }
         middlewareConfig.use(SecurityHeaders.self)
         services.register(securityHeadersToAdd.build())
+        
+        if let fileMiddleware = fileMiddleware {
+            middlewareConfig.use(StubFileMiddleware.self)
+            services.register(fileMiddleware)
+        }
+        
         services.register(middlewareConfig)
 
         if perRouteCSP {
