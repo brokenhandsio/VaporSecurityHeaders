@@ -108,7 +108,29 @@ The Vapor Security Headers package will set a default CSP of `default-src: 'self
 
 The API default CSP is `default-src: 'none'` as an API should only return data and never be loading scripts or images to display!
 
-You can build a CSP header (`ContentSecurityPolicy`) with the following directives: baseUri(sources), blockAllMixedContent(), connectSrc(sources), defaultSrc(sources), fontSrc(sources), formAction(sources), frameAncestors(sources), frameSrc(sources), imgSrc(sources), manifestSrc(sources), mediaSrc(sources), objectSrc(sources), pluginTypes(types), reportTo(json_object), reportUri(uri), requireSriFor(values), sandbox(values), scriptSrc(sources), styleSrc(sources), upgradeInsecureRequests(), workerSrc(sources)
+You can build a CSP header (`ContentSecurityPolicy`) with the following directives: 
+
+- baseUri(sources)
+- blockAllMixedContent()
+- connectSrc(sources)
+- defaultSrc(sources)
+- fontSrc(sources)
+- formAction(sources)
+- frameAncestors(sources)
+- frameSrc(sources)
+- imgSrc(sources)
+- manifestSrc(sources)
+- mediaSrc(sources)
+- objectSrc(sources)
+- pluginTypes(types)
+- reportTo(json_object)
+- reportUri(uri)
+- requireSriFor(values)
+- sandbox(values)
+- scriptSrc(sources)
+- styleSrc(sources)
+- upgradeInsecureRequests()
+- workerSrc(sources)
 
 *Example:*
 
@@ -123,10 +145,24 @@ let cspConfig = ContentSecurityPolicy()
 Content-Security-Policy: script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io
 ```
 
-You can set a custom header with set(value).
+You can set a custom header with ContentSecurityPolicy().set(value) or ContentSecurityPolicyConfiguration(value).
+
+**ContentSecurityPolicy().set(value)**
 
 ```swift
-ContentSecurityPolicy().set(value: "default-src: 'none'")
+let cspBuilder = ContentSecurityPolicy().set(value: "default-src: 'none'")
+
+let cspConfig = ContentSecurityPolicyConfiguration(value: cspBuilder)
+
+let securityHeaders = SecurityHeaders(contentSecurityPolicyConfiguration: cspConfig)
+```
+
+**ContentSecurityPolicyConfiguration(value)**
+
+```swift
+let cspConfig = ContentSecurityPolicyConfiguration(value: "default-src 'none'")
+
+let securityHeaders = SecurityHeaders(contentSecurityPolicyConfiguration: cspConfig)
 ```
 
 ```http
@@ -178,7 +214,7 @@ See [Google Developers - The Reporting API](https://developers.google.com/web/up
 To configure your CSP you can add it to your `ContentSecurityPolicyConfiguration` like so:
 
 ```swift
-let cspConfig = ContentSecurityPolicy()
+let cspBuilder = ContentSecurityPolicy()
         .defaultSrc(sources: CSPKeywords.none)
         .scriptSrc(sources: "https://static.brokenhands.io")
         .styleSrc(sources: "https://static.brokenhands.io")
@@ -190,7 +226,9 @@ let cspConfig = ContentSecurityPolicy()
         .blockAllMixedContent()
         .requireSriFor(values: "script", "style")
         .reportUri(uri: "https://csp-report.brokenhands.io")
-        
+
+let cspConfig = ContentSecurityPolicyConfiguration(value: cspBuilder)
+
 let securityHeaders = SecurityHeaders(contentSecurityPolicyConfiguration: cspConfig)
 ```
 
