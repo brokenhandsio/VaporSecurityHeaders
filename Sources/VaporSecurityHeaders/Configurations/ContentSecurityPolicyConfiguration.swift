@@ -5,6 +5,10 @@ public struct ContentSecurityPolicyConfiguration: SecurityHeaderConfiguration {
     
     private let value: String
 
+    public init(value: String) {
+        self.value = value
+    }
+
     public init(value: ContentSecurityPolicy) {
         self.value = value.value
     }
