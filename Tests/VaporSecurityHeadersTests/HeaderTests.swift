@@ -33,6 +33,10 @@ class HeaderTests: XCTestCase {
         ("testHeadersWithHSTSwithSubdomainAndPreloadFalse", testHeadersWithHSTSwithSubdomainAndPreloadFalse),
         ("testHeadersWithServerValue", testHeadersWithServerValue),
         ("testHeadersWithCSP", testHeadersWithCSP),
+        ("testHeadersWithStringCSP", testHeadersWithStringCSP),
+        ("testHeadersWithSetCSP", testHeadersWithSetCSP),
+        ("testHeadersWithReportToCSP", testHeadersWithReportToCSP),
+        ("testHeadersWithExhaustiveCSP", testHeadersWithExhaustiveCSP),
         ("testHeadersWithReportOnlyCSP", testHeadersWithReportOnlyCSP),
         ("testHeadersWithReferrerPolicyEmpty", testHeadersWithReferrerPolicyEmpty),
         ("testHeadersWithReferrerPolicyNoReferrer", testHeadersWithReferrerPolicyNoReferrer),
@@ -289,6 +293,58 @@ class HeaderTests: XCTestCase {
             .upgradeInsecureRequests()
             .blockAllMixedContent()
             .requireSriFor(values: "script", "style")
+        let cspConfig = ContentSecurityPolicyConfiguration(value: cspBuilder)
+        let factory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
+        let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
+
+        XCTAssertEqual(csp, response.http.headers[.contentSecurityPolicy].first)
+    }
+
+    func testHeadersWithStringCSP() throws {
+        let csp = "default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style"
+        let cspConfig = ContentSecurityPolicyConfiguration(value: csp)
+        let factory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
+        let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
+
+        XCTAssertEqual(csp, response.http.headers[.contentSecurityPolicy].first)
+    }
+
+    func testHeadersWithSetCSP() throws {
+        let csp = "default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style"
+        let cspBuilder = ContentSecurityPolicy().set(value: csp)
+        let cspConfig = ContentSecurityPolicyConfiguration(value: cspBuilder)
+        let factory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
+        let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
+
+        XCTAssertEqual(csp, response.http.headers[.contentSecurityPolicy].first)
+    }
+
+    func testHeadersWithReportToCSP() throws {
+        let csp = "default-src 'none'; script-src https://static.brokenhands.io; report-to {\"group\":\"vapor-csp\",\"endpoints\":[{\"url\":\"https:\\/\\/csp-report.brokenhands.io\\/csp-reports\"}],\"include_subdomains\":true,\"max_age\":10886400}"
+        let reportToEndpoint = CSPReportToEndpoint(url: "https://csp-report.brokenhands.io/csp-reports")
+        let reportToValue = CSPReportTo(group: "vapor-csp", max_age: 10886400, endpoints: [reportToEndpoint], include_subdomains: true)
+        let cspValue = ContentSecurityPolicy()
+            .defaultSrc(sources: CSPKeywords.none)
+            .scriptSrc(sources: "https://static.brokenhands.io")
+            .reportTo(reportToObject: reportToValue)
+        let cspConfig = ContentSecurityPolicyConfiguration(value: cspValue)
+        let factory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
+        let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
+
+        XCTAssertEqual(csp, response.http.headers[.contentSecurityPolicy].first)
+    }
+
+    func testHeadersWithExhaustiveCSP() throws {
+        let csp = "base-uri 'self'; frame-ancestors 'none'; frame-src 'self'; manifest-src https://brokenhands.io; object-src 'self'; plugin-types application/pdf; report-uri https://csp-report.brokenhands.io; sandbox allow-forms allow-scripts; worker-src https://brokenhands.io"
+        let cspBuilder = ContentSecurityPolicy()
+            .baseUri(sources: CSPKeywords.`self`)
+            .frameAncestors(sources: CSPKeywords.none)
+            .frameSrc(sources: CSPKeywords.`self`)
+            .manifestSrc(sources: "https://brokenhands.io")
+            .objectSrc(sources: CSPKeywords.`self`)
+            .pluginTypes(types: "application/pdf")
+            .reportUri(uri: "https://csp-report.brokenhands.io").sandbox(values: "allow-forms", "allow-scripts")
+            .workerSrc(sources: "https://brokenhands.io")
         let cspConfig = ContentSecurityPolicyConfiguration(value: cspBuilder)
         let factory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
