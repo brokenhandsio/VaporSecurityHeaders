@@ -348,7 +348,7 @@ class HeaderTests: XCTestCase {
     }
 
     func testHeadersWithExhaustiveCSP() throws {
-        let csp = "base-uri 'self'; frame-ancestors 'none'; frame-src 'self'; manifest-src https://brokenhands.io; object-src 'self'; plugin-types application/pdf; report-uri https://csp-report.brokenhands.io; sandbox allow-forms allow-scripts; worker-src https://brokenhands.io"
+        let csp = "base-uri 'self'; frame-ancestors 'none'; frame-src 'self'; manifest-src https://brokenhands.io; object-src 'self'; plugin-types application/pdf; report-uri https://csp-report.brokenhands.io; sandbox allow-forms allow-scripts; worker-src https://brokenhands.io; media-src https://brokenhands.io"
         let cspBuilder = ContentSecurityPolicy()
             .baseUri(sources: CSPKeywords.`self`)
             .frameAncestors(sources: CSPKeywords.none)
@@ -358,6 +358,7 @@ class HeaderTests: XCTestCase {
             .pluginTypes(types: "application/pdf")
             .reportUri(uri: "https://csp-report.brokenhands.io").sandbox(values: "allow-forms", "allow-scripts")
             .workerSrc(sources: "https://brokenhands.io")
+            .mediaSrc(sources: "https://brokenhands.io")
         let cspConfig = ContentSecurityPolicyConfiguration(value: cspBuilder)
         let factory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
