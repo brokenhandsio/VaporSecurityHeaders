@@ -320,7 +320,6 @@ class HeaderTests: XCTestCase {
     }
 
     func testHeadersWithReportToCSP() throws {
-        let csp = "default-src 'none'; script-src https://static.brokenhands.io; report-to {\"group\":\"vapor-csp\",\"endpoints\":[{\"url\":\"https:\\/\\/csp-report.brokenhands.io\\/csp-reports\"}],\"include_subdomains\":true,\"max_age\":10886400}"
         let reportToEndpoint = CSPReportToEndpoint(url: "https://csp-report.brokenhands.io/csp-reports")
         let reportToValue = CSPReportTo(group: "vapor-csp", max_age: 10886400, endpoints: [reportToEndpoint], include_subdomains: true)
         let cspValue = ContentSecurityPolicy()
@@ -330,8 +329,22 @@ class HeaderTests: XCTestCase {
         let cspConfig = ContentSecurityPolicyConfiguration(value: cspValue)
         let factory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
+        guard let cspResponseHeader = response.http.headers[.contentSecurityPolicy].first else {
+            XCTFail("Expected a CSP Response Header")
+            return
+        }
+        let replacedCSPHeader = cspResponseHeader.replacingOccurrences(of: "default-src 'none'; script-src https://static.brokenhands.io; report-to", with: "")
+        guard let reportToJson = replacedCSPHeader.data(using: .utf8) else {
+            XCTFail("Expected String CSP Response Header")
+            return
+        }
+        let decoder = JSONDecoder()
+        guard let reportToData = try? decoder.decode(CSPReportTo.self, from: reportToJson) else {
+            XCTFail("Expected JSON CSP Response Header")
+            return
+        }
 
-        XCTAssertEqual(csp, response.http.headers[.contentSecurityPolicy].first)
+        XCTAssertEqual(reportToValue, reportToData)
     }
 
     func testHeadersWithExhaustiveCSP() throws {

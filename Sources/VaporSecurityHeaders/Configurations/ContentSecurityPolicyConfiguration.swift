@@ -2,7 +2,6 @@ import Vapor
 import Foundation
 
 public struct ContentSecurityPolicyConfiguration: SecurityHeaderConfiguration {
-    
     private let value: String
 
     public init(value: String) {
@@ -66,6 +65,9 @@ public struct CSPReportToEndpoint: Codable {
         self.url = url
     }
 }
+
+extension CSPReportToEndpoint: Equatable {}
+extension CSPReportTo: Equatable {}
 
 public struct CSPKeywords {
     public static let all = "*"
@@ -196,6 +198,6 @@ public class ContentSecurityPolicy {
         policy.append("worker-src \(sources.joined(separator: " "))")
         return self
     }
-    
+
     public init() {}
 }
