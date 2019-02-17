@@ -66,8 +66,20 @@ public struct CSPReportToEndpoint: Codable {
     }
 }
 
-extension CSPReportToEndpoint: Equatable {}
-extension CSPReportTo: Equatable {}
+extension CSPReportToEndpoint: Equatable {
+    public static func == (lhs: CSPReportToEndpoint, rhs: CSPReportToEndpoint) -> Bool {
+        return lhs.url == rhs.url
+    }
+}
+
+extension CSPReportTo: Equatable {
+    public static func == (lhs: CSPReportTo, rhs: CSPReportTo) -> Bool {
+        return lhs.group == rhs.group &&
+            lhs.max_age == rhs.max_age &&
+            lhs.endpoints == rhs.endpoints &&
+            lhs.include_subdomains == rhs.include_subdomains
+    }
+}
 
 public struct CSPKeywords {
     public static let all = "*"
