@@ -49,14 +49,31 @@ services.register(middlewareConfig)
 
 The default factory will add default values to your site for Content-Security-Policy, X-XSS-Protection, X-Frame-Options and X-Content-Type-Options.
 
+```HTTP
+x-content-type-options: nosniff
+content-security-policy: default-src 'self'
+x-frame-options: DENY
+x-xss-protection: 1; mode=block
+```
+
 ***Note:*** You should ensure you set the security headers as the last middleware in your `MiddlewareConfig` (i.e., the first middleware to be applied to responses) to make sure the headers get added to all responses.
 
 If you want to add your own values, it is easy to do using the factory. For instance, to add a content security policy configuration, just do:
 
 ```swift
 let cspValue = "default-src 'none'; script-src https://static.brokenhands.io;"
+
 let cspConfig = ContentSecurityPolicyConfiguration(value: cspValue)
-let securityHeadersMiddlewareFactory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
+
+let securityHeadersFactory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
+services.register(securityHeadersFactory.build())
+```
+
+```HTTP
+x-content-type-options: nosniff
+content-security-policy: default-src 'none'; script-src https://static.brokenhands.io;
+x-frame-options: DENY
+x-xss-protection: 1; mode=block
 ```
 
 You will need to add it as a dependency in your `Package.swift` file:
@@ -70,7 +87,7 @@ dependencies: [
 
 Each different header has its own configuration and options, details of which can be found below.
 
-You can test your site by visiting the awesome [Security Headers](https://securityheaders.io) (no affiliation) websites
+You can test your site by visiting the awesome [Security Headers](https://securityheaders.io) (no affiliation) website.
 
 ## API Headers
 
@@ -80,7 +97,14 @@ If you are running an API you can choose a default configuration for that by cre
 let securityHeaders = SecurityHeadersFactory.api()
 ```
 
-## Manual Initialisation
+```http
+x-content-type-options: nosniff
+content-security-policy: default-src 'none'
+x-frame-options: DENY
+x-xss-protection: 1; mode=block
+```
+
+## Manual Initialization
 
 You can also build the middleware manually like so:
 
@@ -154,7 +178,7 @@ let cspBuilder = ContentSecurityPolicy().set(value: "default-src: 'none'")
 
 let cspConfig = ContentSecurityPolicyConfiguration(value: cspBuilder)
 
-let securityHeaders = SecurityHeaders(contentSecurityPolicyConfiguration: cspConfig)
+let securityHeadersFactory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
 ```
 
 **ContentSecurityPolicyConfiguration(value)**
@@ -162,7 +186,7 @@ let securityHeaders = SecurityHeaders(contentSecurityPolicyConfiguration: cspCon
 ```swift
 let cspConfig = ContentSecurityPolicyConfiguration(value: "default-src 'none'")
 
-let securityHeaders = SecurityHeaders(contentSecurityPolicyConfiguration: cspConfig)
+let securityHeadersFactory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
 ```
 
 ```http
@@ -215,21 +239,21 @@ To configure your CSP you can add it to your `ContentSecurityPolicyConfiguration
 
 ```swift
 let cspBuilder = ContentSecurityPolicy()
-        .defaultSrc(sources: CSPKeywords.none)
-        .scriptSrc(sources: "https://static.brokenhands.io")
-        .styleSrc(sources: "https://static.brokenhands.io")
-        .imgSrc(sources: "https://static.brokenhands.io")
-        .fontSrc(sources: "https://static.brokenhands.io")
-        .connectSrc(sources: "https://*.brokenhands.io")
-        .formAction(sources: CSPKeywords.`self`)
-        .upgradeInsecureRequests()
-        .blockAllMixedContent()
-        .requireSriFor(values: "script", "style")
-        .reportUri(uri: "https://csp-report.brokenhands.io")
+    .defaultSrc(sources: CSPKeywords.none)
+    .scriptSrc(sources: "https://static.brokenhands.io")
+    .styleSrc(sources: "https://static.brokenhands.io")
+    .imgSrc(sources: "https://static.brokenhands.io")
+    .fontSrc(sources: "https://static.brokenhands.io")
+    .connectSrc(sources: "https://*.brokenhands.io")
+    .formAction(sources: CSPKeywords.`self`)
+    .upgradeInsecureRequests()
+    .blockAllMixedContent()
+    .requireSriFor(values: "script", "style")
+    .reportUri(uri: "https://csp-report.brokenhands.io")
 
 let cspConfig = ContentSecurityPolicyConfiguration(value: cspBuilder)
 
-let securityHeaders = SecurityHeaders(contentSecurityPolicyConfiguration: cspConfig)
+let securityHeadersFactory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
 ```
 
 ```http
@@ -257,15 +281,15 @@ Vapor Security Headers also supports setting the CSP on a route or request basis
 
 ```swift
 let cspConfig = ContentSecurityPolicy()
-        .defaultSrc(sources: CSPKeywords.none)
-        .scriptSrc(sources: "https://comments.disqus.com")
+    .defaultSrc(sources: CSPKeywords.none)
+    .scriptSrc(sources: "https://comments.disqus.com")
 
-let pageSpecificCSP = ContentSecurityPolicyConfiguration(value: pageSpecificCSPValue)
-request.contentSecurityPolicy = pageSpecificCSP
+let pageSpecificCSP = ContentSecurityPolicyConfiguration(value: cspConfig)
+req.contentSecurityPolicy = pageSpecificCSP
 ```
 
 ```http
-Content-Security-Policy: default-src 'none'; script-src https://comments.disqus.com
+content-security-policy: default-src 'none'; script-src https://comments.disqus.com
 ```
 
 You must also enable the `CSPRequestConfiguration` service for this to work. In `configure.swift` add:
@@ -284,7 +308,12 @@ To configure this, just pass in your policy to the `ContentSecurityPolicyReportO
 
 ```swift
 let cspConfig = ContentSecurityPolicyReportOnlyConfiguration(value: "default-src https:; report-uri https://csp-report.brokenhands.io")
-let securityHeaders = SecurityHeaders(contentSecurityPolicyReportOnlyConfiguration: cspConfig)
+        
+let securityHeadersFactory = SecurityHeadersFactory().with(contentSecurityPolicyReportOnly: cspConfig)  
+```
+
+```http
+content-security-policy-report-only: default-src https:; report-uri https://csp-report.brokenhands.io
 ```
 
 The [above blog post](https://scotthelme.co.uk/content-security-policy-an-introduction/) goes into more details about this.
@@ -294,25 +323,47 @@ The [above blog post](https://scotthelme.co.uk/content-security-policy-an-introd
 X-XSS-Protection configures the browser's cross-site scripting filter. The recommended, and default, setting is `.block` which blocks the response if the browser detects an attack. This can be configured with:
 
 ```swift
-let xssProtectionConfig = XssProtectionConfiguration(option: .block)
+let xssProtectionConfig = XSSProtectionConfiguration(option: .block)
+    
+let securityHeadersFactory = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig)
+```
+
+```http
+x-xss-protection: 1; mode=block
 ```
 
 To just enable the protection:
 
 ```swift
-let xssProtectionConfig = XssProtectionConfiguration(option: .enable)
+let xssProtectionConfig = XSSProtectionConfiguration(option: .enable)
 ```
 
-To sanitise the page and report the violation:
+```http
+x-xss-protection: 1
+```
+
+To sanitize the page and report the violation:
 
 ```swift
-let xssProtectionConfig = XssProtectionConfiguration(option: .report("https://report-uri.com"))
+let xssProtectionConfig = XSSProtectionConfiguration(option: .report(uri: "https://report-uri.com"))
+    
+let securityHeadersFactory = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig) 
+```
+
+```http
+x-xss-protection: 1; report=https://report-uri.com
 ```
 
 Or to disable:
 
 ```swift
-let xssProtectionConfig = XssProtectionConfiguration(option: .disable)
+let xssProtectionConfig = XSSProtectionConfiguration(option: .disable)
+    
+let securityHeadersFactory = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig)
+```
+
+```http
+x-xss-protection: 0
 ```
 
 ## X-Content-Type-Options
@@ -321,6 +372,12 @@ X-Content-Type-Options stops a browser from trying to MIME-sniff content types f
 
 ```swift
 let contentTypeConfig = ContentTypeOptionsConfiguration(option: .nosniff)
+    
+let securityHeadersFactory = SecurityHeadersFactory().with(contentTypeOptions: contentTypeConfig)
+```
+
+```http
+x-content-type-options: nosniff
 ```
 
 To disable it:
@@ -335,6 +392,12 @@ The X-Frame-Options header is for click-jacking attacks and tells the browser wh
 
 ```swift
 let frameOptionsConfig = FrameOptionsConfiguration(option: .deny)
+
+let securityHeadersFactory = SecurityHeadersFactory().with(frameOptions: frameOptionsConfig)
+```
+
+```http
+x-frame-options: DENY
 ```
 
 To allow you to frame your own site:
@@ -343,10 +406,18 @@ To allow you to frame your own site:
 let frameOptionsConfig = FrameOptionsConfiguration(option: .sameOrigin)
 ```
 
+```http
+x-frame-options: SAMEORIGIN
+```
+
 To allow a specific site to frame yours, use:
 
 ```swift
 let frameOptionsConfig = FrameOptionsConfiguration(option: .allow(from: "https://mytrustedsite.com"))
+```
+
+```http
+x-frame-options: ALLOW-FROM https://mytrustedsite.com
 ```
 
 ## Strict-Transport-Security
@@ -361,18 +432,28 @@ To use the Strict-Transport-Security header, you can configure and add it as so 
 
 ```swift
 let strictTransportSecurityConfig = StrictTransportSecurityConfiguration(maxAge: 31536000, includeSubdomains: true, preload: true)
-let securityHeaders = SecurityHeaders(hstsConfiguration: strictTransportSecurityConfig)
+
+let securityHeadersFactory = SecurityHeadersFactory().with(strictTransportSecurity: strictTransportSecurityConfig)
+```
+
+```http
+strict-transport-security: max-age=31536000; includeSubDomains; preload
 ```
 
 ## Server
 
 The Server header is usually hidden from responses in order to not give away what type of server you are running and what version you are using. This is to stop attackers from scanning your site and using known vulnerabilities against it easily. By default Vapor does not show the server header in responses for this reason.
 
-However, it can be fun to add in a custom server configuration for a bit of personalisation, such as your website name, or company name (look at Github's response) and the `ServerConfiguraiton` is to allow this. So, for example, if I wanted my `Server` header to be `brokenhands.io`, I would configure it like:
+However, it can be fun to add in a custom server configuration for a bit of personalization, such as your website name, or company name (look at Github's response) and the `ServerConfiguraiton` is to allow this. So, for example, if I wanted my `Server` header to be `brokenhands.io`, I would configure it like:
 
 ```swift
 let serverConfig = ServerConfiguration(value: "brokenhands.io")
-let securityHeaders = SecurityHeaders(serverConfiguration: serverConfig)
+
+let securityHeadersFactory = SecurityHeadersFactory().with(server: serverConfig)
+```
+
+```http
+server: brokenhands.io
 ```
 
 ## Referrer Policy
@@ -392,3 +473,13 @@ The different options are:
 * "unsafe-url"
 
 I won't go into details about each one, I will point you in the direction of a far better explanation [by Scott Helme](https://scotthelme.co.uk/a-new-security-header-referrer-policy/).
+
+```swift
+let referrerPolicyConfig = ReferrerPolicyConfiguration(.noReferrer)
+
+let securityHeadersFactory = SecurityHeadersFactory().with(referrerPolicy: referrerPolicyConfig)
+```
+
+```http
+referrer-policy: no-referrer
+```
