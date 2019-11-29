@@ -5,9 +5,8 @@
     <a href="https://swift.org">
         <img src="http://img.shields.io/badge/Swift-4.1-brightgreen.svg" alt="Language">
     </a>
-    <a href="https://travis-ci.org/brokenhandsio/VaporSecurityHeaders">
-        <img src="https://travis-ci.org/brokenhandsio/VaporSecurityHeaders.svg?branch=master" alt="Build Status">
-    </a>
+    <a href="https://github.com/brokenhandsio/VaporSecurityHeaders/actions">
+         <img src="https://github.com/brokenhandsio/VaporSecurityHeaders/workflows/CI/badge.svg?branch=master" alt="Build Status">
     <a href="https://codecov.io/gh/brokenhandsio/VaporSecurityHeaders">
         <img src="https://codecov.io/gh/brokenhandsio/VaporSecurityHeaders/branch/master/graph/badge.svg" alt="Code Coverage">
     </a>
