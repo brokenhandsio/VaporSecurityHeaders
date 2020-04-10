@@ -34,13 +34,12 @@ extension Request {
 //            } else {
 //                return nil
 //            }
-            fatalError()
+            return nil
         }
         set {
 //            if let requestConfig = try? privateContainer.make(CSPRequestConfiguration.self) {
 //                requestConfig.configuration = newValue
 //            }
-            fatalError()
         }
     }
 }
