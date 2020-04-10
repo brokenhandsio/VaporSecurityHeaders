@@ -511,8 +511,9 @@ class HeaderTests: XCTestCase {
 
     private func makeTestResponse(for request: Request, securityHeadersToAdd: SecurityHeadersFactory, routeHandler: ((Request) throws -> String)? = nil, fileMiddleware: StubFileMiddleware? = nil, initialRequest: Request? = nil) throws -> Response {
 
-
+        application.middleware = Middlewares()
         application.middleware.use(securityHeadersToAdd.build())
+        application.middleware.use(ErrorMiddleware.default(environment: request.application.environment))
         
         if let fileMiddleware = fileMiddleware {
             application.middleware.use(fileMiddleware)
