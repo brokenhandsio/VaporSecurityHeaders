@@ -4,6 +4,9 @@ import PackageDescription
 
 let package = Package(
     name: "VaporSecurityHeaders",
+    platforms: [
+       .macOS(.v10_15)
+    ],
     products: [
         .library(name: "VaporSecurityHeaders", targets: ["VaporSecurityHeaders"]),
     ],
