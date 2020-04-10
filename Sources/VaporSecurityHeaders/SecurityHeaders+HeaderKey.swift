@@ -1,6 +1,6 @@
 import Vapor
 
-public extension HTTPHeaders {
+public extension HTTPHeaders.Name {
 
     static let contentSecurityPolicy = HTTPHeaders.Name("Content-Security-Policy")
     static let xXssProtection = HTTPHeaders.Name("X-XSS-Protection")
