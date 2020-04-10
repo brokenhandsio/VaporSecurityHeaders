@@ -34,16 +34,15 @@ These headers will *help* prevent cross-site scripting attacks, SSL downgrade at
 
 # Usage
 
-To use Vapor Security Headers, just register the middleware with your services and add it to your `MiddlewareConfig`. Vapor Security Headers makes this easy to do with a `build` function on the factory. In `configure.swift` add:
+To use Vapor Security Headers, you need to add the middleware to your `Application`'s `Middlewares`. Vapor Security Headers makes this easy to do with a `build` function on the factory. **Note:** if you want security headers added to error reponses (recommended), you need to initialise the `Middlewares` from fresh and add the middleware in _after_ the `SecuriyHeaders`. In `configure.swift` add:
 
 ```swift
 let securityHeadersFactory = SecurityHeadersFactory()
-services.register(securityHeadersFactory.build())
 
-var middlewareConfig = MiddlewareConfig()
-// ...
-middlewareConfig.use(SecurityHeaders.self)
-services.register(middlewareConfig)
+application.middleware = Middlewares()
+application.middleware.use(securityHeadersFactory.build())
+application.middleware.use(ErrorMiddleware.default(environment: application.environment))
+// Add other middlewares...
 ```
 
 The default factory will add default values to your site for Content-Security-Policy, X-XSS-Protection, X-Frame-Options and X-Content-Type-Options.
@@ -55,7 +54,7 @@ x-frame-options: DENY
 x-xss-protection: 1; mode=block
 ```
 
-***Note:*** You should ensure you set the security headers as the last middleware in your `MiddlewareConfig` (i.e., the first middleware to be applied to responses) to make sure the headers get added to all responses.
+***Note:*** You should ensure you set the security headers as the first middleware in your `Middlewares` (i.e., the first middleware to be applied to responses) to make sure the headers get added to all responses.
 
 If you want to add your own values, it is easy to do using the factory. For instance, to add a content security policy configuration, just do:
 
@@ -80,7 +79,7 @@ You will need to add it as a dependency in your `Package.swift` file:
 ```swift
 dependencies: [
     ...,
-    .package(url: "https://github.com/brokenhandsio/VaporSecurityHeaders.git", from: "2.0.0")
+    .package(url: "https://github.com/brokenhandsio/VaporSecurityHeaders.git", from: "3.0.0")
 ]
 ```
 
