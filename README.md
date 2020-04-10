@@ -3,7 +3,7 @@
     <br>
     <br>
     <a href="https://swift.org">
-        <img src="http://img.shields.io/badge/Swift-4.1-brightgreen.svg" alt="Language">
+        <img src="http://img.shields.io/badge/Swift-5.2-brightgreen.svg" alt="Language">
     </a>
     <a href="https://github.com/brokenhandsio/VaporSecurityHeaders/actions">
          <img src="https://github.com/brokenhandsio/VaporSecurityHeaders/workflows/CI/badge.svg?branch=master" alt="Build Status">
