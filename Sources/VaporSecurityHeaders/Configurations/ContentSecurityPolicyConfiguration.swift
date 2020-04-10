@@ -26,20 +26,18 @@ public class CSPRequestConfiguration {
     public init() {}
 }
 
+extension ContentSecurityPolicyConfiguration: StorageKey {
+    public typealias Value = Self
+}
+
 extension Request {
+    
     public var contentSecurityPolicy: ContentSecurityPolicyConfiguration? {
         get {
-//            if let requestConfig = try? privateContainer.make(CSPRequestConfiguration.self) {
-//                return requestConfig.configuration
-//            } else {
-//                return nil
-//            }
-            return nil
+            return self.storage[ContentSecurityPolicyConfiguration.self]
         }
         set {
-//            if let requestConfig = try? privateContainer.make(CSPRequestConfiguration.self) {
-//                requestConfig.configuration = newValue
-//            }
+            self.storage[ContentSecurityPolicyConfiguration.self] = newValue
         }
     }
 }
