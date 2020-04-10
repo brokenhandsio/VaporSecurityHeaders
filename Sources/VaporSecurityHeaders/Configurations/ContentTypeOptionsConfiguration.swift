@@ -16,7 +16,7 @@ public struct ContentTypeOptionsConfiguration: SecurityHeaderConfiguration {
     func setHeader(on response: Response, from request: Request) {
         switch option {
         case .nosniff:
-            response.http.headers.replaceOrAdd(name: .xContentTypeOptions, value: "nosniff")
+            response.headers.replaceOrAdd(name: .xContentTypeOptions, value: "nosniff")
         default:
             break
         }

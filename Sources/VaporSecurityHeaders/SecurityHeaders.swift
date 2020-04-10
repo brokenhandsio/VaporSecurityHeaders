@@ -1,4 +1,3 @@
-import HTTP
 import Vapor
 
 public struct SecurityHeaders {
@@ -34,16 +33,13 @@ public struct SecurityHeaders {
 
 }
 
-extension SecurityHeaders: Middleware, Service {
-
-    public func respond(to request: Request, chainingTo next: Responder) throws -> Future<Response> {
-        let response = try next.respond(to: request)
-
-        return response.map(to: Response.self) { response in
+extension SecurityHeaders: Middleware {
+    
+    public func respond(to request: Request, chainingTo next: Responder) -> EventLoopFuture<Response> {
+        next.respond(to: request).map { response in
             for spec in self.configurations {
                 spec.setHeader(on: response, from: request)
             }
-
             return response
         }
     }

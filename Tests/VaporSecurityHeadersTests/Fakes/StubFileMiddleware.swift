@@ -1,30 +1,26 @@
 import Vapor
-import HTTP
 import VaporSecurityHeaders
 
-struct StubFileMiddleware: Middleware, Service {
+struct StubFileMiddleware: Middleware {
     var cspConfig: ContentSecurityPolicyConfiguration?
     init(cspConfig: ContentSecurityPolicyConfiguration? = nil) {
         self.cspConfig = cspConfig
     }
-
-    func respond(to request: Request, chainingTo next: Responder) throws -> Future<Response> {
-        if request.http.url.path == "/file" {
+    
+    func respond(to request: Request, chainingTo next: Responder) -> EventLoopFuture<Response> {
+        if request.url.path == "/file/" {
             request.contentSecurityPolicy = self.cspConfig
 
-            let body = HTTPBody(string: "Hello World!")
+            let body = Response.Body(string: "Hello World!")
             var headers = HTTPHeaders()
-            headers.add(name: .eTag, value: "1491512490-\(body.count ?? 0)")
+            headers.add(name: .eTag, value: "1491512490-\(body.count)")
             headers.add(name: .contentType, value: "text/plain")
-            let httpResponse = HTTPResponse(status: .ok, headers: headers, body: body)
-            return Future.map(on: request) {
-                return Response(http: httpResponse, using: request)
-            }
+            let response = Response(status: .ok, headers: headers, body: body)
+            return request.eventLoop.future(response)
         }
         else {
-            return try next.respond(to: request)
+            return next.respond(to: request)
         }
-
     }
 }
 

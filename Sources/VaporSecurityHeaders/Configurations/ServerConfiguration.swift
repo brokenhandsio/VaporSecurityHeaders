@@ -1,4 +1,3 @@
-import HTTP
 import Vapor
 
 public struct ServerConfiguration: SecurityHeaderConfiguration {
@@ -9,6 +8,6 @@ public struct ServerConfiguration: SecurityHeaderConfiguration {
     }
 
     func setHeader(on response: Response, from request: Request) {
-        response.http.headers.replaceOrAdd(name: .server, value: value)
+        response.headers.replaceOrAdd(name: .server, value: value)
     }
 }

@@ -14,31 +14,25 @@ public struct ContentSecurityPolicyConfiguration: SecurityHeaderConfiguration {
 
     func setHeader(on response: Response, from request: Request) {
         if let requestCSP = request.contentSecurityPolicy {
-            response.http.headers.replaceOrAdd(name: .contentSecurityPolicy, value: requestCSP.value)
+            response.headers.replaceOrAdd(name: .contentSecurityPolicy, value: requestCSP.value)
         } else {
-            response.http.headers.replaceOrAdd(name: .contentSecurityPolicy, value: value)
+            response.headers.replaceOrAdd(name: .contentSecurityPolicy, value: value)
         }
     }
 }
 
-public class CSPRequestConfiguration: Service {
-    var configuration: ContentSecurityPolicyConfiguration?
-    public init() {}
+extension ContentSecurityPolicyConfiguration: StorageKey {
+    public typealias Value = Self
 }
 
 extension Request {
+    
     public var contentSecurityPolicy: ContentSecurityPolicyConfiguration? {
         get {
-            if let requestConfig = try? privateContainer.make(CSPRequestConfiguration.self) {
-                return requestConfig.configuration
-            } else {
-                return nil
-            }
+            return self.storage[ContentSecurityPolicyConfiguration.self]
         }
         set {
-            if let requestConfig = try? privateContainer.make(CSPRequestConfiguration.self) {
-                requestConfig.configuration = newValue
-            }
+            self.storage[ContentSecurityPolicyConfiguration.self] = newValue
         }
     }
 }
@@ -98,81 +92,103 @@ public class ContentSecurityPolicy {
         return policy.joined(separator: "; ")
     }
 
+    @discardableResult
     public func set(value: String) -> ContentSecurityPolicy {
         policy.append(value)
         return self
     }
-
+    
+    @discardableResult
     public func baseUri(sources: String...) -> ContentSecurityPolicy {
         policy.append("base-uri \(sources.joined(separator: " "))")
         return self
     }
 
+    @discardableResult
     public func blockAllMixedContent() -> ContentSecurityPolicy {
         policy.append("block-all-mixed-content")
         return self
     }
+    
+    @discardableResult
+    public func childSrc(sources: String...) -> ContentSecurityPolicy {
+        policy.append("child-src \(sources.joined(separator: " "))")
+        return self
+    }
 
+    @discardableResult
     public func connectSrc(sources: String...) -> ContentSecurityPolicy {
         policy.append("connect-src \(sources.joined(separator: " "))")
         return self
     }
 
+    @discardableResult
     public func defaultSrc(sources: String...) -> ContentSecurityPolicy {
         policy.append("default-src \(sources.joined(separator: " "))")
         return self
     }
 
+    @discardableResult
     public func fontSrc(sources: String...) -> ContentSecurityPolicy {
         policy.append("font-src \(sources.joined(separator: " "))")
         return self
     }
 
+    @discardableResult
     public func formAction(sources: String...) -> ContentSecurityPolicy {
         policy.append("form-action \(sources.joined(separator: " "))")
         return self
     }
 
+    @discardableResult
     public func frameAncestors(sources: String...) -> ContentSecurityPolicy {
         policy.append("frame-ancestors \(sources.joined(separator: " "))")
         return self
     }
 
+    @discardableResult
     public func frameSrc(sources: String...) -> ContentSecurityPolicy {
         policy.append("frame-src \(sources.joined(separator: " "))")
         return self
     }
 
+    @discardableResult
     public func imgSrc(sources: String...) -> ContentSecurityPolicy {
         policy.append("img-src \(sources.joined(separator: " "))")
         return self
     }
 
+    @discardableResult
     public func manifestSrc(sources: String...) -> ContentSecurityPolicy {
         policy.append("manifest-src \(sources.joined(separator: " "))")
         return self
     }
 
+    @discardableResult
     public func mediaSrc(sources: String...) -> ContentSecurityPolicy {
         policy.append("media-src \(sources.joined(separator: " "))")
         return self
     }
 
+    @discardableResult
     public func objectSrc(sources: String...) -> ContentSecurityPolicy {
         policy.append("object-src \(sources.joined(separator: " "))")
         return self
     }
 
+    @discardableResult
     public func pluginTypes(types: String...) -> ContentSecurityPolicy {
         policy.append("plugin-types \(types.joined(separator: " "))")
         return self
     }
 
+    @discardableResult
     public func requireSriFor(values: String...) -> ContentSecurityPolicy {
         policy.append("require-sri-for \(values.joined(separator: " "))")
         return self
     }
 
+    @discardableResult
     public func reportTo(reportToObject: CSPReportTo) -> ContentSecurityPolicy {
         let encoder = JSONEncoder()
         guard let data = try? encoder.encode(reportToObject) else { return self }
@@ -181,31 +197,37 @@ public class ContentSecurityPolicy {
         return self
     }
 
+    @discardableResult
     public func reportUri(uri: String) -> ContentSecurityPolicy {
         policy.append("report-uri \(uri)")
         return self
     }
 
+    @discardableResult
     public func sandbox(values: String...) -> ContentSecurityPolicy {
         policy.append("sandbox \(values.joined(separator: " "))")
         return self
     }
 
+    @discardableResult
     public func scriptSrc(sources: String...) -> ContentSecurityPolicy {
         policy.append("script-src \(sources.joined(separator: " "))")
         return self
     }
 
+    @discardableResult
     public func styleSrc(sources: String...) -> ContentSecurityPolicy {
         policy.append("style-src \(sources.joined(separator: " "))")
         return self
     }
 
+    @discardableResult
     public func upgradeInsecureRequests() -> ContentSecurityPolicy {
         policy.append("upgrade-insecure-requests")
         return self
     }
 
+    @discardableResult
     public func workerSrc(sources: String...) -> ContentSecurityPolicy {
         policy.append("worker-src \(sources.joined(separator: " "))")
         return self
