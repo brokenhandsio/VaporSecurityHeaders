@@ -34,6 +34,28 @@ These headers will *help* prevent cross-site scripting attacks, SSL downgrade at
 
 # Usage
 
+## Add the package
+
+Add the package as a dependency in your `Package.swift` manifest:
+
+```swift
+dependencies: [
+    ...,
+    .package(url: "https://github.com/brokenhandsio/VaporSecurityHeaders.git", from: "3.0.0")
+]
+```
+
+Then add the dependency to your target:
+
+```swift
+.target(name: "App",
+        dependencies: [
+                // ...
+                "VaporSecurityHeaders"]),
+```
+
+## Configuration
+
 To use Vapor Security Headers, you need to add the middleware to your `Application`'s `Middlewares`. Vapor Security Headers makes this easy to do with a `build` function on the factory. **Note:** if you want security headers added to error reponses (recommended), you need to initialise the `Middlewares` from fresh and add the middleware in _after_ the `SecuriyHeaders`. In `configure.swift` add:
 
 ```swift
@@ -64,7 +86,7 @@ let cspValue = "default-src 'none'; script-src https://static.brokenhands.io;"
 let cspConfig = ContentSecurityPolicyConfiguration(value: cspValue)
 
 let securityHeadersFactory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
-services.register(securityHeadersFactory.build())
+application.middleware.use(securityHeadersFactory.build())
 ```
 
 ```HTTP
@@ -72,15 +94,6 @@ x-content-type-options: nosniff
 content-security-policy: default-src 'none'; script-src https://static.brokenhands.io;
 x-frame-options: DENY
 x-xss-protection: 1; mode=block
-```
-
-You will need to add it as a dependency in your `Package.swift` file:
-
-```swift
-dependencies: [
-    ...,
-    .package(url: "https://github.com/brokenhandsio/VaporSecurityHeaders.git", from: "3.0.0")
-]
 ```
 
 Each different header has its own configuration and options, details of which can be found below.
@@ -93,6 +106,7 @@ If you are running an API you can choose a default configuration for that by cre
 
 ```swift
 let securityHeaders = SecurityHeadersFactory.api()
+application.middleware.use(securityHeaders)
 ```
 
 ```http
@@ -102,19 +116,11 @@ x-frame-options: DENY
 x-xss-protection: 1; mode=block
 ```
 
-## Manual Initialization
-
-You can also build the middleware manually like so:
-
-```swift
-let securityHeadersMiddleware = SecurityHeadersFactory().build()
-```
-
 # Server Configuration
 
 ## Vapor
 
-If you are running Vapor on it's own (i.e. not as a CGI application or behind and reverse proxy) then you do not need to do anything more to get it running!
+If you are running Vapor on it's own (i.e. not as a CGI application or behind a reverse proxy) then you do not need to do anything more to get it running!
 
 ## Nginx, Apache and 3rd Party Services
 
@@ -434,7 +440,7 @@ strict-transport-security: max-age=31536000; includeSubDomains; preload
 
 The Server header is usually hidden from responses in order to not give away what type of server you are running and what version you are using. This is to stop attackers from scanning your site and using known vulnerabilities against it easily. By default Vapor does not show the server header in responses for this reason.
 
-However, it can be fun to add in a custom server configuration for a bit of personalization, such as your website name, or company name (look at Github's response) and the `ServerConfiguraiton` is to allow this. So, for example, if I wanted my `Server` header to be `brokenhands.io`, I would configure it like:
+However, it can be fun to add in a custom server configuration for a bit of personalization, such as your website name, or company name (look at Github's response) and the `ServerConfiguraiton` allows this. So, for example, if I wanted my `Server` header to be `brokenhands.io`, I would configure it like:
 
 ```swift
 let serverConfig = ServerConfiguration(value: "brokenhands.io")
