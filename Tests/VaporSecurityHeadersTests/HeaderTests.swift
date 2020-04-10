@@ -6,55 +6,6 @@ import VaporSecurityHeaders
 
 class HeaderTests: XCTestCase {
 
-    // MARK: - All Tests
-
-    static var allTests = [
-        ("testLinuxTestSuiteIncludesAllTests", testLinuxTestSuiteIncludesAllTests),
-        ("testDefaultHeaders", testDefaultHeaders),
-        ("testDefaultHeadersWithHSTS", testDefaultHeadersWithHSTS),
-        ("testAllHeadersForApi", testAllHeadersForApi),
-        ("testAPIHeadersWithHSTS", testAPIHeadersWithHSTS),
-        ("testHeadersWithContentTypeOptionsTurnedOff", testHeadersWithContentTypeOptionsTurnedOff),
-        ("testHeadersWithContentTypeOptionsNosniff", testHeadersWithContentTypeOptionsNosniff),
-        ("testHeaderWithFrameOptionsDeny", testHeaderWithFrameOptionsDeny),
-        ("testHeaderWithFrameOptionsSameOrigin", testHeaderWithFrameOptionsSameOrigin),
-        ("testHeaderWithFrameOptionsAllowFrom", testHeaderWithFrameOptionsAllowFrom),
-        ("testHeaderWithXssProtectionDisable", testHeaderWithXssProtectionDisable),
-        ("testHeaderWithXssProtectionEnable", testHeaderWithXssProtectionEnable),
-        ("testHeaderWithXssProtectionBlock", testHeaderWithXssProtectionBlock),
-        ("testHeaderWithXssProtectionReport", testHeaderWithXssProtectionReport),
-        ("testHeaderWithHSTSwithMaxAge", testHeaderWithHSTSwithMaxAge),
-        ("testHeadersWithHSTSwithSubdomains", testHeadersWithHSTSwithSubdomains),
-        ("testHeadersWithHSTSwithPreload", testHeadersWithHSTSwithPreload),
-        ("testHeadersWithHSTSwithPreloadAndSubdomain", testHeadersWithHSTSwithPreloadAndSubdomain),
-        ("testHeadersWithHSTSwithSubdomainsFalse", testHeadersWithHSTSwithSubdomainsFalse),
-        ("testHeadersWithHSTSwithPreloadFalse", testHeadersWithHSTSwithPreloadFalse),
-        ("testHeadersWithHSTSwithSubdomainAndPreloadFalse", testHeadersWithHSTSwithSubdomainAndPreloadFalse),
-        ("testHeadersWithServerValue", testHeadersWithServerValue),
-        ("testHeadersWithCSP", testHeadersWithCSP),
-        ("testHeadersWithStringCSP", testHeadersWithStringCSP),
-        ("testHeadersWithSetCSP", testHeadersWithSetCSP),
-        ("testHeadersWithReportToCSP", testHeadersWithReportToCSP),
-        ("testHeadersWithExhaustiveCSP", testHeadersWithExhaustiveCSP),
-        ("testHeadersWithReportOnlyCSP", testHeadersWithReportOnlyCSP),
-        ("testHeadersWithReferrerPolicyEmpty", testHeadersWithReferrerPolicyEmpty),
-        ("testHeadersWithReferrerPolicyNoReferrer", testHeadersWithReferrerPolicyNoReferrer),
-        ("testHeadersWithReferrerPolicyNoReferrerWhenDowngrade", testHeadersWithReferrerPolicyNoReferrerWhenDowngrade),
-        ("testHeadersWithReferrerPolicySameOrigin", testHeadersWithReferrerPolicySameOrigin),
-        ("testHeadersWithReferrerPolicyOrigin", testHeadersWithReferrerPolicyOrigin),
-        ("testHeadersWithReferrerPolicyStrictOrigin", testHeadersWithReferrerPolicyStrictOrigin),
-        ("testHeadersWithReferrerPolicyOriginWhenCrossOrigin", testHeadersWithReferrerPolicyOriginWhenCrossOrigin),
-        ("testHeadersWithReferrerPolicyStrictOriginWhenCrossOrigin", testHeadersWithReferrerPolicyStrictOriginWhenCrossOrigin),
-        ("testHeadersWithReferrerPolicyUnsafeUrl", testHeadersWithReferrerPolicyUnsafeUrl),
-        ("testApiPolicyWithAddedReferrerPolicy", testApiPolicyWithAddedReferrerPolicy),
-        ("testCustomCSPOnSingleRoute", testCustomCSPOnSingleRoute),
-        ("testCustomCSPDoesntAffectSecondRoute", testCustomCSPDoesntAffectSecondRoute),
-        ("testDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute", testDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute),
-        ("testAbortMiddleware", testAbortMiddleware),
-        ("testMockFileMiddleware", testMockFileMiddleware),
-        ("testMockFileMiddlewareDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute", testMockFileMiddlewareDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute),
-    ]
-
     // MARK: - Properties
 
     private var application: Application!
@@ -81,17 +32,6 @@ class HeaderTests: XCTestCase {
     }
 
     // MARK: - Tests
-
-    func testLinuxTestSuiteIncludesAllTests() {
-        #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
-            let thisClass = type(of: self)
-            let linuxCount = thisClass.allTests.count
-            let darwinCount = Int(thisClass
-                .defaultTestSuite.testCaseCount)
-            XCTAssertEqual(linuxCount, darwinCount,
-                           "\(darwinCount - linuxCount) tests are missing from allTests")
-        #endif
-    }
 
     func testDefaultHeaders() throws {
         let expectedXCTOHeaderValue = "nosniff"
@@ -480,7 +420,7 @@ class HeaderTests: XCTestCase {
             req.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: cspBuilder)
             return "Different CSP!"
         }
-        let response = try makeTestResponse(for: routeRequest, securityHeadersToAdd: factory, routeHandler: cspSettingRouteHandler, perRouteCSP: true)
+        let response = try makeTestResponse(for: routeRequest, securityHeadersToAdd: factory, routeHandler: cspSettingRouteHandler)
 
         XCTAssertEqual(expectedCsp, response.headers[.contentSecurityPolicy].first)
     }
@@ -501,7 +441,7 @@ class HeaderTests: XCTestCase {
             req.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: customCSP)
             return "Different CSP!"
         }
-        let response = try makeTestResponse(for: request, securityHeadersToAdd: factory, routeHandler: cspSettingRouteHandler, perRouteCSP: true, initialRequest: routeRequest)
+        let response = try makeTestResponse(for: request, securityHeadersToAdd: factory, routeHandler: cspSettingRouteHandler, initialRequest: routeRequest)
         let expectedCSPHeaderValue = "default-src 'none'"
 
         XCTAssertEqual(expectedCSPHeaderValue, response.headers[.contentSecurityPolicy].first)
@@ -516,7 +456,7 @@ class HeaderTests: XCTestCase {
             req.contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: differentCsp)
             return "Different CSP!"
         }
-        let response = try makeTestResponse(for: request, securityHeadersToAdd: factory, routeHandler: cspSettingRouteHandler, perRouteCSP: true)
+        let response = try makeTestResponse(for: request, securityHeadersToAdd: factory, routeHandler: cspSettingRouteHandler)
 
         XCTAssertEqual("default-src 'none'", response.headers[.contentSecurityPolicy].first)
     }
@@ -535,7 +475,7 @@ class HeaderTests: XCTestCase {
         XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[.xXssProtection].first)
     }
 
-    func testMockFileMiddleware() throws {
+    func testStubFileMiddleware() throws {
         let expectedXCTOHeaderValue = "nosniff"
         let expectedCSPHeaderValue = "default-src 'none'"
         let expectedXFOHeaderValue = "DENY"
@@ -549,7 +489,7 @@ class HeaderTests: XCTestCase {
         XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[.xXssProtection].first)
     }
 
-    func testMockFileMiddlewareDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute() throws {
+    func testStubFileMiddlewareDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute() throws {
         let expectedXCTOHeaderValue = "nosniff"
         let expectedCSPHeaderValue = "default-src 'none'; script-src test"
         let csp = ContentSecurityPolicy()
@@ -558,7 +498,7 @@ class HeaderTests: XCTestCase {
         let expectedXFOHeaderValue = "DENY"
         let expectedXSSProtectionHeaderValue = "1; mode=block"
 
-        let response = try makeTestResponse(for: fileRequest, securityHeadersToAdd: SecurityHeadersFactory.api(), fileMiddleware: StubFileMiddleware(cspConfig: ContentSecurityPolicyConfiguration(value: csp)), perRouteCSP: true)
+        let response = try makeTestResponse(for: fileRequest, securityHeadersToAdd: SecurityHeadersFactory.api(), fileMiddleware: StubFileMiddleware(cspConfig: ContentSecurityPolicyConfiguration(value: csp)))
 
         XCTAssertEqual("Hello World!", String(data: response.body.data!, encoding: String.Encoding.utf8))
         XCTAssertEqual(expectedXCTOHeaderValue, response.headers[.xContentTypeOptions].first)
@@ -569,20 +509,13 @@ class HeaderTests: XCTestCase {
 
     // MARK: - Private functions
 
-    private func makeTestResponse(for request: Request, securityHeadersToAdd: SecurityHeadersFactory, routeHandler: ((Request) throws -> String)? = nil, fileMiddleware: StubFileMiddleware? = nil, perRouteCSP: Bool = false, initialRequest: Request? = nil) throws -> Response {
+    private func makeTestResponse(for request: Request, securityHeadersToAdd: SecurityHeadersFactory, routeHandler: ((Request) throws -> String)? = nil, fileMiddleware: StubFileMiddleware? = nil, initialRequest: Request? = nil) throws -> Response {
 
 
         application.middleware.use(securityHeadersToAdd.build())
         
         if let fileMiddleware = fileMiddleware {
             application.middleware.use(fileMiddleware)
-        }
-
-        if perRouteCSP {
-//            services.register { _ in
-//                return CSPRequestConfiguration()
-//            }
-            #warning("TODO")
         }
 
         application.routes.get("test") { req in
@@ -596,9 +529,6 @@ class HeaderTests: XCTestCase {
         application.routes.get("abort") { req -> EventLoopFuture<Response> in
             throw Abort(.badRequest)
         }
-
-//        let middleware = try app.make(MiddlewareConfig.self).resolve(for: app)
-//        let responderWithMiddleware = middleware.makeResponder(chainedto: responder)
 
         if let dummyRequest = initialRequest {
             _ = try application.responder.respond(to: dummyRequest).wait()
