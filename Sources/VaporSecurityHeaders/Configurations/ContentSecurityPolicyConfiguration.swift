@@ -109,6 +109,12 @@ public class ContentSecurityPolicy {
         policy.append("block-all-mixed-content")
         return self
     }
+    
+    @discardableResult
+    public func childSrc(sources: String...) -> ContentSecurityPolicy {
+        policy.append("child-src \(sources.joined(separator: " "))")
+        return self
+    }
 
     @discardableResult
     public func connectSrc(sources: String...) -> ContentSecurityPolicy {

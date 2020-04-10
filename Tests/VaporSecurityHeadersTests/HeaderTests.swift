@@ -404,13 +404,14 @@ class HeaderTests: XCTestCase {
     }
 
     func testCustomCSPOnSingleRoute() throws {
-        let expectedCsp = "default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style"
+        let expectedCsp = "default-src 'none'; script-src https://static.brokenhands.io; style-src https://static.brokenhands.io; img-src https://static.brokenhands.io; font-src https://static.brokenhands.io; connect-src https://*.brokenhands.io; child-src 'self'; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content; require-sri-for script style"
         let cspBuilder = ContentSecurityPolicy()
             .defaultSrc(sources: CSPKeywords.none)
             .scriptSrc(sources: "https://static.brokenhands.io").styleSrc(sources: "https://static.brokenhands.io")
             .imgSrc(sources: "https://static.brokenhands.io")
             .fontSrc(sources: "https://static.brokenhands.io")
             .connectSrc(sources: "https://*.brokenhands.io")
+            .childSrc(sources: CSPKeywords.`self`)
             .formAction(sources: CSPKeywords.`self`)
             .upgradeInsecureRequests()
             .blockAllMixedContent()
