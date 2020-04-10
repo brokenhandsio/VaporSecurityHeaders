@@ -8,7 +8,7 @@ struct StubFileMiddleware: Middleware {
     }
     
     func respond(to request: Request, chainingTo next: Responder) -> EventLoopFuture<Response> {
-        if request.url.path == "/file" {
+        if request.url.path == "/file/" {
             request.contentSecurityPolicy = self.cspConfig
 
             let body = Response.Body(string: "Hello World!")
