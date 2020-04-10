@@ -21,6 +21,6 @@ public struct ReferrerPolicyConfiguration: SecurityHeaderConfiguration {
     }
 
     func setHeader(on response: Response, from request: Request) {
-        response.http.headers.replaceOrAdd(name: .referrerPolicy, value: option.rawValue)
+        response.headers.replaceOrAdd(name: HTTPHeaders.referrerPolicy, value: option.rawValue)
     }
 }

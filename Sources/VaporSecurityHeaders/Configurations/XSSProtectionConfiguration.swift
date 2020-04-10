@@ -18,13 +18,13 @@ public struct XSSProtectionConfiguration: SecurityHeaderConfiguration {
     func setHeader(on response: Response, from request: Request) {
         switch option {
         case .disable:
-            response.http.headers.replaceOrAdd(name: .xXssProtection, value: "0")
+            response.headers.replaceOrAdd(name: HTTPHeaders.xXssProtection, value: "0")
         case .enable:
-            response.http.headers.replaceOrAdd(name: .xXssProtection, value: "1")
+            response.headers.replaceOrAdd(name: HTTPHeaders.xXssProtection, value: "1")
         case .block:
-            response.http.headers.replaceOrAdd(name: .xXssProtection, value: "1; mode=block")
+            response.headers.replaceOrAdd(name: HTTPHeaders.xXssProtection, value: "1; mode=block")
         case .report(let uri):
-            response.http.headers.replaceOrAdd(name: .xXssProtection, value: "1; report=\(uri)")
+            response.headers.replaceOrAdd(name: HTTPHeaders.xXssProtection, value: "1; report=\(uri)")
         }
     }
 }

@@ -1,10 +1,11 @@
 import Vapor
 
-public extension HTTPHeaderName {
+public extension HTTPHeaders {
 
-    static let contentSecurityPolicy = HTTPHeaderName("Content-Security-Policy")
-    static let xXssProtection = HTTPHeaderName("X-XSS-Protection")
-    static let xContentTypeOptions = HTTPHeaderName("X-Content-Type-Options")
-    static let contentSecurityPolicyReportOnly = HTTPHeaderName("Content-Security-Policy-Report-Only")
-    static let referrerPolicy = HTTPHeaderName("Referrer-Policy")
+    static let contentSecurityPolicy = HTTPHeaders.Name("Content-Security-Policy")
+    static let xXssProtection = HTTPHeaders.Name("X-XSS-Protection")
+    static let xContentTypeOptions = HTTPHeaders.Name("X-Content-Type-Options")
+    static let contentSecurityPolicyReportOnly = HTTPHeaders.Name("Content-Security-Policy-Report-Only")
+    static let referrerPolicy = HTTPHeaders.Name("Referrer-Policy")
 }
+

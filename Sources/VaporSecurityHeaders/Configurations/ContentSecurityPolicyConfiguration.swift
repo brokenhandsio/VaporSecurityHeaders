@@ -14,14 +14,14 @@ public struct ContentSecurityPolicyConfiguration: SecurityHeaderConfiguration {
 
     func setHeader(on response: Response, from request: Request) {
         if let requestCSP = request.contentSecurityPolicy {
-            response.http.headers.replaceOrAdd(name: .contentSecurityPolicy, value: requestCSP.value)
+            response.headers.replaceOrAdd(name: .contentSecurityPolicy, value: requestCSP.value)
         } else {
-            response.http.headers.replaceOrAdd(name: .contentSecurityPolicy, value: value)
+            response.headers.replaceOrAdd(name: .contentSecurityPolicy, value: value)
         }
     }
 }
 
-public class CSPRequestConfiguration: Service {
+public class CSPRequestConfiguration {
     var configuration: ContentSecurityPolicyConfiguration?
     public init() {}
 }
@@ -29,16 +29,18 @@ public class CSPRequestConfiguration: Service {
 extension Request {
     public var contentSecurityPolicy: ContentSecurityPolicyConfiguration? {
         get {
-            if let requestConfig = try? privateContainer.make(CSPRequestConfiguration.self) {
-                return requestConfig.configuration
-            } else {
-                return nil
-            }
+//            if let requestConfig = try? privateContainer.make(CSPRequestConfiguration.self) {
+//                return requestConfig.configuration
+//            } else {
+//                return nil
+//            }
+            fatalError()
         }
         set {
-            if let requestConfig = try? privateContainer.make(CSPRequestConfiguration.self) {
-                requestConfig.configuration = newValue
-            }
+//            if let requestConfig = try? privateContainer.make(CSPRequestConfiguration.self) {
+//                requestConfig.configuration = newValue
+//            }
+            fatalError()
         }
     }
 }

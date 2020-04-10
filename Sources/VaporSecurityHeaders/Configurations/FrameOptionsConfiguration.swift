@@ -1,4 +1,3 @@
-import HTTP
 import Vapor
 
 public struct FrameOptionsConfiguration: SecurityHeaderConfiguration {
@@ -18,11 +17,11 @@ public struct FrameOptionsConfiguration: SecurityHeaderConfiguration {
     func setHeader(on response: Response, from request: Request) {
         switch option {
         case .deny:
-            response.http.headers.replaceOrAdd(name: .xFrameOptions, value: "DENY")
+            response.headers.replaceOrAdd(name: .xFrameOptions, value: "DENY")
         case .sameOrigin:
-            response.http.headers.replaceOrAdd(name: .xFrameOptions, value: "SAMEORIGIN")
+            response.headers.replaceOrAdd(name: .xFrameOptions, value: "SAMEORIGIN")
         case .allow(let from):
-            response.http.headers.replaceOrAdd(name: .xFrameOptions, value: "ALLOW-FROM \(from)")
+            response.headers.replaceOrAdd(name: .xFrameOptions, value: "ALLOW-FROM \(from)")
         }
     }
 }
