@@ -1,7 +1,6 @@
 import XCTest
 
 @testable import Vapor
-import HTTP
 
 import VaporSecurityHeaders
 
@@ -58,18 +57,27 @@ class HeaderTests: XCTestCase {
 
     // MARK: - Properties
 
-    private var request: HTTPRequest!
-    private var routeRequest: HTTPRequest!
-    private var abortRequest: HTTPRequest!
-    private var fileRequest: HTTPRequest!
+    private var application: Application!
+    private var eventLoopGroup: EventLoopGroup!
+    private var request: Request!
+    private var routeRequest: Request!
+    private var abortRequest: Request!
+    private var fileRequest: Request!
 
     // MARK: - Overrides
 
     override func setUp() {
-        request = HTTPRequest(method: .GET, url: URL(string: "/test/")!)
-        routeRequest = HTTPRequest(method: .GET, url: URL(string: "/route/")!)
-        abortRequest = HTTPRequest(method: .GET, url: URL(string: "/abort/")!)
-        fileRequest = HTTPRequest(method: .GET, url: URL(string: "/file/")!)
+        eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        application = Application(.testing, .shared(eventLoopGroup))
+        request = Request(application: application, method: .GET, url: URI(string: "/test/"), on: eventLoopGroup.next())
+        routeRequest = Request(application: application, method: .GET, url: URI(string: "/route/"), on: eventLoopGroup.next())
+        abortRequest = Request(application: application, method: .GET, url: URI(string: "/abort/"), on: eventLoopGroup.next())
+        fileRequest = Request(application: application, method: .GET, url: URI(string: "/file/"), on: eventLoopGroup.next())
+    }
+    
+    override func tearDownWithError() throws {
+        application.shutdown()
+        try eventLoopGroup.syncShutdownGracefully()
     }
 
     // MARK: - Tests
@@ -93,10 +101,10 @@ class HeaderTests: XCTestCase {
 
         let response = try makeTestResponse(for: request, securityHeadersToAdd: SecurityHeadersFactory())
 
-        XCTAssertEqual(expectedXCTOHeaderValue, response.http.headers[.xContentTypeOptions].first)
-        XCTAssertEqual(expectedCSPHeaderValue, response.http.headers[.contentSecurityPolicy].first)
-        XCTAssertEqual(expectedXFOHeaderValue, response.http.headers[.xFrameOptions].first)
-        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.http.headers[.xXssProtection].first)
+        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[.xContentTypeOptions].first)
+        XCTAssertEqual(expectedCSPHeaderValue, response.headers[.contentSecurityPolicy].first)
+        XCTAssertEqual(expectedXFOHeaderValue, response.headers[.xFrameOptions].first)
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[.xXssProtection].first)
     }
 
     func testDefaultHeadersWithHSTS() throws {
@@ -108,11 +116,11 @@ class HeaderTests: XCTestCase {
 
         let response = try makeTestResponse(for: request, securityHeadersToAdd: SecurityHeadersFactory().with(strictTransportSecurity: StrictTransportSecurityConfiguration()))
 
-        XCTAssertEqual(expectedXCTOHeaderValue, response.http.headers[.xContentTypeOptions].first)
-        XCTAssertEqual(expectedCSPHeaderValue, response.http.headers[.contentSecurityPolicy].first)
-        XCTAssertEqual(expectedXFOHeaderValue, response.http.headers[.xFrameOptions].first)
-        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.http.headers[.xXssProtection].first)
-        XCTAssertEqual(expectedHSTSHeaderValue, response.http.headers[.strictTransportSecurity].first)
+        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[.xContentTypeOptions].first)
+        XCTAssertEqual(expectedCSPHeaderValue, response.headers[.contentSecurityPolicy].first)
+        XCTAssertEqual(expectedXFOHeaderValue, response.headers[.xFrameOptions].first)
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[.xXssProtection].first)
+        XCTAssertEqual(expectedHSTSHeaderValue, response.headers[.strictTransportSecurity].first)
     }
 
     func testAllHeadersForApi() throws {
@@ -123,10 +131,10 @@ class HeaderTests: XCTestCase {
 
         let response = try makeTestResponse(for: request, securityHeadersToAdd: SecurityHeadersFactory.api())
 
-        XCTAssertEqual(expectedXCTOHeaderValue, response.http.headers[.xContentTypeOptions].first)
-        XCTAssertEqual(expectedCSPHeaderValue, response.http.headers[.contentSecurityPolicy].first)
-        XCTAssertEqual(expectedXFOHeaderValue, response.http.headers[.xFrameOptions].first)
-        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.http.headers[.xXssProtection].first)
+        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[.xContentTypeOptions].first)
+        XCTAssertEqual(expectedCSPHeaderValue, response.headers[.contentSecurityPolicy].first)
+        XCTAssertEqual(expectedXFOHeaderValue, response.headers[.xFrameOptions].first)
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[.xXssProtection].first)
     }
 
     func testAPIHeadersWithHSTS() throws {
@@ -138,11 +146,11 @@ class HeaderTests: XCTestCase {
 
         let response = try makeTestResponse(for: request, securityHeadersToAdd: SecurityHeadersFactory.api().with(strictTransportSecurity: StrictTransportSecurityConfiguration()))
 
-        XCTAssertEqual(expectedXCTOHeaderValue, response.http.headers[.xContentTypeOptions].first)
-        XCTAssertEqual(expectedCSPHeaderValue, response.http.headers[.contentSecurityPolicy].first)
-        XCTAssertEqual(expectedXFOHeaderValue, response.http.headers[.xFrameOptions].first)
-        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.http.headers[.xXssProtection].first)
-        XCTAssertEqual(expectedHSTSHeaderValue, response.http.headers[.strictTransportSecurity].first)
+        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[.xContentTypeOptions].first)
+        XCTAssertEqual(expectedCSPHeaderValue, response.headers[.contentSecurityPolicy].first)
+        XCTAssertEqual(expectedXFOHeaderValue, response.headers[.xFrameOptions].first)
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[.xXssProtection].first)
+        XCTAssertEqual(expectedHSTSHeaderValue, response.headers[.strictTransportSecurity].first)
     }
 
     func testHeadersWithContentTypeOptionsTurnedOff() throws {
@@ -150,7 +158,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(contentTypeOptions: contentTypeConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertNil(response.http.headers[.xContentTypeOptions].first)
+        XCTAssertNil(response.headers[.xContentTypeOptions].first)
     }
 
     func testHeadersWithContentTypeOptionsNosniff() throws {
@@ -158,7 +166,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(contentTypeOptions: contentTypeConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual("nosniff", response.http.headers[.xContentTypeOptions].first)
+        XCTAssertEqual("nosniff", response.headers[.xContentTypeOptions].first)
     }
 
     func testHeaderWithFrameOptionsDeny() throws {
@@ -166,7 +174,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(frameOptions: frameOptionsConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual("DENY", response.http.headers[.xFrameOptions].first)
+        XCTAssertEqual("DENY", response.headers[.xFrameOptions].first)
     }
 
     func testHeaderWithFrameOptionsSameOrigin() throws {
@@ -174,7 +182,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(frameOptions: frameOptionsConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual("SAMEORIGIN", response.http.headers[.xFrameOptions].first)
+        XCTAssertEqual("SAMEORIGIN", response.headers[.xFrameOptions].first)
     }
 
     func testHeaderWithFrameOptionsAllowFrom() throws {
@@ -182,7 +190,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(frameOptions: frameOptionsConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual("ALLOW-FROM https://test.com", response.http.headers[.xFrameOptions].first)
+        XCTAssertEqual("ALLOW-FROM https://test.com", response.headers[.xFrameOptions].first)
     }
 
     func testHeaderWithXssProtectionDisable() throws {
@@ -190,7 +198,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual("0", response.http.headers[.xXssProtection].first)
+        XCTAssertEqual("0", response.headers[.xXssProtection].first)
     }
 
     func testHeaderWithXssProtectionEnable() throws {
@@ -198,7 +206,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual("1", response.http.headers[.xXssProtection].first)
+        XCTAssertEqual("1", response.headers[.xXssProtection].first)
     }
 
     func testHeaderWithXssProtectionBlock() throws {
@@ -206,7 +214,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual("1; mode=block", response.http.headers[.xXssProtection].first)
+        XCTAssertEqual("1; mode=block", response.headers[.xXssProtection].first)
     }
 
     func testHeaderWithXssProtectionReport() throws {
@@ -214,7 +222,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual("1; report=https://test.com", response.http.headers[.xXssProtection].first)
+        XCTAssertEqual("1; report=https://test.com", response.headers[.xXssProtection].first)
     }
 
     func testHeaderWithHSTSwithMaxAge() throws {
@@ -222,7 +230,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(strictTransportSecurity: hstsConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual("max-age=30; includeSubDomains; preload", response.http.headers[.strictTransportSecurity].first)
+        XCTAssertEqual("max-age=30; includeSubDomains; preload", response.headers[.strictTransportSecurity].first)
     }
 
     func testHeadersWithHSTSwithSubdomains() throws {
@@ -230,7 +238,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(strictTransportSecurity: hstsConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual("max-age=30; includeSubDomains; preload", response.http.headers[.strictTransportSecurity].first)
+        XCTAssertEqual("max-age=30; includeSubDomains; preload", response.headers[.strictTransportSecurity].first)
     }
 
     func testHeadersWithHSTSwithPreload() throws {
@@ -238,7 +246,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(strictTransportSecurity: hstsConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual("max-age=30; includeSubDomains; preload", response.http.headers[.strictTransportSecurity].first)
+        XCTAssertEqual("max-age=30; includeSubDomains; preload", response.headers[.strictTransportSecurity].first)
     }
 
     func testHeadersWithHSTSwithPreloadAndSubdomain() throws {
@@ -246,7 +254,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(strictTransportSecurity: hstsConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual("max-age=30; includeSubDomains; preload", response.http.headers[.strictTransportSecurity].first)
+        XCTAssertEqual("max-age=30; includeSubDomains; preload", response.headers[.strictTransportSecurity].first)
     }
 
     func testHeadersWithHSTSwithSubdomainsFalse() throws {
@@ -254,7 +262,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(strictTransportSecurity: hstsConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual("max-age=30; preload", response.http.headers[.strictTransportSecurity].first)
+        XCTAssertEqual("max-age=30; preload", response.headers[.strictTransportSecurity].first)
     }
 
     func testHeadersWithHSTSwithPreloadFalse() throws {
@@ -262,7 +270,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(strictTransportSecurity: hstsConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual("max-age=30; includeSubDomains;", response.http.headers[.strictTransportSecurity].first)
+        XCTAssertEqual("max-age=30; includeSubDomains;", response.headers[.strictTransportSecurity].first)
     }
 
     func testHeadersWithHSTSwithSubdomainAndPreloadFalse() throws {
@@ -270,7 +278,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(strictTransportSecurity: hstsConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual("max-age=30;", response.http.headers[.strictTransportSecurity].first)
+        XCTAssertEqual("max-age=30;", response.headers[.strictTransportSecurity].first)
     }
 
     func testHeadersWithServerValue() throws {
@@ -278,7 +286,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(server: serverConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual("brokenhands.io", response.http.headers[.server].first)
+        XCTAssertEqual("brokenhands.io", response.headers[.server].first)
     }
 
     func testHeadersWithCSP() throws {
@@ -297,7 +305,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual(csp, response.http.headers[.contentSecurityPolicy].first)
+        XCTAssertEqual(csp, response.headers[.contentSecurityPolicy].first)
     }
 
     func testHeadersWithStringCSP() throws {
@@ -306,7 +314,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual(csp, response.http.headers[.contentSecurityPolicy].first)
+        XCTAssertEqual(csp, response.headers[.contentSecurityPolicy].first)
     }
 
     func testHeadersWithSetCSP() throws {
@@ -316,7 +324,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual(csp, response.http.headers[.contentSecurityPolicy].first)
+        XCTAssertEqual(csp, response.headers[.contentSecurityPolicy].first)
     }
 
     func testHeadersWithReportToCSP() throws {
@@ -329,7 +337,7 @@ class HeaderTests: XCTestCase {
         let cspConfig = ContentSecurityPolicyConfiguration(value: cspValue)
         let factory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
-        guard let cspResponseHeader = response.http.headers[.contentSecurityPolicy].first else {
+        guard let cspResponseHeader = response.headers[.contentSecurityPolicy].first else {
             XCTFail("Expected a CSP Response Header")
             return
         }
@@ -363,7 +371,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(contentSecurityPolicy: cspConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual(csp, response.http.headers[.contentSecurityPolicy].first)
+        XCTAssertEqual(csp, response.headers[.contentSecurityPolicy].first)
     }
 
     func testHeadersWithReportOnlyCSP() throws {
@@ -372,7 +380,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(contentSecurityPolicyReportOnly: cspConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual(csp, response.http.headers[.contentSecurityPolicyReportOnly].first)
+        XCTAssertEqual(csp, response.headers[.contentSecurityPolicyReportOnly].first)
     }
 
     func testHeadersWithReferrerPolicyEmpty() throws {
@@ -380,7 +388,7 @@ class HeaderTests: XCTestCase {
         let referrerConfig = ReferrerPolicyConfiguration(.empty)
         let factory = SecurityHeadersFactory().with(referrerPolicy: referrerConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
-        XCTAssertEqual(expected, response.http.headers[.referrerPolicy].first)
+        XCTAssertEqual(expected, response.headers[.referrerPolicy].first)
     }
 
     func testHeadersWithReferrerPolicyNoReferrer() throws {
@@ -388,7 +396,7 @@ class HeaderTests: XCTestCase {
         let referrerConfig = ReferrerPolicyConfiguration(.noReferrer)
         let factory = SecurityHeadersFactory().with(referrerPolicy: referrerConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
-        XCTAssertEqual(expected, response.http.headers[.referrerPolicy].first)
+        XCTAssertEqual(expected, response.headers[.referrerPolicy].first)
     }
 
     func testHeadersWithReferrerPolicyNoReferrerWhenDowngrade() throws {
@@ -396,7 +404,7 @@ class HeaderTests: XCTestCase {
         let referrerConfig = ReferrerPolicyConfiguration(.noReferrerWhenDowngrade)
         let factory = SecurityHeadersFactory().with(referrerPolicy: referrerConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
-        XCTAssertEqual(expected, response.http.headers[.referrerPolicy].first)
+        XCTAssertEqual(expected, response.headers[.referrerPolicy].first)
     }
 
     func testHeadersWithReferrerPolicySameOrigin() throws {
@@ -404,7 +412,7 @@ class HeaderTests: XCTestCase {
         let referrerConfig = ReferrerPolicyConfiguration(.sameOrigin)
         let factory = SecurityHeadersFactory().with(referrerPolicy: referrerConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
-        XCTAssertEqual(expected, response.http.headers[.referrerPolicy].first)
+        XCTAssertEqual(expected, response.headers[.referrerPolicy].first)
     }
 
     func testHeadersWithReferrerPolicyOrigin() throws {
@@ -412,7 +420,7 @@ class HeaderTests: XCTestCase {
         let referrerConfig = ReferrerPolicyConfiguration(.origin)
         let factory = SecurityHeadersFactory().with(referrerPolicy: referrerConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
-        XCTAssertEqual(expected, response.http.headers[.referrerPolicy].first)
+        XCTAssertEqual(expected, response.headers[.referrerPolicy].first)
     }
 
     func testHeadersWithReferrerPolicyStrictOrigin() throws {
@@ -420,7 +428,7 @@ class HeaderTests: XCTestCase {
         let referrerConfig = ReferrerPolicyConfiguration(.strictOrigin)
         let factory = SecurityHeadersFactory().with(referrerPolicy: referrerConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
-        XCTAssertEqual(expected, response.http.headers[.referrerPolicy].first)
+        XCTAssertEqual(expected, response.headers[.referrerPolicy].first)
     }
 
     func testHeadersWithReferrerPolicyOriginWhenCrossOrigin() throws {
@@ -428,7 +436,7 @@ class HeaderTests: XCTestCase {
         let referrerConfig = ReferrerPolicyConfiguration(.originWhenCrossOrigin)
         let factory = SecurityHeadersFactory().with(referrerPolicy: referrerConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
-        XCTAssertEqual(expected, response.http.headers[.referrerPolicy].first)
+        XCTAssertEqual(expected, response.headers[.referrerPolicy].first)
     }
 
     func testHeadersWithReferrerPolicyStrictOriginWhenCrossOrigin() throws {
@@ -436,7 +444,7 @@ class HeaderTests: XCTestCase {
         let referrerConfig = ReferrerPolicyConfiguration(.strictOriginWhenCrossOrigin)
         let factory = SecurityHeadersFactory().with(referrerPolicy: referrerConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
-        XCTAssertEqual(expected, response.http.headers[.referrerPolicy].first)
+        XCTAssertEqual(expected, response.headers[.referrerPolicy].first)
     }
 
     func testHeadersWithReferrerPolicyUnsafeUrl() throws {
@@ -444,7 +452,7 @@ class HeaderTests: XCTestCase {
         let referrerConfig = ReferrerPolicyConfiguration(.unsafeUrl)
         let factory = SecurityHeadersFactory().with(referrerPolicy: referrerConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
-        XCTAssertEqual(expected, response.http.headers[.referrerPolicy].first)
+        XCTAssertEqual(expected, response.headers[.referrerPolicy].first)
     }
 
     func testApiPolicyWithAddedReferrerPolicy() throws {
@@ -452,7 +460,7 @@ class HeaderTests: XCTestCase {
         let referrerConfig = ReferrerPolicyConfiguration(.strictOrigin)
         let factory = SecurityHeadersFactory.api().with(referrerPolicy: referrerConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
-        XCTAssertEqual(expected, response.http.headers[.referrerPolicy].first)
+        XCTAssertEqual(expected, response.headers[.referrerPolicy].first)
     }
 
     func testCustomCSPOnSingleRoute() throws {
@@ -474,7 +482,7 @@ class HeaderTests: XCTestCase {
         }
         let response = try makeTestResponse(for: routeRequest, securityHeadersToAdd: factory, routeHandler: cspSettingRouteHandler, perRouteCSP: true)
 
-        XCTAssertEqual(expectedCsp, response.http.headers[.contentSecurityPolicy].first)
+        XCTAssertEqual(expectedCsp, response.headers[.contentSecurityPolicy].first)
     }
 
     func testCustomCSPDoesntAffectSecondRoute() throws {
@@ -496,7 +504,7 @@ class HeaderTests: XCTestCase {
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory, routeHandler: cspSettingRouteHandler, perRouteCSP: true, initialRequest: routeRequest)
         let expectedCSPHeaderValue = "default-src 'none'"
 
-        XCTAssertEqual(expectedCSPHeaderValue, response.http.headers[.contentSecurityPolicy].first)
+        XCTAssertEqual(expectedCSPHeaderValue, response.headers[.contentSecurityPolicy].first)
     }
 
     func testDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute() throws {
@@ -510,7 +518,7 @@ class HeaderTests: XCTestCase {
         }
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory, routeHandler: cspSettingRouteHandler, perRouteCSP: true)
 
-        XCTAssertEqual("default-src 'none'", response.http.headers[.contentSecurityPolicy].first)
+        XCTAssertEqual("default-src 'none'", response.headers[.contentSecurityPolicy].first)
     }
 
     func testAbortMiddleware() throws {
@@ -521,10 +529,10 @@ class HeaderTests: XCTestCase {
 
         let response = try makeTestResponse(for: abortRequest, securityHeadersToAdd: SecurityHeadersFactory.api())
 
-        XCTAssertEqual(expectedXCTOHeaderValue, response.http.headers[.xContentTypeOptions].first)
-        XCTAssertEqual(expectedCSPHeaderValue, response.http.headers[.contentSecurityPolicy].first)
-        XCTAssertEqual(expectedXFOHeaderValue, response.http.headers[.xFrameOptions].first)
-        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.http.headers[.xXssProtection].first)
+        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[.xContentTypeOptions].first)
+        XCTAssertEqual(expectedCSPHeaderValue, response.headers[.contentSecurityPolicy].first)
+        XCTAssertEqual(expectedXFOHeaderValue, response.headers[.xFrameOptions].first)
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[.xXssProtection].first)
     }
 
     func testMockFileMiddleware() throws {
@@ -534,11 +542,11 @@ class HeaderTests: XCTestCase {
         let expectedXSSProtectionHeaderValue = "1; mode=block"
         let response = try makeTestResponse(for: fileRequest, securityHeadersToAdd: SecurityHeadersFactory.api(), fileMiddleware: StubFileMiddleware())
 
-        XCTAssertEqual("Hello World!", String(data: response.http.body.data!, encoding: String.Encoding.utf8))
-        XCTAssertEqual(expectedXCTOHeaderValue, response.http.headers[.xContentTypeOptions].first)
-        XCTAssertEqual(expectedCSPHeaderValue, response.http.headers[.contentSecurityPolicy].first)
-        XCTAssertEqual(expectedXFOHeaderValue, response.http.headers[.xFrameOptions].first)
-        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.http.headers[.xXssProtection].first)
+        XCTAssertEqual("Hello World!", String(data: response.body.data!, encoding: String.Encoding.utf8))
+        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[.xContentTypeOptions].first)
+        XCTAssertEqual(expectedCSPHeaderValue, response.headers[.contentSecurityPolicy].first)
+        XCTAssertEqual(expectedXFOHeaderValue, response.headers[.xFrameOptions].first)
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[.xXssProtection].first)
     }
 
     func testMockFileMiddlewareDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute() throws {
@@ -552,69 +560,51 @@ class HeaderTests: XCTestCase {
 
         let response = try makeTestResponse(for: fileRequest, securityHeadersToAdd: SecurityHeadersFactory.api(), fileMiddleware: StubFileMiddleware(cspConfig: ContentSecurityPolicyConfiguration(value: csp)), perRouteCSP: true)
 
-        XCTAssertEqual("Hello World!", String(data: response.http.body.data!, encoding: String.Encoding.utf8))
-        XCTAssertEqual(expectedXCTOHeaderValue, response.http.headers[.xContentTypeOptions].first)
-        XCTAssertEqual(expectedCSPHeaderValue, response.http.headers[.contentSecurityPolicy].first)
-        XCTAssertEqual(expectedXFOHeaderValue, response.http.headers[.xFrameOptions].first)
-        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.http.headers[.xXssProtection].first)
+        XCTAssertEqual("Hello World!", String(data: response.body.data!, encoding: String.Encoding.utf8))
+        XCTAssertEqual(expectedXCTOHeaderValue, response.headers[.xContentTypeOptions].first)
+        XCTAssertEqual(expectedCSPHeaderValue, response.headers[.contentSecurityPolicy].first)
+        XCTAssertEqual(expectedXFOHeaderValue, response.headers[.xFrameOptions].first)
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[.xXssProtection].first)
     }
 
     // MARK: - Private functions
 
-    private func makeTestResponse(for request: HTTPRequest, securityHeadersToAdd: SecurityHeadersFactory, routeHandler: ((Request) throws -> String)? = nil, fileMiddleware: StubFileMiddleware? = nil, perRouteCSP: Bool = false, initialRequest: HTTPRequest? = nil) throws -> Response {
+    private func makeTestResponse(for request: Request, securityHeadersToAdd: SecurityHeadersFactory, routeHandler: ((Request) throws -> String)? = nil, fileMiddleware: StubFileMiddleware? = nil, perRouteCSP: Bool = false, initialRequest: Request? = nil) throws -> Response {
 
-        var services = Services.default()
-        var middlewareConfig = MiddlewareConfig()
 
-        middlewareConfig.use(ErrorMiddleware.self)
-        services.register { worker in
-          return ErrorMiddleware() { request, error in
-            return request.makeResponse()
-          }
-        }
-        middlewareConfig.use(SecurityHeaders.self)
-        services.register(securityHeadersToAdd.build())
+        application.middleware.use(securityHeadersToAdd.build())
         
         if let fileMiddleware = fileMiddleware {
-            middlewareConfig.use(StubFileMiddleware.self)
-            services.register(fileMiddleware)
+            application.middleware.use(fileMiddleware)
         }
-        
-        services.register(middlewareConfig)
 
         if perRouteCSP {
-            services.register { _ in
-                return CSPRequestConfiguration()
-            }
+//            services.register { _ in
+//                return CSPRequestConfiguration()
+//            }
+            #warning("TODO")
         }
 
-        let app = try Application(services: services)
-
-        let router = try app.make(Router.self)
-        router.get("test") { req in
+        application.routes.get("test") { req in
             return "TEST"
         }
 
         if let routeHandler = routeHandler {
-            router.get("route", use: routeHandler)
+            application.routes.get("route", use: routeHandler)
         }
 
-        router.get("abort") { req -> Future<Response> in
+        application.routes.get("abort") { req -> EventLoopFuture<Response> in
             throw Abort(.badRequest)
         }
 
-        let responder = try app.make(Responder.self)
-
-        let middleware = try app.make(MiddlewareConfig.self).resolve(for: app)
-        let responderWithMiddleware = middleware.makeResponder(chainedto: responder)
+//        let middleware = try app.make(MiddlewareConfig.self).resolve(for: app)
+//        let responderWithMiddleware = middleware.makeResponder(chainedto: responder)
 
         if let dummyRequest = initialRequest {
-            let dummyWrappedRequest = Request(http: dummyRequest, using: app)
-            _ = try responderWithMiddleware.respond(to: dummyWrappedRequest).wait()
+            _ = try application.responder.respond(to: dummyRequest).wait()
         }
 
-        let wrappedRequest = Request(http: request, using: app)
-        return try responderWithMiddleware.respond(to: wrappedRequest).wait()
+        return try application.responder.respond(to: request).wait()
     }
 
 }
