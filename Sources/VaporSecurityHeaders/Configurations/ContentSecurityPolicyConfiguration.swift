@@ -21,11 +21,6 @@ public struct ContentSecurityPolicyConfiguration: SecurityHeaderConfiguration {
     }
 }
 
-public class CSPRequestConfiguration {
-    var configuration: ContentSecurityPolicyConfiguration?
-    public init() {}
-}
-
 extension ContentSecurityPolicyConfiguration: StorageKey {
     public typealias Value = Self
 }

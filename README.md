@@ -275,7 +275,7 @@ Check out [https://report-uri.io/](https://report-uri.io/) for a free tool to se
 
 ### Page Specific CSP
 
-Vapor Security Headers also supports setting the CSP on a route or request basis. If the middleware has been added to the `MiddlewareConfig`, you can override the CSP for a request. This allows you to have a strict default CSP, but allow content from extra sources when required, such as only allowing the Javascript for blog comments on the blog page. Create a separate `ContentSecurityPolicyConfiguration` and then add it to the request. For example, inside a route handler, you could do:
+Vapor Security Headers also supports setting the CSP on a route or request basis. If the middleware has been added to the `Middlewares`, you can override the CSP for a request. This allows you to have a strict default CSP, but allow content from extra sources when required, such as only allowing the Javascript for blog comments on the blog page. Create a separate `ContentSecurityPolicyConfiguration` and then add it to the request. For example, inside a route handler, you could do:
 
 ```swift
 let cspConfig = ContentSecurityPolicy()
@@ -288,14 +288,6 @@ req.contentSecurityPolicy = pageSpecificCSP
 
 ```http
 content-security-policy: default-src 'none'; script-src https://comments.disqus.com
-```
-
-You must also enable the `CSPRequestConfiguration` service for this to work. In `configure.swift` add:
-
-```swift
-services.register { _ in
-    return CSPRequestConfiguration()
-}
 ```
 
 ## Content-Security-Policy-Report-Only
