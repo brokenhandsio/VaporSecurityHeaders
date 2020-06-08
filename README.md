@@ -106,7 +106,7 @@ If you are running an API you can choose a default configuration for that by cre
 
 ```swift
 let securityHeaders = SecurityHeadersFactory.api()
-application.middleware.use(securityHeaders)
+application.middleware.use(securityHeaders.build())
 ```
 
 ```http
