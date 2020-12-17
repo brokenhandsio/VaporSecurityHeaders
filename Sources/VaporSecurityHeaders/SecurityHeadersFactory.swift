@@ -9,6 +9,7 @@ public class SecurityHeadersFactory {
     var server: ServerConfiguration?
     var referrerPolicy: ReferrerPolicyConfiguration?
     var contentSecurityPolicyReportOnly: ContentSecurityPolicyReportOnlyConfiguration?
+    public var redirectMiddleware = HSTSRedirectMiddleware()
 
     public init() {}
 
