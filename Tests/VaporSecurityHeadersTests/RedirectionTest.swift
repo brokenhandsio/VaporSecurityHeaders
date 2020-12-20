@@ -15,34 +15,32 @@ class RedirectionTest: XCTestCase {
     override func setUp() {
         eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         application = Application(.testing, .shared(eventLoopGroup))
-        request = Request(application: application, method: .GET, url: URI(string: "/"), on: eventLoopGroup.next())
+        request = Request(application: application, method: .GET, on: eventLoopGroup.next())
     }
 
     override func tearDownWithError() throws {
         application.shutdown()
         try eventLoopGroup.syncShutdownGracefully()
     }
-    
-    func testRedirectionMiddleware() throws {
+
+    func testWithRedirectionMiddleware() throws {
         let expectedRedirectStatus: HTTPStatus = HTTPResponseStatus(statusCode: 301, reasonPhrase: "Moved permanently")
-        let expectedNoRedirectStatus: HTTPStatus = HTTPResponseStatus(statusCode: 200, reasonPhrase: "Ok")
         request.headers.add(name: .host, value: "localhost:8080")
         let responseRedirected = try makeTestResponse(for: request, withRedirection: true)
-        let response = try makeTestResponse(for: request, withRedirection: false)
         XCTAssertEqual(expectedRedirectStatus, responseRedirected.status)
+    }
+    func testWithoutRedirectionMiddleware() throws {
+        let expectedNoRedirectStatus: HTTPStatus = HTTPResponseStatus(statusCode: 200, reasonPhrase: "Ok")
+        request.headers.add(name: .host, value: "localhost:8080")
+        let response = try makeTestResponse(for: request, withRedirection: false)
         XCTAssertEqual(expectedNoRedirectStatus, response.status)
     }
-    
     private func makeTestResponse(for request: Request, withRedirection: Bool, routeHandler: ((Request) throws -> String)? = nil) throws -> Response {
-        
         application.middleware = Middlewares()
-        
         if withRedirection == true {
         application.middleware.use(SecurityHeadersFactory().redirectMiddleware)
-        
         }
         try routes(application)
-        
         return try application.responder.respond(to: request).wait()
     }
     
@@ -54,7 +52,6 @@ class RedirectionTest: XCTestCase {
         func boot(routes: RoutesBuilder) throws {
             routes.get(use: testing)
         }
-        
         func testing(req: Request) throws -> String {
             return "Test"
         }
