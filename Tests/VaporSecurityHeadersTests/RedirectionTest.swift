@@ -35,8 +35,35 @@ class RedirectionTest: XCTestCase {
         let response = try makeTestResponse(for: request, withRedirection: false)
         XCTAssertEqual(expectedNoRedirectStatus, response.status)
     }
-    private func makeTestResponse(for request: Request, withRedirection: Bool, routeHandler: ((Request) throws -> String)? = nil) throws -> Response {
+    
+    func testOnDevelopmentEnvironment() throws {
+        let expectedStatus: HTTPStatus = HTTPResponseStatus(statusCode: 200, reasonPhrase: "Ok")
+        request.headers.add(name: .host, value: "localhost:8080")
+        let response = try makeTestResponse(for: request, withRedirection: true, environment: .development)
+        XCTAssertEqual(expectedStatus, response.status)
+    }
+    
+    func testWithoutHost() throws {
+        let expectedOutcome: String = "Abort.400: Bad Request"
+        do {
+            _ = try makeTestResponse(for: request, withRedirection: true)
+        } catch (let error) {
+            XCTAssertEqual(expectedOutcome, error.localizedDescription)
+        }
+    }
+    
+    func testWithProtoSet() throws {
+        let expectedStatus: HTTPStatus = HTTPResponseStatus(statusCode: 200, reasonPhrase: "Ok")
+        request.headers.add(name: .xForwardedProto, value: "https")
+        let response = try makeTestResponse(for: request, withRedirection: true)
+        XCTAssertEqual(expectedStatus, response.status)
+    }
+    
+    private func makeTestResponse(for request: Request, withRedirection: Bool, environment: Environment? = nil) throws -> Response {
         application.middleware = Middlewares()
+        if let environment = environment {
+            application.environment = environment
+        }
         if withRedirection == true {
         application.middleware.use(SecurityHeadersFactory().redirectMiddleware)
         }
