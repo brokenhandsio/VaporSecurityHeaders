@@ -441,10 +441,10 @@ strict-transport-security: max-age=31536000; includeSubDomains; preload
 
 If Strict-Transport-Security is not enough to accomplish a forwarding connection to HTTPS from the browsers, you can opt to add an additional middleware who provides this redirection if clients try to reach your site with an HTTP connection.
 
-To use the HSTS Redirect Middleware, you can add the following line in your middlewares, preferably before securityHeadersFactory.build():
+To use the HTTPS Redirect Middleware, you can add the following line in **configure.swift** to enable the middleware. This must be done before `securityHeadersFactory.build()` to ensure HSTS works:
 
 ```swift
-app.middleware.use(securityHeadersFactory.redirectMiddleware)
+app.middleware.use(HTTPSRedirectMiddleware())
 ```
 
 ## Server

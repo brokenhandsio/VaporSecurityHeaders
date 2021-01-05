@@ -1,7 +1,9 @@
 import Vapor
 
-public class HSTSRedirectMiddleware: Middleware {
+public class HTTPSRedirectMiddleware: Middleware {
 
+    public init() {}
+    
     public func respond(to request: Request, chainingTo next: Responder) -> EventLoopFuture<Response> {
         if request.application.environment == .development {
             return next.respond(to: request)

@@ -65,7 +65,7 @@ class RedirectionTest: XCTestCase {
             application.environment = environment
         }
         if withRedirection == true {
-        application.middleware.use(SecurityHeadersFactory().redirectMiddleware)
+        application.middleware.use(HTTPSRedirectMiddleware())
         }
         try routes(application)
         return try application.responder.respond(to: request).wait()
