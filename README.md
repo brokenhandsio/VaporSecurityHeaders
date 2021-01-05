@@ -27,6 +27,7 @@ Easily add headers to all your responses for improving the security of your site
 * X-Frame-Options
 * X-Content-Type-Options
 * Strict-Transport-Security (HSTS)
+* Redirect HTTP to HTTPS
 * Server
 * Referrer Policy
 
@@ -434,6 +435,16 @@ let securityHeadersFactory = SecurityHeadersFactory().with(strictTransportSecuri
 
 ```http
 strict-transport-security: max-age=31536000; includeSubDomains; preload
+```
+
+## Redirect HTTP to HTTPS
+
+If Strict-Transport-Security is not enough to accomplish a forwarding connection to HTTPS from the browsers, you can opt to add an additional middleware who provides this redirection if clients try to reach your site with an HTTP connection.
+
+To use the HTTPS Redirect Middleware, you can add the following line in **configure.swift** to enable the middleware. This must be done before `securityHeadersFactory.build()` to ensure HSTS works:
+
+```swift
+app.middleware.use(HTTPSRedirectMiddleware())
 ```
 
 ## Server
