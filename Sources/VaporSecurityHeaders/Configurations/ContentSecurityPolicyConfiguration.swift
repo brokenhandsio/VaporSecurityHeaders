@@ -250,25 +250,25 @@ public class ContentSecurityPolicy {
 
     @discardableResult
     public func pluginTypes(types: String...) -> ContentSecurityPolicy {
-        join(sources: sources, to: "plugin-types")
+        join(sources: types, to: "plugin-types")
         return self
     }
     
     @discardableResult
     public func pluginTypes(types: [String]) -> ContentSecurityPolicy {
-        join(sources: sources, to: "plugin-types")
+        join(sources: types, to: "plugin-types")
         return self
     }
 
     @discardableResult
     public func requireSriFor(values: String...) -> ContentSecurityPolicy {
-        join(sources: sources, to: "require-sri-for")
+        join(sources: values, to: "require-sri-for")
         return self
     }
     
     @discardableResult
     public func requireSriFor(values: [String]) -> ContentSecurityPolicy {
-        join(sources: sources, to: "require-sri-for")
+        join(sources: values, to: "require-sri-for")
         return self
     }
 
@@ -301,13 +301,13 @@ public class ContentSecurityPolicy {
 
     @discardableResult
     public func scriptSrc(sources: String...) -> ContentSecurityPolicy {
-        join(sources: values, to: "script-src")
+        join(sources: sources, to: "script-src")
         return self
     }
     
     @discardableResult
     public func scriptSrc(sources: [String]) -> ContentSecurityPolicy {
-        join(sources: values, to: "script-src")
+        join(sources: sources, to: "script-src")
         return self
     }
 
