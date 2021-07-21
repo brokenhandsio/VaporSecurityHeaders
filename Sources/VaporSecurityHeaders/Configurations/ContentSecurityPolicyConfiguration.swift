@@ -100,7 +100,13 @@ public class ContentSecurityPolicy {
     
     @discardableResult
     public func baseUri(sources: String...) -> ContentSecurityPolicy {
-        policy.append("base-uri \(sources.joined(separator: " "))")
+        join(sources: sources, to: "base-uri")
+        return self
+    }
+    
+    @discardableResult
+    public func baseUri(sources: [String]) -> ContentSecurityPolicy {
+        join(sources: sources, to: "base-uri")
         return self
     }
 
@@ -112,79 +118,157 @@ public class ContentSecurityPolicy {
     
     @discardableResult
     public func childSrc(sources: String...) -> ContentSecurityPolicy {
-        policy.append("child-src \(sources.joined(separator: " "))")
+        join(sources: sources, to: "child-src")
+        return self
+    }
+    
+    @discardableResult
+    public func childSrc(sources: [String]) -> ContentSecurityPolicy {
+        join(sources: sources, to: "child-src")
         return self
     }
 
     @discardableResult
     public func connectSrc(sources: String...) -> ContentSecurityPolicy {
-        policy.append("connect-src \(sources.joined(separator: " "))")
+        join(sources: sources, to: "connect-src")
+        return self
+    }
+    
+    @discardableResult
+    public func connectSrc(sources: [String]) -> ContentSecurityPolicy {
+        join(sources: sources, to: "connect-src")
         return self
     }
 
     @discardableResult
     public func defaultSrc(sources: String...) -> ContentSecurityPolicy {
-        policy.append("default-src \(sources.joined(separator: " "))")
+        join(sources: sources, to: "default-src")
+        return self
+    }
+    
+    @discardableResult
+    public func defaultSrc(sources: [String]) -> ContentSecurityPolicy {
+        join(sources: sources, to: "default-src")
         return self
     }
 
     @discardableResult
     public func fontSrc(sources: String...) -> ContentSecurityPolicy {
-        policy.append("font-src \(sources.joined(separator: " "))")
+        join(sources: sources, to: "font-src")
+        return self
+    }
+    
+    @discardableResult
+    public func fontSrc(sources: [String]) -> ContentSecurityPolicy {
+        join(sources: sources, to: "font-src")
         return self
     }
 
     @discardableResult
     public func formAction(sources: String...) -> ContentSecurityPolicy {
-        policy.append("form-action \(sources.joined(separator: " "))")
+        join(sources: sources, to: "form-action")
+        return self
+    }
+    
+    @discardableResult
+    public func formAction(sources: [String]) -> ContentSecurityPolicy {
+        join(sources: sources, to: "form-action")
         return self
     }
 
     @discardableResult
     public func frameAncestors(sources: String...) -> ContentSecurityPolicy {
-        policy.append("frame-ancestors \(sources.joined(separator: " "))")
+        join(sources: sources, to: "frame-ancestors")
+        return self
+    }
+    
+    @discardableResult
+    public func frameAncestors(sources: [String]) -> ContentSecurityPolicy {
+        join(sources: sources, to: "frame-ancestors")
         return self
     }
 
     @discardableResult
     public func frameSrc(sources: String...) -> ContentSecurityPolicy {
-        policy.append("frame-src \(sources.joined(separator: " "))")
+        join(sources: sources, to: "frame-src")
+        return self
+    }
+    
+    @discardableResult
+    public func frameSrc(sources: [String]) -> ContentSecurityPolicy {
+        join(sources: sources, to: "frame-src")
         return self
     }
 
     @discardableResult
     public func imgSrc(sources: String...) -> ContentSecurityPolicy {
-        policy.append("img-src \(sources.joined(separator: " "))")
+        join(sources: sources, to: "img-src")
+        return self
+    }
+    
+    @discardableResult
+    public func imgSrc(sources: [String]) -> ContentSecurityPolicy {
+        join(sources: sources, to: "img-src")
         return self
     }
 
     @discardableResult
     public func manifestSrc(sources: String...) -> ContentSecurityPolicy {
-        policy.append("manifest-src \(sources.joined(separator: " "))")
+        join(sources: sources, to: "manifest-src")
+        return self
+    }
+    
+    @discardableResult
+    public func manifestSrc(sources: [String]) -> ContentSecurityPolicy {
+        join(sources: sources, to: "manifest-src")
         return self
     }
 
     @discardableResult
     public func mediaSrc(sources: String...) -> ContentSecurityPolicy {
-        policy.append("media-src \(sources.joined(separator: " "))")
+        join(sources: sources, to: "media-src")
+        return self
+    }
+    
+    @discardableResult
+    public func mediaSrc(sources: [String]) -> ContentSecurityPolicy {
+        join(sources: sources, to: "media-src")
         return self
     }
 
     @discardableResult
     public func objectSrc(sources: String...) -> ContentSecurityPolicy {
-        policy.append("object-src \(sources.joined(separator: " "))")
+        join(sources: sources, to: "object-src")
+        return self
+    }
+    
+    @discardableResult
+    public func objectSrc(sources: [String]) -> ContentSecurityPolicy {
+        join(sources: sources, to: "object-src")
         return self
     }
 
     @discardableResult
     public func pluginTypes(types: String...) -> ContentSecurityPolicy {
-        policy.append("plugin-types \(types.joined(separator: " "))")
+        join(sources: sources, to: "plugin-types")
+        return self
+    }
+    
+    @discardableResult
+    public func pluginTypes(types: [String]) -> ContentSecurityPolicy {
+        join(sources: sources, to: "plugin-types")
         return self
     }
 
     @discardableResult
     public func requireSriFor(values: String...) -> ContentSecurityPolicy {
-        policy.append("require-sri-for \(values.joined(separator: " "))")
+        join(sources: sources, to: "require-sri-for")
+        return self
+    }
+    
+    @discardableResult
+    public func requireSriFor(values: [String]) -> ContentSecurityPolicy {
+        join(sources: sources, to: "require-sri-for")
         return self
     }
 
@@ -205,19 +289,37 @@ public class ContentSecurityPolicy {
 
     @discardableResult
     public func sandbox(values: String...) -> ContentSecurityPolicy {
-        policy.append("sandbox \(values.joined(separator: " "))")
+        join(sources: values, to: "sandbox")
+        return self
+    }
+    
+    @discardableResult
+    public func sandbox(values: [String]) -> ContentSecurityPolicy {
+        join(sources: values, to: "sandbox")
         return self
     }
 
     @discardableResult
     public func scriptSrc(sources: String...) -> ContentSecurityPolicy {
-        policy.append("script-src \(sources.joined(separator: " "))")
+        join(sources: values, to: "script-src")
+        return self
+    }
+    
+    @discardableResult
+    public func scriptSrc(sources: [String]) -> ContentSecurityPolicy {
+        join(sources: values, to: "script-src")
         return self
     }
 
     @discardableResult
     public func styleSrc(sources: String...) -> ContentSecurityPolicy {
-        policy.append("style-src \(sources.joined(separator: " "))")
+        join(sources: sources, to: "style-src")
+        return self
+    }
+    
+    @discardableResult
+    public func styleSrc(sources: [String]) -> ContentSecurityPolicy {
+        join(sources: sources, to: "style-src")
         return self
     }
 
@@ -229,9 +331,23 @@ public class ContentSecurityPolicy {
 
     @discardableResult
     public func workerSrc(sources: String...) -> ContentSecurityPolicy {
-        policy.append("worker-src \(sources.joined(separator: " "))")
+        join(sources: sources, to: "worker-src")
+        return self
+    }
+    
+    @discardableResult
+    public func workerSrc(sources: [String]) -> ContentSecurityPolicy {
+        join(sources: sources, to: "worker-src")
         return self
     }
 
+    private func join(sources: [String], to directive: String) {
+        policy.append("\(directive) \(sources.joined(separator: " "))")
+    }
+    
+    private func join(sources: String..., to directive: String) {
+        policy.append("\(directive) \(sources.joined(separator: " "))")
+    }
+    
     public init() {}
 }
