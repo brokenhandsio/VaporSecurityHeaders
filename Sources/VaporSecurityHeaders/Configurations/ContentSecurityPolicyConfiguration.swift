@@ -345,9 +345,5 @@ public class ContentSecurityPolicy {
         policy.append("\(directive) \(sources.joined(separator: " "))")
     }
     
-    private func join(sources: String..., to directive: String) {
-        policy.append("\(directive) \(sources.joined(separator: " "))")
-    }
-    
     public init() {}
 }
