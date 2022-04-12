@@ -44,7 +44,7 @@ class HeaderTests: XCTestCase {
         XCTAssertEqual(expectedXCTOHeaderValue, response.headers[.xContentTypeOptions].first)
         XCTAssertEqual(expectedCSPHeaderValue, response.headers[.contentSecurityPolicy].first)
         XCTAssertEqual(expectedXFOHeaderValue, response.headers[.xFrameOptions].first)
-        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[.xXssProtection].first)
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[.xssProtection].first)
     }
 
     func testDefaultHeadersWithHSTS() throws {
@@ -59,7 +59,7 @@ class HeaderTests: XCTestCase {
         XCTAssertEqual(expectedXCTOHeaderValue, response.headers[.xContentTypeOptions].first)
         XCTAssertEqual(expectedCSPHeaderValue, response.headers[.contentSecurityPolicy].first)
         XCTAssertEqual(expectedXFOHeaderValue, response.headers[.xFrameOptions].first)
-        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[.xXssProtection].first)
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[.xssProtection].first)
         XCTAssertEqual(expectedHSTSHeaderValue, response.headers[.strictTransportSecurity].first)
     }
 
@@ -74,7 +74,7 @@ class HeaderTests: XCTestCase {
         XCTAssertEqual(expectedXCTOHeaderValue, response.headers[.xContentTypeOptions].first)
         XCTAssertEqual(expectedCSPHeaderValue, response.headers[.contentSecurityPolicy].first)
         XCTAssertEqual(expectedXFOHeaderValue, response.headers[.xFrameOptions].first)
-        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[.xXssProtection].first)
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[.xssProtection].first)
     }
 
     func testAPIHeadersWithHSTS() throws {
@@ -89,7 +89,7 @@ class HeaderTests: XCTestCase {
         XCTAssertEqual(expectedXCTOHeaderValue, response.headers[.xContentTypeOptions].first)
         XCTAssertEqual(expectedCSPHeaderValue, response.headers[.contentSecurityPolicy].first)
         XCTAssertEqual(expectedXFOHeaderValue, response.headers[.xFrameOptions].first)
-        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[.xXssProtection].first)
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[.xssProtection].first)
         XCTAssertEqual(expectedHSTSHeaderValue, response.headers[.strictTransportSecurity].first)
     }
 
@@ -138,7 +138,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual("0", response.headers[.xXssProtection].first)
+        XCTAssertEqual("0", response.headers[.xssProtection].first)
     }
 
     func testHeaderWithXssProtectionEnable() throws {
@@ -146,7 +146,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual("1", response.headers[.xXssProtection].first)
+        XCTAssertEqual("1", response.headers[.xssProtection].first)
     }
 
     func testHeaderWithXssProtectionBlock() throws {
@@ -154,7 +154,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual("1; mode=block", response.headers[.xXssProtection].first)
+        XCTAssertEqual("1; mode=block", response.headers[.xssProtection].first)
     }
 
     func testHeaderWithXssProtectionReport() throws {
@@ -162,7 +162,7 @@ class HeaderTests: XCTestCase {
         let factory = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
-        XCTAssertEqual("1; report=https://test.com", response.headers[.xXssProtection].first)
+        XCTAssertEqual("1; report=https://test.com", response.headers[.xssProtection].first)
     }
 
     func testHeaderWithHSTSwithMaxAge() throws {
@@ -598,7 +598,7 @@ class HeaderTests: XCTestCase {
         XCTAssertEqual(expectedXCTOHeaderValue, response.headers[.xContentTypeOptions].first)
         XCTAssertEqual(expectedCSPHeaderValue, response.headers[.contentSecurityPolicy].first)
         XCTAssertEqual(expectedXFOHeaderValue, response.headers[.xFrameOptions].first)
-        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[.xXssProtection].first)
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[.xssProtection].first)
     }
 
     func testStubFileMiddleware() throws {
@@ -612,7 +612,7 @@ class HeaderTests: XCTestCase {
         XCTAssertEqual(expectedXCTOHeaderValue, response.headers[.xContentTypeOptions].first)
         XCTAssertEqual(expectedCSPHeaderValue, response.headers[.contentSecurityPolicy].first)
         XCTAssertEqual(expectedXFOHeaderValue, response.headers[.xFrameOptions].first)
-        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[.xXssProtection].first)
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[.xssProtection].first)
     }
 
     func testStubFileMiddlewareDifferentRequestReturnsDefaultCSPWhenSettingCustomCSPOnRoute() throws {
@@ -630,7 +630,7 @@ class HeaderTests: XCTestCase {
         XCTAssertEqual(expectedXCTOHeaderValue, response.headers[.xContentTypeOptions].first)
         XCTAssertEqual(expectedCSPHeaderValue, response.headers[.contentSecurityPolicy].first)
         XCTAssertEqual(expectedXFOHeaderValue, response.headers[.xFrameOptions].first)
-        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[.xXssProtection].first)
+        XCTAssertEqual(expectedXSSProtectionHeaderValue, response.headers[.xssProtection].first)
     }
 
     // MARK: - Private functions
