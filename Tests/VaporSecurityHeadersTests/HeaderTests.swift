@@ -37,7 +37,7 @@ class HeaderTests: XCTestCase {
         let expectedXCTOHeaderValue = "nosniff"
         let expectedCSPHeaderValue = "default-src 'self'"
         let expectedXFOHeaderValue = "DENY"
-        let expectedXSSProtectionHeaderValue = "1; mode=block"
+        let expectedXSSProtectionHeaderValue = "0"
 
         let response = try makeTestResponse(for: request, securityHeadersToAdd: SecurityHeadersFactory())
 
@@ -51,7 +51,7 @@ class HeaderTests: XCTestCase {
         let expectedXCTOHeaderValue = "nosniff"
         let expectedCSPHeaderValue = "default-src 'self'"
         let expectedXFOHeaderValue = "DENY"
-        let expectedXSSProtectionHeaderValue = "1; mode=block"
+        let expectedXSSProtectionHeaderValue = "0"
         let expectedHSTSHeaderValue = "max-age=31536000; includeSubDomains; preload"
 
         let response = try makeTestResponse(for: request, securityHeadersToAdd: SecurityHeadersFactory().with(strictTransportSecurity: StrictTransportSecurityConfiguration()))
@@ -67,7 +67,7 @@ class HeaderTests: XCTestCase {
         let expectedXCTOHeaderValue = "nosniff"
         let expectedCSPHeaderValue = "default-src 'none'"
         let expectedXFOHeaderValue = "DENY"
-        let expectedXSSProtectionHeaderValue = "1; mode=block"
+        let expectedXSSProtectionHeaderValue = "0"
 
         let response = try makeTestResponse(for: request, securityHeadersToAdd: SecurityHeadersFactory.api())
 
@@ -81,7 +81,7 @@ class HeaderTests: XCTestCase {
         let expectedXCTOHeaderValue = "nosniff"
         let expectedCSPHeaderValue = "default-src 'none'"
         let expectedXFOHeaderValue = "DENY"
-        let expectedXSSProtectionHeaderValue = "1; mode=block"
+        let expectedXSSProtectionHeaderValue = "0"
         let expectedHSTSHeaderValue = "max-age=31536000; includeSubDomains; preload"
 
         let response = try makeTestResponse(for: request, securityHeadersToAdd: SecurityHeadersFactory.api().with(strictTransportSecurity: StrictTransportSecurityConfiguration()))
@@ -133,36 +133,12 @@ class HeaderTests: XCTestCase {
         XCTAssertEqual("ALLOW-FROM https://test.com", response.headers[.xFrameOptions].first)
     }
 
-    func testHeaderWithXssProtectionDisable() throws {
-        let xssProtectionConfig = XSSProtectionConfiguration(option: .disable)
+    func testHeaderWithXssProtection() throws {
+        let xssProtectionConfig = XSSProtectionConfiguration()
         let factory = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig)
         let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
 
         XCTAssertEqual("0", response.headers[.xssProtection].first)
-    }
-
-    func testHeaderWithXssProtectionEnable() throws {
-        let xssProtectionConfig = XSSProtectionConfiguration(option: .enable)
-        let factory = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig)
-        let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
-
-        XCTAssertEqual("1", response.headers[.xssProtection].first)
-    }
-
-    func testHeaderWithXssProtectionBlock() throws {
-        let xssProtectionConfig = XSSProtectionConfiguration(option: .block)
-        let factory = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig)
-        let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
-
-        XCTAssertEqual("1; mode=block", response.headers[.xssProtection].first)
-    }
-
-    func testHeaderWithXssProtectionReport() throws {
-        let xssProtectionConfig = XSSProtectionConfiguration(option: .report(uri: "https://test.com"))
-        let factory = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig)
-        let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
-
-        XCTAssertEqual("1; report=https://test.com", response.headers[.xssProtection].first)
     }
 
     func testHeaderWithHSTSwithMaxAge() throws {
@@ -591,7 +567,7 @@ class HeaderTests: XCTestCase {
         let expectedXCTOHeaderValue = "nosniff"
         let expectedCSPHeaderValue = "default-src 'none'"
         let expectedXFOHeaderValue = "DENY"
-        let expectedXSSProtectionHeaderValue = "1; mode=block"
+        let expectedXSSProtectionHeaderValue = "0"
 
         let response = try makeTestResponse(for: abortRequest, securityHeadersToAdd: SecurityHeadersFactory.api())
 
@@ -605,7 +581,7 @@ class HeaderTests: XCTestCase {
         let expectedXCTOHeaderValue = "nosniff"
         let expectedCSPHeaderValue = "default-src 'none'"
         let expectedXFOHeaderValue = "DENY"
-        let expectedXSSProtectionHeaderValue = "1; mode=block"
+        let expectedXSSProtectionHeaderValue = "0"
         let response = try makeTestResponse(for: fileRequest, securityHeadersToAdd: SecurityHeadersFactory.api(), fileMiddleware: StubFileMiddleware())
 
         XCTAssertEqual("Hello World!", String(data: response.body.data!, encoding: String.Encoding.utf8))
@@ -622,7 +598,7 @@ class HeaderTests: XCTestCase {
             .defaultSrc(sources: CSPKeywords.none)
             .scriptSrc(sources: "test")
         let expectedXFOHeaderValue = "DENY"
-        let expectedXSSProtectionHeaderValue = "1; mode=block"
+        let expectedXSSProtectionHeaderValue = "0"
 
         let response = try makeTestResponse(for: fileRequest, securityHeadersToAdd: SecurityHeadersFactory.api(), fileMiddleware: StubFileMiddleware(cspConfig: ContentSecurityPolicyConfiguration(value: csp)))
 

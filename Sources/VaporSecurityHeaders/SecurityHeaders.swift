@@ -7,7 +7,7 @@ public struct SecurityHeaders {
     init(contentTypeConfiguration: ContentTypeOptionsConfiguration = ContentTypeOptionsConfiguration(option: .nosniff),
          contentSecurityPolicyConfiguration: ContentSecurityPolicyConfiguration = ContentSecurityPolicyConfiguration(value: ContentSecurityPolicy().defaultSrc(sources: CSPKeywords.`self`)),
          frameOptionsConfiguration: FrameOptionsConfiguration = FrameOptionsConfiguration(option: .deny),
-         xssProtectionConfiguration: XSSProtectionConfiguration = XSSProtectionConfiguration(option: .block),
+         xssProtectionConfiguration: XSSProtectionConfiguration = XSSProtectionConfiguration(),
          hstsConfiguration: StrictTransportSecurityConfiguration? = nil,
          serverConfiguration: ServerConfiguration? = nil,
          contentSecurityPolicyReportOnlyConfiguration: ContentSecurityPolicyReportOnlyConfiguration? = nil,

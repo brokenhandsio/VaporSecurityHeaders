@@ -74,7 +74,7 @@ The default factory will add default values to your site for Content-Security-Po
 x-content-type-options: nosniff
 content-security-policy: default-src 'self'
 x-frame-options: DENY
-x-xss-protection: 1; mode=block
+x-xss-protection: 0
 ```
 
 ***Note:*** You should ensure you set the security headers as the first middleware in your `Middlewares` (i.e., the first middleware to be applied to responses) to make sure the headers get added to all responses.
@@ -94,7 +94,7 @@ application.middleware.use(securityHeadersFactory.build())
 x-content-type-options: nosniff
 content-security-policy: default-src 'none'; script-src https://static.brokenhands.io;
 x-frame-options: DENY
-x-xss-protection: 1; mode=block
+x-xss-protection: 0
 ```
 
 Each different header has its own configuration and options, details of which can be found below.
@@ -114,7 +114,7 @@ application.middleware.use(securityHeaders.build())
 x-content-type-options: nosniff
 content-security-policy: default-src 'none'
 x-frame-options: DENY
-x-xss-protection: 1; mode=block
+x-xss-protection: 0
 ```
 
 # Server Configuration
@@ -317,44 +317,10 @@ The [above blog post](https://scotthelme.co.uk/content-security-policy-an-introd
 
 ## X-XSS-Protection
 
-X-XSS-Protection configures the browser's cross-site scripting filter. The recommended, and default, setting is `.block` which blocks the response if the browser detects an attack. This can be configured with:
+X-XSS-Protection configures the browser's cross-site scripting filter. This package configures the header to be disabled, which (surprisingly) offers security benefits. See [this article on MDN for more information](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection).
 
 ```swift
-let xssProtectionConfig = XSSProtectionConfiguration(option: .block)
-    
-let securityHeadersFactory = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig)
-```
-
-```http
-x-xss-protection: 1; mode=block
-```
-
-To just enable the protection:
-
-```swift
-let xssProtectionConfig = XSSProtectionConfiguration(option: .enable)
-```
-
-```http
-x-xss-protection: 1
-```
-
-To sanitize the page and report the violation:
-
-```swift
-let xssProtectionConfig = XSSProtectionConfiguration(option: .report(uri: "https://report-uri.com"))
-    
-let securityHeadersFactory = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig) 
-```
-
-```http
-x-xss-protection: 1; report=https://report-uri.com
-```
-
-Or to disable:
-
-```swift
-let xssProtectionConfig = XSSProtectionConfiguration(option: .disable)
+let xssProtectionConfig = XSSProtectionConfiguration()
     
 let securityHeadersFactory = SecurityHeadersFactory().with(XSSProtection: xssProtectionConfig)
 ```
