@@ -4,7 +4,7 @@ public class SecurityHeadersFactory {
     var contentTypeOptions = ContentTypeOptionsConfiguration(option: .nosniff)
     var contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: ContentSecurityPolicy().defaultSrc(sources: CSPKeywords.`self`))
     var frameOptions = FrameOptionsConfiguration(option: .deny)
-    var xssProtection = XSSProtectionConfiguration(option: .block)
+    var xssProtection = XSSProtectionConfiguration()
     var hsts: StrictTransportSecurityConfiguration?
     var server: ServerConfiguration?
     var referrerPolicy: ReferrerPolicyConfiguration?
