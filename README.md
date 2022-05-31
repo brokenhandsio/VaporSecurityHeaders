@@ -456,3 +456,15 @@ let securityHeadersFactory = SecurityHeadersFactory().with(referrerPolicy: refer
 ```http
 referrer-policy: no-referrer
 ```
+
+You can also [set a fallback policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy#specify_a_fallback_policy).
+
+```swift
+let referrerPolicyConfig = ReferrerPolicyConfiguration([.noReferrer, .strictOriginWhenCrossOrigin])
+
+let securityHeadersFactory = SecurityHeadersFactory().with(referrerPolicy: referrerPolicyConfig)
+```
+
+```http
+referrer-policy: no-referrer, strict-origin-when-cross-origin
+```

@@ -433,6 +433,14 @@ class HeaderTests: XCTestCase {
         XCTAssertEqual(expected, response.headers[.referrerPolicy].first)
     }
 
+    func testHeadersWithReferrerPolicyFallbacks() throws {
+        let expected = "no-referrer, strict-origin-when-cross-origin"
+        let referrerConfig = ReferrerPolicyConfiguration([.noReferrer, .strictOriginWhenCrossOrigin])
+        let factory = SecurityHeadersFactory().with(referrerPolicy: referrerConfig)
+        let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
+        XCTAssertEqual(expected, response.headers[.referrerPolicy].first)
+    }
+
     func testApiPolicyWithAddedReferrerPolicy() throws {
         let expected = "strict-origin"
         let referrerConfig = ReferrerPolicyConfiguration(.strictOrigin)
