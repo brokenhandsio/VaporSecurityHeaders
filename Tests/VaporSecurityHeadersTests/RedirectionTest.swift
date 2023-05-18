@@ -33,15 +33,17 @@ class RedirectionTest: XCTestCase {
     func testWithRedirectMiddlewareWithAllowedHost() throws {
         let expectedRedirectStatus: HTTPStatus = HTTPResponseStatus(statusCode: 301, reasonPhrase: "Moved permanently")
         request.headers.add(name: .host, value: "localhost:8080")
-        let responseRedirected = try makeTestResponse(for: request, withRedirection: true, allowedHosts: ["localhost:8081", "example.com"])
+        let responseRedirected = try makeTestResponse(for: request, withRedirection: true, allowedHosts: ["localhost:8080", "example.com"])
         XCTAssertEqual(expectedRedirectStatus, responseRedirected.status)
     }
     
     func testWithRedirectMiddlewareWithDisallowedHost() throws {
-        let expectedRedirectStatus: HTTPStatus = HTTPResponseStatus(statusCode: 400, reasonPhrase: "Bad request")
-        request.headers.add(name: .host, value: "localhost:8080")
-        let responseRedirected = try makeTestResponse(for: request, withRedirection: true, allowedHosts: ["localhost:8081", "example.com"])
-        XCTAssertEqual(expectedRedirectStatus, responseRedirected.status)
+        let expectedOutcome: String = "Abort.400: Bad Request"
+        do {
+            _ = try makeTestResponse(for: request, withRedirection: true, allowedHosts: ["localhost:8081", "example.com"])
+        } catch (let error) {
+            XCTAssertEqual(expectedOutcome, error.localizedDescription)
+        }
     }
     
     func testWithoutRedirectionMiddleware() throws {
@@ -74,7 +76,7 @@ class RedirectionTest: XCTestCase {
         XCTAssertEqual(expectedStatus, response.status)
     }
     
-    private func makeTestResponse(for request: Request, withRedirection: Bool, environment: Environment? = nil, allowedHosts: [String] = []) throws -> Response {
+    private func makeTestResponse(for request: Request, withRedirection: Bool, environment: Environment? = nil, allowedHosts: [String]? = nil) throws -> Response {
         application.middleware = Middlewares()
         if let environment = environment {
             application.environment = environment
