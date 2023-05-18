@@ -413,6 +413,14 @@ To use the HTTPS Redirect Middleware, you can add the following line in **config
 app.middleware.use(HTTPSRedirectMiddleware())
 ```
 
+The `HTTPSRedirectMiddleware` allows you to set an array of allowed hosts that the application can redirect to. This prevents attackers poisoning the `Host` header and forcing a redirect to a domain under their control. To use this, provide the list of allowed hosts to the initialiser:
+
+```swift
+app.middleware.use(HTTPSRedirectMiddleware(allowedHosts: ["www.brokenhands.io", "brokenhands.io", "static.brokenhands.io"))
+```
+
+Any attempts to redirect to another host, for example `attacker.com` will result in a **400 Bad Request** response.
+
 ## Server
 
 The Server header is usually hidden from responses in order to not give away what type of server you are running and what version you are using. This is to stop attackers from scanning your site and using known vulnerabilities against it easily. By default Vapor does not show the server header in responses for this reason.
