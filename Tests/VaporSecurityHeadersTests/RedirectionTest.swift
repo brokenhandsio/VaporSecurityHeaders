@@ -40,6 +40,7 @@ class RedirectionTest: XCTestCase {
     func testWithRedirectMiddlewareWithDisallowedHost() throws {
         let expectedOutcome: String = "Abort.400: Bad Request"
         do {
+            request.headers.add(name: .host, value: "localhost:8080")
             _ = try makeTestResponse(for: request, withRedirection: true, allowedHosts: ["localhost:8081", "example.com"])
         } catch (let error) {
             XCTAssertEqual(expectedOutcome, error.localizedDescription)
