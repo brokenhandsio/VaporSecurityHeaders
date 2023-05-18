@@ -18,7 +18,7 @@ public class HTTPSRedirectMiddleware: Middleware {
                 return request.eventLoop.makeFailedFuture(Abort(.badRequest))
             }
             let httpsURL = "https://" + host + "\(request.url)"
-            return request.redirect(to: "\(httpsURL)", type: .permanent).encodeResponse(for: request)
+            return request.redirect(to: "\(httpsURL)", redirectType: .permanent).encodeResponse(for: request)
         }
         return next.respond(to: request)
     }
