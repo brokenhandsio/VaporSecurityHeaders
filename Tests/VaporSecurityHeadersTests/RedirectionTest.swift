@@ -29,6 +29,21 @@ class RedirectionTest: XCTestCase {
         let responseRedirected = try makeTestResponse(for: request, withRedirection: true)
         XCTAssertEqual(expectedRedirectStatus, responseRedirected.status)
     }
+    
+    func testWithRedirectMiddlewareWithAllowedHost() throws {
+        let expectedRedirectStatus: HTTPStatus = HTTPResponseStatus(statusCode: 301, reasonPhrase: "Moved permanently")
+        request.headers.add(name: .host, value: "localhost:8080")
+        let responseRedirected = try makeTestResponse(for: request, withRedirection: true, allowedHosts: ["localhost:8081", "example.com"])
+        XCTAssertEqual(expectedRedirectStatus, responseRedirected.status)
+    }
+    
+    func testWithRedirectMiddlewareWithDisallowedHost() throws {
+        let expectedRedirectStatus: HTTPStatus = HTTPResponseStatus(statusCode: 400, reasonPhrase: "Bad request")
+        request.headers.add(name: .host, value: "localhost:8080")
+        let responseRedirected = try makeTestResponse(for: request, withRedirection: true, allowedHosts: ["localhost:8081", "example.com"])
+        XCTAssertEqual(expectedRedirectStatus, responseRedirected.status)
+    }
+    
     func testWithoutRedirectionMiddleware() throws {
         let expectedNoRedirectStatus: HTTPStatus = HTTPResponseStatus(statusCode: 200, reasonPhrase: "Ok")
         request.headers.add(name: .host, value: "localhost:8080")
@@ -59,13 +74,13 @@ class RedirectionTest: XCTestCase {
         XCTAssertEqual(expectedStatus, response.status)
     }
     
-    private func makeTestResponse(for request: Request, withRedirection: Bool, environment: Environment? = nil) throws -> Response {
+    private func makeTestResponse(for request: Request, withRedirection: Bool, environment: Environment? = nil, allowedHosts: [String] = []) throws -> Response {
         application.middleware = Middlewares()
         if let environment = environment {
             application.environment = environment
         }
         if withRedirection == true {
-        application.middleware.use(HTTPSRedirectMiddleware())
+        application.middleware.use(HTTPSRedirectMiddleware(allowedHosts: allowedHosts))
         }
         try routes(application)
         return try application.responder.respond(to: request).wait()
