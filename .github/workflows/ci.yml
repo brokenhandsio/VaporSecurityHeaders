@@ -3,21 +3,14 @@ on:
   push:
   pull_request:
 jobs:
-  xenial:
+  test:
     container: 
-      image: vapor/swift:5.2-xenial
+      image: swift:5.8
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - run: swift test --enable-test-discovery --enable-code-coverage --sanitize=thread
-  bionic:
-    container: 
-      image: vapor/swift:5.2-bionic
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@master
-    - name: Run Bionic Tests
-      run: swift test --enable-test-discovery --enable-code-coverage --sanitize=thread
+    - uses: actions/checkout@v3
+    - name: Run Tests
+      run: swift test --enable-code-coverage --sanitize=thread
     - name: Setup container for codecov upload
       run: apt-get update && apt-get install curl -y
     - name: Process coverage file

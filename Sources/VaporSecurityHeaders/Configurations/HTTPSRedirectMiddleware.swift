@@ -2,7 +2,11 @@ import Vapor
 
 public class HTTPSRedirectMiddleware: Middleware {
 
-    public init() {}
+    let allowedHosts: [String]?
+    
+    public init(allowedHosts: [String]? = nil) {
+        self.allowedHosts = allowedHosts
+    }
     
     public func respond(to request: Request, chainingTo next: Responder) -> EventLoopFuture<Response> {
         if request.application.environment == .development {
@@ -17,8 +21,15 @@ public class HTTPSRedirectMiddleware: Middleware {
             guard let host = request.headers.first(name: .host) else {
                 return request.eventLoop.makeFailedFuture(Abort(.badRequest))
             }
+            
+            if let allowedHosts = allowedHosts {
+                guard allowedHosts.contains(host) else {
+                    return request.eventLoop.makeFailedFuture(Abort(.badRequest))
+                }
+            }
+            
             let httpsURL = "https://" + host + "\(request.url)"
-            return request.redirect(to: "\(httpsURL)", type: .permanent).encodeResponse(for: request)
+            return request.redirect(to: "\(httpsURL)", redirectType: .permanent).encodeResponse(for: request)
         }
         return next.respond(to: request)
     }
