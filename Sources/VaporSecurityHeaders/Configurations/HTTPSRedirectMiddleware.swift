@@ -2,7 +2,11 @@ import Vapor
 
 public class HTTPSRedirectMiddleware: Middleware {
 
-    public init() {}
+    let allowedHosts: [String]
+    
+    public init(allowedHosts: [String] = []) {
+        self.allowedHosts = allowedHosts
+    }
     
     public func respond(to request: Request, chainingTo next: Responder) -> EventLoopFuture<Response> {
         if request.application.environment == .development {
