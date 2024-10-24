@@ -4,7 +4,7 @@ public class SecurityHeadersFactory {
     var contentTypeOptions = ContentTypeOptionsConfiguration(option: .nosniff)
     var contentSecurityPolicy = ContentSecurityPolicyConfiguration(value: ContentSecurityPolicy().defaultSrc(sources: CSPKeywords.`self`))
     var frameOptions = FrameOptionsConfiguration(option: .deny)
-    var xssProtection = XSSProtectionConfiguration()
+    var xssProtection: XSSProtectionConfiguration? = XSSProtectionConfiguration()
     var hsts: StrictTransportSecurityConfiguration?
     var server: ServerConfiguration?
     var referrerPolicy: ReferrerPolicyConfiguration?
@@ -33,7 +33,7 @@ public class SecurityHeadersFactory {
         return self
     }
 
-    @discardableResult public func with(XSSProtection configuration: XSSProtectionConfiguration) -> SecurityHeadersFactory {
+    @discardableResult public func with(XSSProtection configuration: XSSProtectionConfiguration?) -> SecurityHeadersFactory {
         xssProtection = configuration
         return self
     }

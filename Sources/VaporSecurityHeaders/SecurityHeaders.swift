@@ -7,13 +7,17 @@ public struct SecurityHeaders {
     init(contentTypeConfiguration: ContentTypeOptionsConfiguration = ContentTypeOptionsConfiguration(option: .nosniff),
          contentSecurityPolicyConfiguration: ContentSecurityPolicyConfiguration = ContentSecurityPolicyConfiguration(value: ContentSecurityPolicy().defaultSrc(sources: CSPKeywords.`self`)),
          frameOptionsConfiguration: FrameOptionsConfiguration = FrameOptionsConfiguration(option: .deny),
-         xssProtectionConfiguration: XSSProtectionConfiguration = XSSProtectionConfiguration(),
+         xssProtectionConfiguration: XSSProtectionConfiguration? = XSSProtectionConfiguration(),
          hstsConfiguration: StrictTransportSecurityConfiguration? = nil,
          serverConfiguration: ServerConfiguration? = nil,
          contentSecurityPolicyReportOnlyConfiguration: ContentSecurityPolicyReportOnlyConfiguration? = nil,
          referrerPolicyConfiguration: ReferrerPolicyConfiguration? = nil) {
-        configurations = [contentTypeConfiguration, contentSecurityPolicyConfiguration, frameOptionsConfiguration, xssProtectionConfiguration]
+        configurations = [contentTypeConfiguration, contentSecurityPolicyConfiguration, frameOptionsConfiguration]
 
+        if let xssProtectionConfiguration {
+            configurations.append(xssProtectionConfiguration)
+        }
+        
         if let hstsConfiguration = hstsConfiguration {
             configurations.append(hstsConfiguration)
         }
