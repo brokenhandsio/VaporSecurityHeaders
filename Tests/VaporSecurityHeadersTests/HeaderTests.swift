@@ -140,6 +140,13 @@ class HeaderTests: XCTestCase {
 
         XCTAssertEqual("0", response.headers[.xssProtection].first)
     }
+    
+    func testHeaderWithXssProtectionDisabled() throws {
+        let factory = SecurityHeadersFactory().with(XSSProtection: nil)
+        let response = try makeTestResponse(for: request, securityHeadersToAdd: factory)
+
+        XCTAssertNil(response.headers[.xssProtection].first)
+    }
 
     func testHeaderWithHSTSwithMaxAge() throws {
         let hstsConfig = StrictTransportSecurityConfiguration(maxAge: 30)
